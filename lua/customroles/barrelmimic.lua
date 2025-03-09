@@ -49,7 +49,7 @@ RegisterRole(ROLE)
 
 local announce = CreateConVar("ttt_barrelmimic_announce", "1", FCVAR_REPLICATED, "Whether to announce that there is a barrel mimic", 0, 1)
 local respawn_all_deaths = CreateConVar("ttt_barrelmimic_respawn_all_deaths", "1", FCVAR_REPLICATED, "Whether to respawn when the Barrel Mimic is killed in any way. If disabled, they will only respawn when killed as a barrel", 0, 1)
-local respawn_delay = CreateConVar("ttt_barrelmimic_respawn_delay", "15", FCVAR_REPLICATED, "The delay before the Barrel Mimic is killed without winning the round", 0, 60)
+local respawn_delay = CreateConVar("ttt_barrelmimic_respawn_delay", "15", FCVAR_REPLICATED, "The delay before the Barrel Mimic is killed without winning the round. If set to 0, they will not respawn", 0, 60)
 
 hook.Add("TTTIsPlayerRespawning", "BarrelMimic_TTTIsPlayerRespawning", function(ply)
     if not IsPlayer(ply) then return end
