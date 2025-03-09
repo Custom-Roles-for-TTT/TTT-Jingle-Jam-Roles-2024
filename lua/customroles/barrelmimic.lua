@@ -282,5 +282,31 @@ if CLIENT then
         end
     end)
 
-    -- TODO: Tutorial
+    --------------
+    -- TUTORIAL --
+    --------------
+
+    AddHook("TTTTutorialRoleText", "BarrelMimic_TTTTutorialRoleText", function(role, titleLabel)
+        if role ~= ROLE_BARRELMIMIC then return end
+
+        local roleColor = ROLE_COLORS[ROLE_BARRELMIMIC]
+        local html = "The " .. ROLE_STRINGS[ROLE_BARRELMIMIC] .. " is a <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>jester</span> role who wins by transforming into a barrel, being exploded, and killing other players."
+
+        if announce:GetBool() then
+            html = html .. "<span style='display: block; margin-top: 10px;'>The presence of " .. ROLE_STRINGS_EXT[ROLE_BARRELMIMIC] .. " is <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>announced</span> to everyone!</span>"
+        end
+
+        local delay = respawn_delay:GetInt()
+        if delay > 0 then
+            html = html .. "<span style='display: block; margin-top: 10px;'>If the " .. ROLE_STRINGS[ROLE_BARRELMIMIC] .. " is "
+            if respawn_all_deaths:GetBool() then
+                html = html .. "killed"
+            else
+                html = html .. "exploded as a barrel"
+            end
+            html = html .. " <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>without killing another player first</span>, they respawn after " .. delay .. " seconds!</span>"
+        end
+
+        return html
+    end)
 end
