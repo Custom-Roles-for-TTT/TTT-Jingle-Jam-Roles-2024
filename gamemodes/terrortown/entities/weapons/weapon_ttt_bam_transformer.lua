@@ -1,6 +1,8 @@
 local ents = ents
+local math = math
 
 local EntsCreate = ents.Create
+local MathCeil = math.ceil
 
 AddCSLuaFile()
 
@@ -48,6 +50,7 @@ SWEP.Secondary.Ammo         = nil
 SWEP.Secondary.Sound        = ""
 
 SWEP.Barrel                 = nil
+SWEP.TransformBackTime      = nil
 
 function SWEP:Initialize()
     self:SendWeaponAnim(ACT_SLAM_DETONATOR_DRAW)
@@ -84,7 +87,7 @@ function SWEP:PrimaryAttack()
 
         ent:SetModel("models/props_c17/oildrum001_explosive.mdl")
         ent:SetPos(pos)
-        ent.BarrelMimic = self
+        ent.BarrelMimic = owner
         ent:Spawn()
 
         local phys = ent:GetPhysicsObject()
@@ -96,20 +99,31 @@ function SWEP:PrimaryAttack()
 
         owner:Spectate(OBS_MODE_CHASE)
         owner:SpectateEntity(ent)
+        owner.BarrelMimicEnt = ent
 
         -- The transformer stays in their hand so hide it from view
         owner:DrawViewModel(false)
         owner:DrawWorldModel(false)
 
         self.Barrel = ent
-        self:SetNextSecondaryFire(CurTime() + self.Secondary.Delay)
+        self.TransformBackTime = CurTime() + self.Secondary.Delay
     end
 end
 
 function SWEP:SecondaryAttack()
     if CLIENT then return end
-    if self:GetNextSecondaryFire() > CurTime() then return end
     if not IsValid(self.Barrel) then return end
+
+    local owner = self:GetOwner()
+    if not IsPlayer(owner) then return end
+
+    if self.TransformBackTime and self.TransformBackTime > CurTime() then
+        local remaining = MathCeil(self.TransformBackTime - CurTime())
+        local plural = remaining > 1 and "s" or ""
+        owner:ClearQueuedMessage("bamTransformerBlock")
+        owner:QueueMessage(MSG_PRINTBOTH, "You have to wait about " .. remaining .. " more second" .. plural .. " before changing back...", nil, "bamTransformerBlock")
+        return
+    end
 
     owner:SetParent(nil)
     owner:SpectateEntity(nil)
@@ -117,10 +131,22 @@ function SWEP:SecondaryAttack()
     owner:DrawViewModel(true)
     owner:DrawWorldModel(true)
 
+    owner.BarrelMimicEnt = nil
+
+    -- Remove the player from the barrel so it doesn't trigger the "no kill respawn" logic
+    self.Barrel.BarrelMimic = nil
     self.Barrel:Remove()
     self.Barrel = nil
+    self.TransformBackTime = nil
 end
 
 function SWEP:OnDrop()
     self:Remove()
+end
+
+if SERVER then
+    function SWEP:Holster()
+        -- Don't let them switch weapons while they are a barrel
+        return not IsValid(self.Barrel)
+    end
 end

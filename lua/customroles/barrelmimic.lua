@@ -1,9 +1,13 @@
 local hook = hook
+local math = math
 local player = player
+local table = table
 local timer = timer
 
 local AddHook = hook.Add
 local PlayerIterator = player.Iterator
+local MathRandom = math.random
+local TableInsert = table.insert
 
 local ROLE = {}
 
@@ -21,6 +25,18 @@ ROLE.shortdesc = "Becomes an explodable barrel on demand. If it explodes and kil
 ROLE.team = ROLE_TEAM_JESTER
 
 ROLE.convars = {}
+TableInsert(ROLE.convars, {
+    cvar = "ttt_barrelmimic_announce",
+    type = ROLE_CONVAR_TYPE_BOOL
+})
+TableInsert(ROLE.convars, {
+    cvar = "ttt_barrelmimic_respawn_all_deaths",
+    type = ROLE_CONVAR_TYPE_BOOL
+})
+TableInsert(ROLE.convars, {
+    cvar = "ttt_barrelmimic_respawn_delay",
+    type = ROLE_CONVAR_TYPE_NUM
+})
 
 ROLE.translations = {
     ["english"] = {
@@ -30,6 +46,20 @@ ROLE.translations = {
 }
 
 RegisterRole(ROLE)
+
+local announce = CreateConVar("ttt_barrelmimic_announce", "1", FCVAR_REPLICATED, "Whether to announce that there is a barrel mimic", 0, 1)
+local respawn_all_deaths = CreateConVar("ttt_barrelmimic_respawn_all_deaths", "1", FCVAR_REPLICATED, "Whether to respawn when the Barrel Mimic is killed in any way. If disabled, they will only respawn when killed as a barrel", 0, 1)
+local respawn_delay = CreateConVar("ttt_barrelmimic_respawn_delay", "15", FCVAR_REPLICATED, "The delay before the Barrel Mimic is killed without winning the round", 0, 60)
+
+hook.Add("TTTIsPlayerRespawning", "BarrelMimic_TTTIsPlayerRespawning", function(ply)
+    if not IsPlayer(ply) then return end
+    if ply:Alive() then return end
+    if not ply:IsBarrelMimic() then return end
+
+    if ply.BarrelMimicIsRespawning then
+        return true
+    end
+end)
 
 if SERVER then
     AddCSLuaFile()
@@ -53,6 +83,8 @@ if SERVER then
 
     -- Warn other players that there is a barrel mimic
     AddHook("TTTBeginRound", "BarrelMimic_Announce_TTTBeginRound", function()
+        if not announce:GetBool() then return end
+
         timer.Simple(1.5, function()
             local hasBarrelMimic = false
             for _, v in PlayerIterator() do
@@ -70,16 +102,99 @@ if SERVER then
         end)
     end)
 
+    -------------
+    -- RESPAWN --
+    -------------
+
+    local respawnTimers = {}
+    local function ClearRespawnTimer(ply)
+        local sid64 = ply:SteamID64()
+        if respawnTimers[sid64] then
+            ply:ClearProperty("BarrelMimicIsRespawning")
+            timer.Remove("TTTBarrelMimicRespawn_" .. sid64)
+            respawnTimers[sid64] = nil
+        end
+    end
+
+    local function StartRespawnTimer(ply)
+        ply.BarrelMimicEnt = nil
+
+        local delay = respawn_delay:GetInt()
+        if delay <= 0 then return end
+
+        ply:QueueMessage(MSG_PRINTBOTH, "You've died without killing anyone as a barrel. You will respawn in " .. delay .. " seconds.")
+        ply:SetProperty("BarrelMimicIsRespawning", true)
+
+        local sid64 = ply:SteamID64()
+        local respawnId = "TTTBarrelMimicRespawn_" .. sid64
+        respawnTimers[sid64] = respawnId
+
+        timer.Create(respawnId, delay, 1, function()
+            if not IsValid(ply) then return end
+
+            ClearRespawnTimer(ply)
+
+            -- In case something else respawned them already
+            if ply:Alive() then return end
+            -- Just in case something changed their role while they were dead
+            if not ply:IsBarrelMimic() then return end
+
+            local body = ply.server_ragdoll or ply:GetRagdollEntity()
+            ply:SpawnForRound(true)
+            SafeRemoveEntity(body)
+
+            -- Respawn the player at a random map spawn
+            local spawns = GetSpawnEnts(true, false)
+            local spawn = spawns[MathRandom(#spawns)]
+            local spawnPos = spawn:GetPos()
+            ply:SetPos(FindRespawnLocation(spawnPos) or spawnPos)
+
+            -- Select the crowbar so their barrel thing isn't showing when they respawn
+            ply:Give("weapon_zm_improvised")
+            ply:SelectWeapon("weapon_zm_improvised")
+
+            ply:QueueMessage(MSG_PRINTBOTH, "You have respawned. Good luck =)")
+        end)
+    end
+
+    local barrelMimicWins = false
+    -- Respawn the Barrel Mimic if their barrel explodes but they don't kill anyone
+    -- This appears to happen AFTER the PlayerDeath hook so all we need to do is check if they've won
+    AddHook("EntityRemoved", "BarrelMimic_EntityRemoved", function(ent)
+        if barrelMimicWins then return end
+        if not IsPlayer(ent.BarrelMimic) then return end
+
+        local ply = ent.BarrelMimic
+        -- Check active because we don't want to start a respawn timer if their barrel is removed because the round is ending
+        if not ply:IsActiveBarrelMimic() then return end
+
+        ply:Kill()
+        ply.BarrelMimicEnt = nil
+        StartRespawnTimer(ply)
+    end)
+
+    AddHook("TTTStopPlayerRespawning", "BarrelMimic_TTTStopPlayerRespawning", function(ply)
+        if not IsPlayer(ply) then return end
+        if ply:Alive() then return end
+        if not ply:IsBarrelMimic() then return end
+
+        ClearRespawnTimer(ply)
+    end)
+
     ----------------
     -- WIN CHECKS --
     ----------------
 
-    local barrelMimicWins = false
     AddHook("PlayerDeath", "BarrelMimic_PlayerDeath", function(victim, inflictor, attacker)
         if barrelMimicWins then return end
 
         if IsPlayer(victim) and victim:IsBarrelMimic() then
-            -- TODO: Respawn after a delay
+            if victim == attacker then return end
+
+            -- Respawn this barrel mimic if they were killed while a barrel or all deaths allow respawn
+            if IsValid(victim.BarrelMimicEnt) or respawn_all_deaths:GetBool() then
+                StartRespawnTimer(victim)
+            end
             return
         end
 
@@ -90,6 +205,10 @@ if SERVER then
         barrelMimicWins = true
         net.Start("TTT_UpdateBarrelMimicWins")
         net.Broadcast()
+
+        inflictor.BarrelMimic:QueueMessage(MSG_PRINTBOTH, "Success! Your barrel has killed a player!")
+        inflictor.BarrelMimic:Kill()
+        inflictor.BarrelMimic.BarrelMimicEnt = nil
     end)
 
     AddHook("Initialize", "BarrelMimic_Initialize", function()
@@ -109,6 +228,16 @@ if SERVER then
     -------------
 
     AddHook("TTTPrepareRound", "BarrelMimic_TTTPrepareRound", function()
+        for _, v in PlayerIterator() do
+            ClearRespawnTimer(v)
+            -- If this player has a barrel attached to them (and vice versa), detach it
+            if v.BarrelMimicEnt then
+                v.BarrelMimicEnt = nil
+                v:SetParent(nil)
+            end
+        end
+        table.Empty(respawnTimers)
+
         barrelMimicWins = false
         net.Start("TTT_ResetBarrelMimicWins")
         net.Broadcast()
@@ -152,4 +281,6 @@ if CLIENT then
             TableInsert(secondary_wins, ROLE_BARRELMIMIC)
         end
     end)
+
+    -- TODO: Tutorial
 end
