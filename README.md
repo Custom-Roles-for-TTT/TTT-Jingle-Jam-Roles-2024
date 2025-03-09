@@ -4,7 +4,7 @@ A pack of [Custom Roles for TTT](https://github.com/Custom-Roles-for-TTT/TTT-Cus
 # Roles
 
 ## Barrel Mimic
-Suggested By_: Corvatile\
+_Suggested By_: Corvatile\
 The Barrel Mimic is a jester role that can transform into a barrel. If their barrel is exploded and kills another player, they win!
 \
 \
