@@ -13,7 +13,7 @@ local ROLE = {}
 
 ROLE.nameraw = "barrelmimic"
 ROLE.name = "Barrel Mimic"
-ROLE.nameplural = "Barrel Mimic"
+ROLE.nameplural = "Barrel Mimics"
 ROLE.nameext = "a Barrel Mimic"
 ROLE.nameshort = "bam"
 
