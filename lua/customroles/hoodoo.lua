@@ -151,7 +151,7 @@ if CLIENT then
 
         local html = "The " .. ROLE_STRINGS[ROLE_HOODOO] .. " is a member of the <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>" .. T("traitor") .. " team</span> who is able to buy " .. T("traitor") .. "-focused randomat events, rather than items."
 
-        html = html .. "<span style='display: block; margin-top: 10px;'>The available randomat events <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>change each round</span>, and are shared between everyone who is a " .. ROLE_STRINGS[ROLE_RANDOMAN] .. ".<br><br>Some randomat events <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>cannot be bought</span>, such as ones that are supposed to start secretly.</span>"
+        html = html .. "<span style='display: block; margin-top: 10px;'>The available randomat events <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>change each round</span>, and are shared between everyone who is a " .. ROLE_STRINGS[ROLE_HOODOO] .. ".<br><br>Some randomat events <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>cannot be bought</span>, such as ones that are supposed to start secretly.</span>"
 
         if hoodoo_prevent_auto_randomat:GetBool() and GetConVar("ttt_randomat_auto"):GetBool() then
             html = html .. "<span style='display: block; margin-top: 10px;'>If " .. ROLE_STRINGS_EXT[ROLE_HOODOO] .. " spawns at the start of the round, <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>no randomat automatically triggers</span>.</span>"
