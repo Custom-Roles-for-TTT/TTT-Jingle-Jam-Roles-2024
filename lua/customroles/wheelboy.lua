@@ -43,7 +43,7 @@ if CLIENT then
     local CamPushModelMatrix = cam.PushModelMatrix
     local DrawNoTexture = draw.NoTexture
     local DrawDrawText = draw.DrawText
-    local MathCeil = math.ceil
+    --local MathCeil = math.ceil
     local MathCos = math.cos
     local MathRad = math.rad
     local MathSin = math.sin
