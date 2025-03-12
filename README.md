@@ -52,3 +52,4 @@ ttt_hoodoo_shop_random_enabled        0      // Whether role shop randomization 
 # Special Thanks
 - [Game icons](https://game-icons.net/) for the role icons
 - [The Stig](https://steamcommunity.com/id/The-Stig-294) for the Randoman role that the Hoodoo was very heavily based on
+- Angela from the [Lonely Yogs](https://lonely-yogs.co.uk/) for her help with the math for drawing Wheelboy's segmented wheel
