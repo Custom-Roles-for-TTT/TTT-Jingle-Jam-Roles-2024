@@ -42,7 +42,7 @@ if CLIENT then
     local CamPopModelMatrix = cam.PopModelMatrix
     local CamPushModelMatrix = cam.PushModelMatrix
     local DrawNoTexture = draw.NoTexture
-    local DrawDrawText = draw.DrawText
+    local DrawSimpleTextOutlined = draw.SimpleTextOutlined
     local MathCos = math.cos
     local MathRad = math.rad
     local MathSin = math.sin
@@ -178,7 +178,7 @@ if CLIENT then
         textMat:Rotate(Angle(0, segmentAngle / 2, 0))
 
         CamPushModelMatrix(textMat, true)
-            DrawDrawText(text, "DefaultBold", 0, 0, COLOR_WHITE, TEXT_ALIGN_LEFT)
+            DrawSimpleTextOutlined(text, "DefaultBold", 0, 5, COLOR_WHITE, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, COLOR_BLACK)
         CamPopModelMatrix()
     end
 
