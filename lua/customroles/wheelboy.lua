@@ -35,6 +35,7 @@ end
 
 if CLIENT then
     local cam = cam
+    local CurTime = CurTime
     local draw = draw
     local Material = Material
     local math = math
@@ -47,6 +48,7 @@ if CLIENT then
     local MathCos = math.cos
     local MathMin = math.min
     local MathRad = math.rad
+    local MathRand = math.random
     local MathSin = math.sin
     local SurfaceDrawPoly = surface.DrawPoly
     local SurfaceDrawTexturedRect = surface.DrawTexturedRect
@@ -67,8 +69,10 @@ if CLIENT then
 
     local wheelStartTime = nil
     local wheelEndTime = nil
+    local wheelOffset = nil
     net.Receive("TTT_WheelboySpinWheel", function()
         wheelStartTime = CurTime()
+        wheelOffset = MathRand() * 360
         -- TODO: Make the time configurable?
         wheelEndTime = wheelStartTime + 10
     end)
@@ -222,7 +226,7 @@ if CLIENT then
         -- Once we've spun for the desired time, stop rotating at that point
         local baseTime = MathMin(CurTime(), wheelEndTime)
         -- TODO: Rotate at variable speed, decreasing over time
-        local ang = baseTime * 150
+        local ang = wheelOffset + (baseTime * 150)
 
         local mat = Matrix()
         mat:Translate(Vector(x, y, 0))
