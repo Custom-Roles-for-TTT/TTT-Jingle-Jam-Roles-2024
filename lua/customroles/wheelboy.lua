@@ -142,39 +142,39 @@ if CLIENT then
         "And things"
     }
     -- Derived from the surface.DrawPoly example on the GMod wiki
-    local function DrawSegmentedCircle_Old(x, y, radius, seg)
-        local cir = {}
+    --local function DrawSegmentedCircle_Old(x, y, radius, seg)
+    --    local cir = {}
 
-        local segmentsPerColor = seg / #colors
-        for i = 0, seg do
-            local a = MathRad(((i / seg) * -360) + (segmentsPerColor / 2) - 2)
-            TableInsert(cir, { x = x + MathSin(a) * radius, y = y + MathCos(a) * radius })
-        end
+    --    local segmentsPerColor = seg / #colors
+    --    for i = 0, seg do
+    --        local a = MathRad(((i / seg) * -360) + (segmentsPerColor / 2) - 2)
+    --        TableInsert(cir, { x = x + MathSin(a) * radius, y = y + MathCos(a) * radius })
+    --    end
 
-        local segmentMapping = {}
-        for idx = 1, seg do
-            local colorIdx = MathCeil(idx / segmentsPerColor)
-            if not segmentMapping[colorIdx] then
-                segmentMapping[colorIdx] = {}
-            end
-            TableInsert(segmentMapping[colorIdx], cir[idx])
-        end
+    --    local segmentMapping = {}
+    --    for idx = 1, seg do
+    --        local colorIdx = MathCeil(idx / segmentsPerColor)
+    --        if not segmentMapping[colorIdx] then
+    --            segmentMapping[colorIdx] = {}
+    --        end
+    --        TableInsert(segmentMapping[colorIdx], cir[idx])
+    --    end
 
-        local segmentAngle = 360 / #colors
-        for segmentIdx, segment in pairs(segmentMapping) do
-            PrintTable(segment)
-            -- TODO: Offset this x y to push the point away from the center to create a more uniform gap
-            local angle = MathRad(segmentAngle / 2) * (segmentIdx - 1)
-            TableInsert(segment, { x = x - (3 * MathCos(angle)), y = y - (3 * MathSin(angle)) })
+    --    local segmentAngle = 360 / #colors
+    --    for segmentIdx, segment in pairs(segmentMapping) do
+    --        PrintTable(segment)
+    --        -- TODO: Offset this x y to push the point away from the center to create a more uniform gap
+    --        local angle = MathRad(segmentAngle / 2) * (segmentIdx - 1)
+    --        TableInsert(segment, { x = x - (3 * MathCos(angle)), y = y - (3 * MathSin(angle)) })
 
-            local color = colors[segmentIdx]
-            SurfaceSetDrawColor(color.r, color.g, color.b, color.a)
-            DrawNoTexture()
-            SurfaceDrawPoly(segment)
-        end
+    --        local color = colors[segmentIdx]
+    --        SurfaceSetDrawColor(color.r, color.g, color.b, color.a)
+    --        DrawNoTexture()
+    --        SurfaceDrawPoly(segment)
+    --    end
 
-        -- TODO: Draw text, rotated
-    end
+    --    -- TODO: Draw text, rotated
+    --end
 
     local function DrawCircleSegment(segmentIdx, segmentAngle, segmentCount, polyCount, radius)
         local text = effectNames[segmentIdx]
