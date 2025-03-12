@@ -609,6 +609,7 @@ globals = {
     "LocalPlayer",
     "LocalToWorld",
     "Material",
+    "Matrix",
     "Model",
     "Msg",
     "MsgN",
@@ -1023,6 +1024,7 @@ globals = {
     -- JJ2024
     "ROLE_BARRELMIMIC",
     "ROLE_HOODOO",
+    "ROLE_WHEELBOY",
     "WIN_BARRELMIMIC",
 
     -- Optional external mods
