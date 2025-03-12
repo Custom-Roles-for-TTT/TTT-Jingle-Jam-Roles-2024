@@ -43,7 +43,6 @@ if CLIENT then
     local CamPushModelMatrix = cam.PushModelMatrix
     local DrawNoTexture = draw.NoTexture
     local DrawDrawText = draw.DrawText
-    --local MathCeil = math.ceil
     local MathCos = math.cos
     local MathRad = math.rad
     local MathSin = math.sin
@@ -141,49 +140,19 @@ if CLIENT then
         "Just yelling into the void",
         "And things"
     }
-    -- Derived from the surface.DrawPoly example on the GMod wiki
-    --local function DrawSegmentedCircle_Old(x, y, radius, seg)
-    --    local cir = {}
 
-    --    local segmentsPerColor = seg / #colors
-    --    for i = 0, seg do
-    --        local a = MathRad(((i / seg) * -360) + (segmentsPerColor / 2) - 2)
-    --        TableInsert(cir, { x = x + MathSin(a) * radius, y = y + MathCos(a) * radius })
-    --    end
-
-    --    local segmentMapping = {}
-    --    for idx = 1, seg do
-    --        local colorIdx = MathCeil(idx / segmentsPerColor)
-    --        if not segmentMapping[colorIdx] then
-    --            segmentMapping[colorIdx] = {}
-    --        end
-    --        TableInsert(segmentMapping[colorIdx], cir[idx])
-    --    end
-
-    --    local segmentAngle = 360 / #colors
-    --    for segmentIdx, segment in pairs(segmentMapping) do
-    --        PrintTable(segment)
-    --        -- TODO: Offset this x y to push the point away from the center to create a more uniform gap
-    --        local angle = MathRad(segmentAngle / 2) * (segmentIdx - 1)
-    --        TableInsert(segment, { x = x - (3 * MathCos(angle)), y = y - (3 * MathSin(angle)) })
-
-    --        local color = colors[segmentIdx]
-    --        SurfaceSetDrawColor(color.r, color.g, color.b, color.a)
-    --        DrawNoTexture()
-    --        SurfaceDrawPoly(segment)
-    --    end
-
-    --    -- TODO: Draw text, rotated
-    --end
-
+    -- Thanks to Angela from the Lonely Yogs for the algorithm!
     local function DrawCircleSegment(segmentIdx, segmentAngle, segmentCount, polyCount, radius)
         local text = effectNames[segmentIdx]
         local color = colors[segmentIdx]
 
-        for polyIdx = 2, polyCount-1 do
+        -- Draw each of the polygons except the first and last to create a gap between segments
+        for polyIdx = 2, polyCount - 1 do
+            -- Rotate to the angle of this polygon
             local polyMat = Matrix()
             polyMat:Rotate(Angle(0, (polyIdx - 1) * (segmentAngle / polyCount), 0))
 
+            -- Draw a triangle
             local polySegments = {
                 { x = 0.05, y = 0 },
                 { x = 1   , y = 0 },
@@ -198,11 +167,15 @@ if CLIENT then
         end
 
         local textMat = Matrix()
-        textMat:Translate(Vector(0.5, 0, 0))
-        textMat:Rotate(Angle(0, -segmentAngle / 2, 0))
+
+        -- Multiply by the inverse to undo the scaling, because the scaled text is huge
         local textMatInvert = textMat:GetInverse()
         textMat:Scale(Vector(1 / radius, 1 / radius, 1 / radius))
         textMat:Mul(textMatInvert)
+
+        -- Move out from the center slightly and rotate to re-align the text with the center of the segment
+        textMat:Translate(Vector(35, 0, 0))
+        textMat:Rotate(Angle(0, segmentAngle / 2, 0))
 
         CamPushModelMatrix(textMat, true)
             DrawDrawText(text, "DefaultBold", 0, 0, COLOR_WHITE, TEXT_ALIGN_LEFT)
@@ -212,13 +185,17 @@ if CLIENT then
     local function DrawSegmentedCircle(x, y, radius, seg)
         local segmentCount = #colors
         local segmentAngle = (360 / segmentCount)
+
+        -- TODO: Rotate at variable speed, decreasing over time
         local ang = RealTime() * 50
         local mat = Matrix()
         mat:Translate(Vector(x, y, 0))
         mat:Rotate(Angle(0, ang, 0))
         mat:Scale(Vector(radius, radius, radius))
+
         CamPushModelMatrix(mat)
             for segmentIdx = 1, segmentCount do
+                -- Rotate to the angle of this segment
                 local segmentMat = Matrix()
                 segmentMat:Rotate(Angle(0, (segmentIdx - 1) * segmentAngle, 0))
 
@@ -234,7 +211,6 @@ if CLIENT then
 
         local centerX, centerY = ScrW() / 2, ScrH() / 2
         DrawCircle(centerX, centerY, 205, 60)
-        -- TODO: Rotate at variable speed, decreasing over time
         DrawSegmentedCircle(centerX, centerY, 200, 30)
         DrawPointer(centerX, centerY)
 
