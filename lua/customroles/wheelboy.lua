@@ -36,6 +36,7 @@ end
 if CLIENT then
     local cam = cam
     local draw = draw
+    local Material = Material
     local math = math
     local surface = surface
 
@@ -46,27 +47,43 @@ if CLIENT then
     local MathCos = math.cos
     local MathRad = math.rad
     local MathSin = math.sin
-    local SurfaceSetDrawColor = surface.SetDrawColor
     local SurfaceDrawPoly = surface.DrawPoly
+    local SurfaceDrawTexturedRect = surface.DrawTexturedRect
+    local SurfaceSetDrawColor = surface.SetDrawColor
+    local SurfaceSetMaterial = surface.SetMaterial
+
+    -----------
+    -- WHEEL --
+    -----------
+
+    surface.CreateFont("WheelboyLabels", {
+        font = "Tahoma",
+        size = 16,
+        weight = 1000
+    })
+
+    -- Start/Stop --
 
     local wheelStartTime = nil
     net.Receive("TTT_WheelboySpinWheel", function()
         wheelStartTime = CurTime()
     end)
 
+    -- Pointer --
+
     local pointerOutlinePoints = {
-        { x = 0, y = -194 },
-        { x = -16, y = -204 },
-        { x = -16, y = -221 },
-        { x = 16, y = -221 },
-        { x = 16, y = -204 }
+        { x = 0, y = -244 },
+        { x = -16, y = -254 },
+        { x = -16, y = -271 },
+        { x = 16, y = -271 },
+        { x = 16, y = -254 }
     }
     local pointerPoints = {
-        { x = 0, y = -195 },
-        { x = -15, y = -205 },
-        { x = -15, y = -220 },
-        { x = 15, y = -220 },
-        { x = 15, y = -205 }
+        { x = 0, y = -245 },
+        { x = -15, y = -255 },
+        { x = -15, y = -270 },
+        { x = 15, y = -270 },
+        { x = 15, y = -255 }
     }
     local function DrawPointer(x, y)
         -- Draw the same shape but slightly larger and black
@@ -90,6 +107,8 @@ if CLIENT then
         SurfaceDrawPoly(pointerSegments)
     end
 
+    -- Background --
+
     -- Derived from the surface.DrawPoly example on the GMod wiki
     local function DrawCircle(x, y, radius, seg)
         local cir = {}
@@ -108,22 +127,25 @@ if CLIENT then
         surface.DrawPoly(cir)
     end
 
+    -- Wheel --
+
     local colors = {
         Color(76, 170, 231, 255),
         Color(249, 67, 46, 255),
-        Color(16, 212, 128, 255),
+        Color(21, 106, 46, 255),
         Color(55, 24, 102, 255),
         Color(239, 224, 99, 255),
         Color(249, 67, 46, 255),
         Color(209, 98, 175, 255),
         Color(76, 170, 231, 255),
         Color(249, 67, 46, 255),
-        Color(16, 212, 128, 255),
+        Color(21, 106, 46, 255),
         Color(55, 24, 102, 255),
         Color(239, 224, 99, 255),
         Color(249, 67, 46, 255),
         Color(209, 98, 175, 255)
     }
+    -- TODO
     local effectNames = {
         "Slow movement",
         "Slow firing",
@@ -140,6 +162,13 @@ if CLIENT then
         "Just yelling into the void",
         "And things"
     }
+
+    local logoMat = Material("materials/vgui/ttt/roles/whl/logo.png")
+    local function DrawLogo(x, y)
+        SurfaceSetMaterial(logoMat)
+        SurfaceSetDrawColor(COLOR_WHITE)
+        SurfaceDrawTexturedRect(x - 25, y - 25, 50, 50)
+    end
 
     -- Thanks to Angela from the Lonely Yogs for the algorithm!
     local function DrawCircleSegment(segmentIdx, segmentAngle, segmentCount, polyCount, radius)
@@ -174,11 +203,11 @@ if CLIENT then
         textMat:Mul(textMatInvert)
 
         -- Move out from the center slightly and rotate to re-align the text with the center of the segment
-        textMat:Translate(Vector(35, 0, 0))
+        textMat:Translate(Vector(55, 0, 0))
         textMat:Rotate(Angle(0, segmentAngle / 2, 0))
 
         CamPushModelMatrix(textMat, true)
-            DrawSimpleTextOutlined(text, "DefaultBold", 0, 5, COLOR_WHITE, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, COLOR_BLACK)
+            DrawSimpleTextOutlined(text, "WheelboyLabels", 0, 10, COLOR_WHITE, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, COLOR_BLACK)
         CamPopModelMatrix()
     end
 
@@ -210,9 +239,10 @@ if CLIENT then
         if not wheelStartTime then return end
 
         local centerX, centerY = ScrW() / 2, ScrH() / 2
-        DrawCircle(centerX, centerY, 205, 60)
-        DrawSegmentedCircle(centerX, centerY, 200, 30)
+        DrawCircle(centerX, centerY, 255, 60)
+        DrawSegmentedCircle(centerX, centerY, 250, 30)
         DrawPointer(centerX, centerY)
+        DrawLogo(centerX, centerY)
 
         -- TODO: Play clicking sound at roughly rotation interval
         -- TODO: When it stops rotating:
