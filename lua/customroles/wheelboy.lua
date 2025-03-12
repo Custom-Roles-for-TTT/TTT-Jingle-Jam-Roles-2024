@@ -45,6 +45,7 @@ if CLIENT then
     local DrawNoTexture = draw.NoTexture
     local DrawSimpleTextOutlined = draw.SimpleTextOutlined
     local MathCos = math.cos
+    local MathMin = math.min
     local MathRad = math.rad
     local MathSin = math.sin
     local SurfaceDrawPoly = surface.DrawPoly
@@ -65,8 +66,11 @@ if CLIENT then
     -- Start/Stop --
 
     local wheelStartTime = nil
+    local wheelEndTime = nil
     net.Receive("TTT_WheelboySpinWheel", function()
         wheelStartTime = CurTime()
+        -- TODO: Make the time configurable?
+        wheelEndTime = wheelStartTime + 10
     end)
 
     -- Pointer --
@@ -215,8 +219,11 @@ if CLIENT then
         local segmentCount = #colors
         local segmentAngle = (360 / segmentCount)
 
+        -- Once we've spun for the desired time, stop rotating at that point
+        local baseTime = MathMin(CurTime(), wheelEndTime)
         -- TODO: Rotate at variable speed, decreasing over time
-        local ang = RealTime() * 50
+        local ang = baseTime * 150
+
         local mat = Matrix()
         mat:Translate(Vector(x, y, 0))
         mat:Rotate(Angle(0, ang, 0))
