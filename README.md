@@ -49,6 +49,39 @@ ttt_hoodoo_shop_random_percent        0      // The percent chance that a weapon
 ttt_hoodoo_shop_random_enabled        0      // Whether role shop randomization is enabled for the hoodoo
 ```
 
+## Werewolf
+_Suggested By_: Nick\
+The Werewolf is an independent role who wins by being the last one standing, but can only kill under the cover of night.
+\
+\
+**ConVars**
+```cpp
+ttt_werewolf_enabled                0       // Whether or not the Werewolf should spawn
+ttt_werewolf_spawn_weight           1       // The weight assigned to spawning the Werewolf
+ttt_werewolf_min_players            0       // The minimum number of players required to spawn the Werewolf
+ttt_werewolf_starting_health        100     // The amount of health Werewolves start with
+ttt_werewolf_max_health             100     // The maximum amount of health Werewolves can have
+ttt_werewolf_is_monster             0       // Whether Werewolves should be treated as members of the monster team (rather than the independent team)
+ttt_werewolf_night_visibility_mode  1       // Which players know when it is night. 0 - Only Werewolves, 1 - Everyone if a Werewolf is alive, 2 - Everyone if a Werewolf is in the round, 3 - Everyone regardless of whether a Werewolf exists
+ttt_werewolf_timer_visibility_mode  1       // Which players see a timer showing when it will change to/from night. 0 - No one, 1 - Only Werewolves, 2 - Everyone
+ttt_werewolf_fog_visibility_mode    1       // Which players see fog/darkness during the night. 0 - No one, 1 - Non-Werewolves, 2 - Everyone
+ttt_werewolf_drop_weapons           0       // Whether Werewolves should drop their weapons on the ground when transforming
+ttt_werewolf_transform_model        1       // Whether Werewolves' player models should change to a Werewolf while transformed
+ttt_werewolf_hide_id                1       // Whether Werewolves' target ID (Name, health, karma etc.) should be hidden from other players' HUDs while transformed
+ttt_werewolf_vision_mode            1       // Whether Werewolves have a visible aura around other players, visible through walls. 0 - Never, 1 - While transformed, 2 - Always
+ttt_werewolf_day_length_min         90      // The minimum length of the day phase in seconds
+ttt_werewolf_day_length_max         120     // The maximum length of the day phase in seconds
+ttt_werewolf_night_length_min       45      // The minimum length of the night phase in seconds
+ttt_werewolf_night_length_max       60      // The maximum length of the night phase in seconds
+ttt_werewolf_day_damage_penalty     0.5     // Damage penalty applied to damage dealt by Werewolves during the day (e.g. 0.5 = 50% less damage)
+ttt_werewolf_night_damage_reduction 1       // Damage reduction applied to damage dealt to Werewolves during the night (e.g. 0.5 = 50% less damage)
+ttt_werewolf_night_speed_mult       1.2     // The multiplier to use on Werewolves' movement speed during the night (e.g. 1.2 = 120% normal speed)
+ttt_werewolf_night_sprint_recovery  0.12    // The amount of stamina Werewolves recover per tick at night
+ttt_werewolf_can_see_jesters        1       // Whether jesters are revealed (via head icons, color/icon on the scoreboard, etc.) to Werewolves
+ttt_werewolf_update_scoreboard      1       // Whether Werewolves see dead players as missing in action on the scoreboard
+```
+
+
 # Special Thanks
 - [Game icons](https://game-icons.net/) for the role icons
 - [The Stig](https://steamcommunity.com/id/The-Stig-294) for the Randoman role that the Hoodoo was very heavily based on
