@@ -80,18 +80,18 @@ if CLIENT then
     -- Pointer --
 
     local pointerOutlinePoints = {
-        { x = 0, y = -244 },
-        { x = -16, y = -254 },
-        { x = -16, y = -271 },
-        { x = 16, y = -271 },
-        { x = 16, y = -254 }
+        { x = 0, y = -237 },
+        { x = -16, y = -247 },
+        { x = -16, y = -264 },
+        { x = 16, y = -264 },
+        { x = 16, y = -247 }
     }
     local pointerPoints = {
-        { x = 0, y = -245 },
-        { x = -15, y = -255 },
-        { x = -15, y = -270 },
-        { x = 15, y = -270 },
-        { x = 15, y = -255 }
+        { x = 0, y = -238 },
+        { x = -15, y = -248 },
+        { x = -15, y = -263 },
+        { x = 15, y = -263 },
+        { x = 15, y = -248 }
     }
     local function DrawPointer(x, y)
         -- Draw the same shape but slightly larger and black
@@ -121,14 +121,14 @@ if CLIENT then
     local function DrawCircle(x, y, radius, seg)
         local cir = {}
 
-        table.insert(cir, { x = x, y = y })
+        TableInsert(cir, { x = x, y = y })
         for i = 0, seg do
             local a = MathRad((i / seg) * -360)
-            table.insert(cir, { x = x + MathSin(a) * radius, y = y + MathCos(a) * radius })
+            TableInsert(cir, { x = x + MathSin(a) * radius, y = y + MathCos(a) * radius })
         end
 
         local a = MathRad(0) -- This is needed for non absolute segment counts
-        table.insert(cir, { x = x + MathSin(a) * radius, y = y + MathCos(a) * radius })
+        TableInsert(cir, { x = x + MathSin(a) * radius, y = y + MathCos(a) * radius })
 
         SurfaceSetDrawColor(0, 0, 0, 255)
         DrawNoTexture()
@@ -179,43 +179,55 @@ if CLIENT then
     end
 
     -- Thanks to Angela from the Lonely Yogs for the algorithm!
-    local function DrawCircleSegment(segmentIdx, segmentAngle, segmentCount, polyCount, radius)
+    local function DrawCircleSegment(segmentIdx, segmentAngle, segmentCount, curvePointCount, radius)
         local text = effectNames[segmentIdx]
         local color = colors[segmentIdx]
 
-        -- Draw each of the polygons except the first and last to create a gap between segments
-        for polyIdx = 2, polyCount - 1 do
-            -- Rotate to the angle of this polygon
-            local polyMat = Matrix()
-            polyMat:Rotate(Angle(0, (polyIdx - 1) * (segmentAngle / polyCount), 0))
-
-            -- Draw a triangle
-            local polySegments = {
-                { x = 0.05, y = 0 },
-                { x = 1   , y = 0 },
-                { x = MathCos(MathRad(segmentAngle) / polyCount), y = MathSin(MathRad(segmentAngle) / polyCount) }
-            }
-
-            CamPushModelMatrix(polyMat, true)
-                SurfaceSetDrawColor(color.r, color.g, color.b, color.a)
-                DrawNoTexture()
-                SurfaceDrawPoly(polySegments)
-            CamPopModelMatrix()
+        -- Generate all the points on the polygon
+        local polySegments = {
+            { x = 0, y = 0 }
+        }
+        for i = 0, curvePointCount do
+            TableInsert(
+                polySegments,
+                {
+                    x = MathCos(i * MathRad(segmentAngle) / curvePointCount),
+                    y = MathSin(i * MathRad(segmentAngle) / curvePointCount)
+                }
+            )
         end
 
-        local textMat = Matrix()
+        local polyMat = Matrix()
+        local scaleDown = 0.95
+        -- Rotate and move the segment to the origin before applying the scaling and moving/rotating it back
+        -- This is needed so the scaling is applied against the outer edge of the segment
+        polyMat:Rotate(Angle(0, segmentAngle / 2, 0))
+        polyMat:Translate(Vector(0.5, 0, 0))
+        polyMat:Scale(Vector(scaleDown, scaleDown, 1))
+        polyMat:Translate(Vector(-0.5, 0, 0))
+        polyMat:Rotate(Angle(0, -segmentAngle / 2, 0))
 
-        -- Multiply by the inverse to undo the scaling, because the scaled text is huge
-        local textMatInvert = textMat:GetInverse()
-        textMat:Scale(Vector(1 / radius, 1 / radius, 1 / radius))
-        textMat:Mul(textMatInvert)
+        CamPushModelMatrix(polyMat, true)
+            SurfaceSetDrawColor(color.r, color.g, color.b, color.a)
+            DrawNoTexture()
+            SurfaceDrawPoly(polySegments)
+        CamPopModelMatrix()
 
         -- Move out from the center slightly and rotate to re-align the text with the center of the segment
-        textMat:Translate(Vector(55, 0, 0))
+        local textRenderDisplacement = 10
+        local textMat = Matrix()
         textMat:Rotate(Angle(0, segmentAngle / 2, 0))
 
+        -- This is a really crude attempt at centering the text...
+        textMat:Translate(Vector(0.5 - #text / 90, 0, 0))
+        textMat:Scale(Vector(1 / radius, 1 / radius, 1))
+
+        -- Undo text displacement
+        textMat:Translate(Vector(0, -textRenderDisplacement, 0))
+
         CamPushModelMatrix(textMat, true)
-            DrawSimpleTextOutlined(text, "WheelboyLabels", 0, 10, COLOR_WHITE, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, COLOR_BLACK)
+            -- Displace to ensure the text doesn't get cut off below y=0 (in text render space)
+            DrawSimpleTextOutlined(text, "WheelboyLabels", 0, textRenderDisplacement, COLOR_WHITE, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, COLOR_BLACK)
         CamPopModelMatrix()
     end
 
@@ -250,7 +262,7 @@ if CLIENT then
         if not wheelStartTime then return end
 
         local centerX, centerY = ScrW() / 2, ScrH() / 2
-        DrawCircle(centerX, centerY, 255, 60)
+        DrawCircle(centerX, centerY, 247, 60)
         DrawSegmentedCircle(centerX, centerY, 250, 30)
         DrawPointer(centerX, centerY)
         DrawLogo(centerX, centerY)
