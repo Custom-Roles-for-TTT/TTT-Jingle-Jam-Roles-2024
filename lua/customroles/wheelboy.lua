@@ -19,17 +19,52 @@ ROLE.shortdesc = "TODO"
 ROLE.team = ROLE_TEAM_JESTER
 
 ROLE.convars = {}
+TableInsert(ROLE.convars, {
+    cvar = "ttt_wheelboy_wheel_time",
+    type = ROLE_CONVAR_TYPE_NUM
+})
 
 RegisterRole(ROLE)
+
+-- TODO: Change default value
+local wheelboy_wheel_time = CreateConVar("ttt_wheelboy_wheel_time", 10, FCVAR_REPLICATED, "How long the wheel should spin for", 1, 30)
+
+-- TODO
+local wheelEffects = {
+    { name = "Slow movement", fn = function() end },
+    { name = "Slow firing", fn = function() end },
+    { name = "Fast stamina consumption", fn = function() end },
+    { name = "Lorem ipsum", fn = function() end },
+    { name = "Etc and stuff", fn = function() end },
+    { name = "More things", fn = function() end },
+    { name = "This is for testing", fn = function() end },
+    { name = "More words", fn = function() end },
+    { name = "Words and things", fn = function() end },
+    { name = "Sometimes I can even spell", fn = function() end },
+    { name = "Sometimes I can't", fn = function() end },
+    { name = "Aaaaaaaaaaaaaaaaah", fn = function() end },
+    { name = "Just yelling into the void", fn = function() end },
+    { name = "And things", fn = function() end }
+}
 
 if SERVER then
     AddCSLuaFile()
 
     util.AddNetworkString("TTT_WheelboySpinWheel")
+    util.AddNetworkString("TTT_WheelboySpinResult")
 
     concommand.Add("ttt_wheelboy_test", function(ply)
         net.Start("TTT_WheelboySpinWheel")
         net.Send(ply)
+    end)
+
+    net.Receive("TTT_WheelboySpinResult", function(len, ply)
+        if not IsPlayer(ply) then return end
+        -- TODO: Uncomment this
+        --if not ply:IsActiveWheelboy() then return end
+
+        -- TODO
+        --local result = net.ReadString()
     end)
 end
 
@@ -72,9 +107,8 @@ if CLIENT then
     local wheelOffset = nil
     net.Receive("TTT_WheelboySpinWheel", function()
         wheelStartTime = CurTime()
+        wheelEndTime = wheelStartTime + wheelboy_wheel_time:GetInt()
         wheelOffset = MathRand() * 360
-        -- TODO: Make the time configurable?
-        wheelEndTime = wheelStartTime + 10
     end)
 
     -- Pointer --
@@ -153,23 +187,6 @@ if CLIENT then
         Color(249, 67, 46, 255),
         Color(209, 98, 175, 255)
     }
-    -- TODO
-    local effectNames = {
-        "Slow movement",
-        "Slow firing",
-        "Fast stamina consumption",
-        "Lorem ipsum",
-        "Etc and stuff",
-        "More things",
-        "This is for testing",
-        "More words",
-        "Words and things",
-        "Sometimes I can even spell",
-        "Sometimes I can't",
-        "Aaaaaaaaaaaaaaaaah",
-        "Just yelling into the void",
-        "And things"
-    }
 
     local logoMat = Material("materials/vgui/ttt/roles/whl/logo.png")
     local function DrawLogo(x, y)
@@ -180,7 +197,7 @@ if CLIENT then
 
     -- Thanks to Angela from the Lonely Yogs for the algorithm!
     local function DrawCircleSegment(segmentIdx, segmentAngle, segmentCount, curvePointCount, radius)
-        local text = effectNames[segmentIdx]
+        local text = wheelEffects[segmentIdx].name
         local color = colors[segmentIdx]
 
         -- Generate all the points on the polygon
@@ -268,9 +285,17 @@ if CLIENT then
         DrawLogo(centerX, centerY)
 
         -- TODO: Play clicking sound at roughly rotation interval
-        -- TODO: When it stops rotating:
-        --       1. Send the result to the server
-        --       2. Wait X seconds before hiding
+        if CurTime() >= wheelEndTime + 10 then
+            wheelStartTime = nil
+            wheelEndTime = nil
+            wheelOffset = nil
+
+            -- TODO: Get the result from the wheel
+            local result = ""
+            net.Start("TTT_WheelboySpinResult")
+                net.WriteString(result)
+            net.SendToServer()
+        end
     end)
 
     --------------
