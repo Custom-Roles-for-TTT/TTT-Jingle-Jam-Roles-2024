@@ -273,11 +273,14 @@ if CLIENT then
         mat:Rotate(Angle(0, currentAngle, 0))
         mat:Scale(Vector(radius, radius, radius))
 
+        -- Start at 90deg offset so the start is the top instead of the right
+        -- Offset by an additional 1/2 segment so the arrow points to the middle instead of the edge
+        local angleOffset = 90 + (anglePerSegment / 2)
         CamPushModelMatrix(mat)
             for segmentIdx = 1, segmentCount do
                 -- Rotate to the angle of this segment
                 local segmentMat = Matrix()
-                segmentMat:Rotate(Angle(0, (segmentIdx - 1) * anglePerSegment, 0))
+                segmentMat:Rotate(Angle(0, ((segmentIdx - 1) * anglePerSegment) - angleOffset, 0))
 
                 CamPushModelMatrix(segmentMat, true)
                     DrawCircleSegment(segmentIdx, segmentCount, anglePerSegment, pointsPerSegment, radius, blink and segmentIdx == lastSegment)
