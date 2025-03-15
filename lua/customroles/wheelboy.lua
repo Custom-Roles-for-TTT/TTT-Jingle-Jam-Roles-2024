@@ -92,6 +92,7 @@ if CLIENT then
     local MathMin = math.min
     local MathRad = math.rad
     local MathRand = math.random
+    local MathRound = math.Round
     local MathSin = math.sin
     local SurfaceDrawPoly = surface.DrawPoly
     local SurfaceDrawTexturedRect = surface.DrawTexturedRect
@@ -116,6 +117,7 @@ if CLIENT then
     local wheelOffset = nil
     local lastSegment = nil
     local blinkStart = nil
+    local anglesPerSegment = nil
     net.Receive("TTT_WheelboySpinWheel", function()
         if wheelStartTime ~= nil then return end
 
@@ -267,15 +269,12 @@ if CLIENT then
         CamPopModelMatrix()
     end
 
-    local function DrawSegmentedCircle(x, y, radius, segmentCount, anglePerSegment, pointsPerSegment, currentAngle, blink)
+    local function DrawSegmentedCircle(x, y, radius, segmentCount, anglePerSegment, pointsPerSegment, currentAngle, angleOffset, blink)
         local mat = Matrix()
         mat:Translate(Vector(x, y, 0))
         mat:Rotate(Angle(0, currentAngle, 0))
         mat:Scale(Vector(radius, radius, radius))
 
-        -- Start at 90deg offset so the start is the top instead of the right
-        -- Offset by an additional 1/2 segment so the arrow points to the middle instead of the edge
-        local angleOffset = 90 + (anglePerSegment / 2)
         CamPushModelMatrix(mat)
             for segmentIdx = 1, segmentCount do
                 -- Rotate to the angle of this segment
@@ -289,25 +288,73 @@ if CLIENT then
         CamPopModelMatrix()
     end
 
+    local function ReduceAngle(ang)
+        while ang < 0 do
+            ang = ang + 360
+        end
+        while ang > 360 do
+            ang = ang - 360
+        end
+        return ang
+    end
+
     AddHook("HUDPaint", "Wheelboy_Wheel_HUDPaint", function()
         if not wheelStartTime then return end
 
         local segmentCount = #colors
         local anglePerSegment = (360 / segmentCount)
 
+        -- Start at 90deg offset so the start is the top instead of the right
+        -- Offset by an additional 1/2 segment so the arrow points to the middle instead of the edge
+        local angleOffset = 90 + (anglePerSegment / 2)
+
+        if anglesPerSegment == nil then
+            anglesPerSegment = {}
+            local halfAngle = anglePerSegment / 2
+            -- Precalculate the angle ranges for each segment, used to determine the current segment later
+            for segmentIdx = 1, segmentCount do
+                anglesPerSegment[segmentIdx] = {
+                    min = halfAngle * ((2 * (segmentIdx - 1)) - 1),
+                    max = halfAngle * ((2 * (segmentIdx - 1)) + 1)
+                }
+            end
+        end
+
         local curTime = CurTime()
         -- Once we've spun for the desired time, stop rotating at that point
         local baseTime = MathMin(curTime, wheelEndTime)
 
         -- TODO: Rotate at variable speed, decreasing over time
-        local currentAngle = wheelOffset + (baseTime * 150)
         -- Loop back around to 0 after we exceed 360
-        while currentAngle > 360 do
-            currentAngle = currentAngle - 360
-        end
+        local currentAngle = anglesPerSegment[1].min--ReduceAngle(wheelOffset + (baseTime * 150))
 
-        -- TODO: Get the current segment from the wheel, using "currentAngle"
-        local currentSegment = 1
+        print("Current Angle", currentAngle)
+
+        -- Get the current segment from the wheel, using the current angle
+        -- Adjust by the angle offset so our 0 points to index 1
+        local adjustedAngle = ReduceAngle(currentAngle - angleOffset)
+        print("Adjusted Angle", adjustedAngle)
+        print("Finding current segment")
+        local currentSegment
+        for segmentIdx, angles in pairs(anglesPerSegment) do
+            print(segmentIdx, angles.min, angles.max, adjustedAngle, adjustedAngle >= angles.min, adjustedAngle < angles.max)
+            if adjustedAngle >= angles.min and adjustedAngle < angles.max then
+                currentSegment = segmentIdx
+                print("Found", currentSegment)
+                break
+            end
+
+            -- Handle case of a negative minimum value
+            if angles.min < 0 and
+                -- Between the normalized minimum and the maximum. Handles [~12.5->347, 360)
+                ((adjustedAngle >= (angles.min + 360) and adjustedAngle < angles.max) or
+                -- Between 0 and the maximum. Handles [0, max]
+                 (adjustedAngle >= 0 and adjustedAngle < angles.max)) then
+                currentSegment = segmentIdx
+                print("Found 2", currentSegment)
+                break
+            end
+        end
 
         -- Keep track of when the segment changes and use that to play the clicking sound
         if currentSegment ~= lastSegment then
@@ -334,17 +381,20 @@ if CLIENT then
         -- Draw everything
         local centerX, centerY = ScrW() / 2, ScrH() / 2
         DrawCircle(centerX, centerY, 247, 60)
-        DrawSegmentedCircle(centerX, centerY, 250, segmentCount, anglePerSegment, 30, currentAngle, blink)
+        DrawSegmentedCircle(centerX, centerY, 250, segmentCount, anglePerSegment, 30, currentAngle, angleOffset, blink)
         DrawPointer(centerX, centerY)
         DrawLogo(centerX, centerY)
 
         -- Wait extra time and then clear everything and send it to the server
         if curTime >= wheelEndTime + wheelboy_wheel_end_wait_time:GetInt() then
+            print("Ending angle", currentAngle)
+            print("Ending segment", currentSegment)
             wheelStartTime = nil
             wheelEndTime = nil
             wheelOffset = nil
             lastSegment = nil
             blinkStart = nil
+            anglesPerSegment = nil
 
             net.Start("TTT_WheelboySpinResult")
                 net.WriteUInt(currentSegment, 4)
