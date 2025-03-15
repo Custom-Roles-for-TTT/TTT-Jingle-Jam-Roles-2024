@@ -23,11 +23,16 @@ TableInsert(ROLE.convars, {
     cvar = "ttt_wheelboy_wheel_time",
     type = ROLE_CONVAR_TYPE_NUM
 })
+TableInsert(ROLE.convars, {
+    cvar = "ttt_wheelboy_wheel_end_wait_time",
+    type = ROLE_CONVAR_TYPE_NUM
+})
 
 RegisterRole(ROLE)
 
 -- TODO: Change default value
 local wheelboy_wheel_time = CreateConVar("ttt_wheelboy_wheel_time", 10, FCVAR_REPLICATED, "How long the wheel should spin for", 1, 30)
+local wheelboy_wheel_end_wait_time = CreateConVar("ttt_wheelboy_wheel_end_wait_time", 10, FCVAR_REPLICATED, "How long the wheel should wait at the end, showing the result, before it hides", 1, 30)
 
 -- TODO
 local wheelEffects = {
@@ -63,8 +68,11 @@ if SERVER then
         -- TODO: Uncomment this
         --if not ply:IsActiveWheelboy() then return end
 
+        local chosenSegment = net.ReadUInt(4)
+        local result = wheelEffects[chosenSegment]
+
         -- TODO
-        --local result = net.ReadString()
+        print("Selected", result.name)
     end)
 end
 
@@ -87,6 +95,7 @@ if CLIENT then
     local MathSin = math.sin
     local SurfaceDrawPoly = surface.DrawPoly
     local SurfaceDrawTexturedRect = surface.DrawTexturedRect
+    local SurfacePlaySound = surface.PlaySound
     local SurfaceSetDrawColor = surface.SetDrawColor
     local SurfaceSetMaterial = surface.SetMaterial
 
@@ -105,7 +114,11 @@ if CLIENT then
     local wheelStartTime = nil
     local wheelEndTime = nil
     local wheelOffset = nil
+    local lastSegment = nil
+    local blinkStart = nil
     net.Receive("TTT_WheelboySpinWheel", function()
+        if wheelStartTime ~= nil then return end
+
         wheelStartTime = CurTime()
         wheelEndTime = wheelStartTime + wheelboy_wheel_time:GetInt()
         wheelOffset = MathRand() * 360
@@ -196,20 +209,26 @@ if CLIENT then
     end
 
     -- Thanks to Angela from the Lonely Yogs for the algorithm!
-    local function DrawCircleSegment(segmentIdx, segmentAngle, segmentCount, curvePointCount, radius)
+    local function DrawCircleSegment(segmentIdx, segmentCount, anglePerSegment, pointsPerSegment, radius, blink)
         local text = wheelEffects[segmentIdx].name
         local color = colors[segmentIdx]
+
+        -- If we're blinking, make this segment darker
+        if blink then
+            local h, s, l = ColorToHSL(colors[segmentIdx])
+            color = HSLToColor(h, s, math.max(l - 0.125, 0.125))
+        end
 
         -- Generate all the points on the polygon
         local polySegments = {
             { x = 0, y = 0 }
         }
-        for i = 0, curvePointCount do
+        for i = 0, pointsPerSegment do
             TableInsert(
                 polySegments,
                 {
-                    x = MathCos(i * MathRad(segmentAngle) / curvePointCount),
-                    y = MathSin(i * MathRad(segmentAngle) / curvePointCount)
+                    x = MathCos(i * MathRad(anglePerSegment) / pointsPerSegment),
+                    y = MathSin(i * MathRad(anglePerSegment) / pointsPerSegment)
                 }
             )
         end
@@ -218,11 +237,11 @@ if CLIENT then
         local scaleDown = 0.95
         -- Rotate and move the segment to the origin before applying the scaling and moving/rotating it back
         -- This is needed so the scaling is applied against the outer edge of the segment
-        polyMat:Rotate(Angle(0, segmentAngle / 2, 0))
+        polyMat:Rotate(Angle(0, anglePerSegment / 2, 0))
         polyMat:Translate(Vector(0.5, 0, 0))
         polyMat:Scale(Vector(scaleDown, scaleDown, 1))
         polyMat:Translate(Vector(-0.5, 0, 0))
-        polyMat:Rotate(Angle(0, -segmentAngle / 2, 0))
+        polyMat:Rotate(Angle(0, -anglePerSegment / 2, 0))
 
         CamPushModelMatrix(polyMat, true)
             SurfaceSetDrawColor(color.r, color.g, color.b, color.a)
@@ -233,7 +252,7 @@ if CLIENT then
         -- Move out from the center slightly and rotate to re-align the text with the center of the segment
         local textRenderDisplacement = 10
         local textMat = Matrix()
-        textMat:Rotate(Angle(0, segmentAngle / 2, 0))
+        textMat:Rotate(Angle(0, anglePerSegment / 2, 0))
 
         -- This is a really crude attempt at centering the text...
         textMat:Translate(Vector(0.5 - #text / 90, 0, 0))
@@ -248,28 +267,20 @@ if CLIENT then
         CamPopModelMatrix()
     end
 
-    local function DrawSegmentedCircle(x, y, radius, seg)
-        local segmentCount = #colors
-        local segmentAngle = (360 / segmentCount)
-
-        -- Once we've spun for the desired time, stop rotating at that point
-        local baseTime = MathMin(CurTime(), wheelEndTime)
-        -- TODO: Rotate at variable speed, decreasing over time
-        local ang = wheelOffset + (baseTime * 150)
-
+    local function DrawSegmentedCircle(x, y, radius, segmentCount, anglePerSegment, pointsPerSegment, currentAngle, blink)
         local mat = Matrix()
         mat:Translate(Vector(x, y, 0))
-        mat:Rotate(Angle(0, ang, 0))
+        mat:Rotate(Angle(0, currentAngle, 0))
         mat:Scale(Vector(radius, radius, radius))
 
         CamPushModelMatrix(mat)
             for segmentIdx = 1, segmentCount do
                 -- Rotate to the angle of this segment
                 local segmentMat = Matrix()
-                segmentMat:Rotate(Angle(0, (segmentIdx - 1) * segmentAngle, 0))
+                segmentMat:Rotate(Angle(0, (segmentIdx - 1) * anglePerSegment, 0))
 
                 CamPushModelMatrix(segmentMat, true)
-                    DrawCircleSegment(segmentIdx, segmentAngle, segmentCount, seg, radius)
+                    DrawCircleSegment(segmentIdx, segmentCount, anglePerSegment, pointsPerSegment, radius, blink and segmentIdx == lastSegment)
                 CamPopModelMatrix()
             end
         CamPopModelMatrix()
@@ -278,22 +289,62 @@ if CLIENT then
     AddHook("HUDPaint", "Wheelboy_Wheel_HUDPaint", function()
         if not wheelStartTime then return end
 
+        local segmentCount = #colors
+        local anglePerSegment = (360 / segmentCount)
+
+        local curTime = CurTime()
+        -- Once we've spun for the desired time, stop rotating at that point
+        local baseTime = MathMin(curTime, wheelEndTime)
+
+        -- TODO: Rotate at variable speed, decreasing over time
+        local currentAngle = wheelOffset + (baseTime * 150)
+        -- Loop back around to 0 after we exceed 360
+        while currentAngle > 360 do
+            currentAngle = currentAngle - 360
+        end
+
+        -- TODO: Get the current segment from the wheel, using "currentAngle"
+        local currentSegment = 1
+
+        -- Keep track of when the segment changes and use that to play the clicking sound
+        if currentSegment ~= lastSegment then
+            SurfacePlaySound("garrysmod/content_downloaded.wav")
+            lastSegment = currentSegment
+        end
+
+        local blink = false
+        -- If we just finished the spin, start blinking the color to indicate which was selected
+        if blinkStart == nil and curTime >= wheelEndTime then
+            blinkStart = curTime
+        end
+
+        -- If we've started blinking and enough time has exceed
+        if blinkStart ~= nil and curTime >= blinkStart then
+            -- Stop blinking after 1/2 second, but start again in another 0.5 second
+            if curTime >= blinkStart + 0.5 then
+                blinkStart = curTime + 0.5
+            else
+                blink = true
+            end
+        end
+
+        -- Draw everything
         local centerX, centerY = ScrW() / 2, ScrH() / 2
         DrawCircle(centerX, centerY, 247, 60)
-        DrawSegmentedCircle(centerX, centerY, 250, 30)
+        DrawSegmentedCircle(centerX, centerY, 250, segmentCount, anglePerSegment, 30, currentAngle, blink)
         DrawPointer(centerX, centerY)
         DrawLogo(centerX, centerY)
 
-        -- TODO: Play clicking sound at roughly rotation interval
-        if CurTime() >= wheelEndTime + 10 then
+        -- Wait extra time and then clear everything and send it to the server
+        if curTime >= wheelEndTime + wheelboy_wheel_end_wait_time:GetInt() then
             wheelStartTime = nil
             wheelEndTime = nil
             wheelOffset = nil
+            lastSegment = nil
+            blinkStart = nil
 
-            -- TODO: Get the result from the wheel
-            local result = ""
             net.Start("TTT_WheelboySpinResult")
-                net.WriteString(result)
+                net.WriteUInt(currentSegment, 4)
             net.SendToServer()
         end
     end)
