@@ -361,24 +361,30 @@ if SERVER then
     hook.Add("TTTPlayerRoleChanged", "Werewolf_TTTPlayerRoleChanged", function(ply, oldRole, newRole)
         CheckForActiveWerewolf()
 
-        if WEREWOLF.isNight and newRole == ROLE_WEREWOLF and oldRole ~= ROLE_WEREWOLF then
-            local drop_weapons = werewolf_drop_weapons:GetBool()
-            if drop_weapons then
-                for _, wep in pairs(ply:GetWeapons()) do
-                    local class = WEPS.GetClass(wep)
-                    if class ~= "weapon_zm_improvised" and class ~= "weapon_wwf_claws" and wep.AllowDrop then
-                        ply:DropWeapon(wep)
+        if WEREWOLF.isNight then
+            if newRole == ROLE_WEREWOLF and oldRole ~= ROLE_WEREWOLF then
+                local drop_weapons = werewolf_drop_weapons:GetBool()
+                if drop_weapons then
+                    for _, wep in pairs(ply:GetWeapons()) do
+                        local class = WEPS.GetClass(wep)
+                        if class ~= "weapon_zm_improvised" and class ~= "weapon_wwf_claws" and wep.AllowDrop then
+                            ply:DropWeapon(wep)
+                        end
                     end
                 end
-            end
-            ply:Give("weapon_wwf_claws")
-            ply:SelectWeapon("weapon_wwf_claws")
+                ply:Give("weapon_wwf_claws")
+                ply:SelectWeapon("weapon_wwf_claws")
 
-            local transform_model = werewolf_transform_model:GetBool()
-            if transform_model then
-                oldPlayerModels[ply:SteamID64()] = ply:GetModel()
-                SetMDL(ply, "models/player/stenli/lycan_werewolf.mdl")
-
+                local transform_model = werewolf_transform_model:GetBool()
+                if transform_model then
+                    oldPlayerModels[ply:SteamID64()] = ply:GetModel()
+                    SetMDL(ply, "models/player/stenli/lycan_werewolf.mdl")
+                end
+            else if oldRole == ROLE_WEREWOLF and newRole ~= ROLE_WEREWOLF then
+                ply:StripWeapon("weapon_wwf_claws")
+                if oldPlayerModels[ply:SteamID64()] then
+                    SetMDL(ply, oldPlayerModels[ply:SteamID64()])
+                end
             end
         end
     end)
@@ -391,7 +397,7 @@ if SERVER then
         if not IsValid(wep) or not IsValid(ply) then return end
         if ply:IsSpec() then return false end
 
-        if WEREWOLF.isNight and ply:IsWerewolf() then return false end
+        if WEREWOLF.isNight and ply:IsWerewolf() and WEPS.GetClass(wep) ~= "weapon_wwf_claws" then return false end
     end)
 
     hook.Add("PlayerSwitchWeapon", "Werewolf_PlayerCanPickupWeapon", function(ply, old, new)
