@@ -594,7 +594,7 @@ if CLIENT then
             if not vision_enabled and (vision_mode == WEREWOLF_VISION_ALWAYS or WEREWOLF.isNight) then
                 EnableWerewolfHighlights()
                 vision_enabled = true
-            elseif vision_enabled and not vision_mode == WEREWOLF_VISION_ALWAYS and not WEREWOLF.isNight then
+            elseif vision_enabled and vision_mode ~= WEREWOLF_VISION_ALWAYS and not WEREWOLF.isNight then
                 vision_enabled = false
             end
         else
