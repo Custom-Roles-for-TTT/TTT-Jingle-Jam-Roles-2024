@@ -215,7 +215,7 @@ if SERVER then
 
     AddHook("PlayerDeath", "Wheelboy_Swap_PlayerDeath", function(victim, infl, attacker)
         -- This gets set to nil when the spin count exceeds the win condition (aka, the wheelboy has won)
-        if spinCount ~= nil then return end
+        if spinCount == nil then return end
         if not swap_on_kill:GetBool() then return end
 
         local valid_kill = IsPlayer(attacker) and attacker ~= victim and GetRoundState() == ROUND_ACTIVE
@@ -229,6 +229,8 @@ if SERVER then
         victim:SetRole(attacker:GetRole())
         attacker:MoveRoleState(victim)
         attacker:SetRole(ROLE_WHEELBOY)
+        attacker:StripRoleWeapons()
+        RunHook("PlayerLoadout", attacker)
         SendFullStateUpdate()
     end)
 
