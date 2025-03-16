@@ -358,7 +358,9 @@ if CLIENT then
 
         -- Keep track of when the segment changes and use that to play the clicking sound
         if currentSegment ~= lastSegment then
-            SurfacePlaySound("whl/click.mp3")
+            if lastSegment ~= nil then
+                SurfacePlaySound("whl/click.mp3")
+            end
             lastSegment = currentSegment
         end
 
