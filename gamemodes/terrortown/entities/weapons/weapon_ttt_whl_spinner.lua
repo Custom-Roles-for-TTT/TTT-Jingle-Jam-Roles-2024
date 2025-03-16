@@ -37,7 +37,6 @@ SWEP.Primary.Cone           = 0
 SWEP.Primary.Ammo           = nil
 SWEP.Primary.Sound          = ""
 
-
 function SWEP:Initialize()
     self:SendWeaponAnim(ACT_SLAM_DETONATOR_DRAW)
 
@@ -58,7 +57,7 @@ end
 function SWEP:PrimaryAttack()
     if CLIENT then return end
     if self:GetNextPrimaryFire() > CurTime() then return end
-    if IsValid(self.Barrel) then return end
+    if GetRoundState() ~= ROUND_ACTIVE then return end
 
     self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
     self:SendWeaponAnim(ACT_SLAM_DETONATOR_DETONATE)
