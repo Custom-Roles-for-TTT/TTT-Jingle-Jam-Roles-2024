@@ -529,21 +529,29 @@ if SERVER then
         end
     end
 
-    AddHook("TTTPrepareRound", "Wheelboy_TTTPrepareRound", function()
+    local function ResetFullState()
+        for _, p in PlayerIterator() do
+            p:SetNWInt("WheelboyNextSpinTime", 0)
+        end
         ClearEffects()
         spinCount = 0
         net.Start("TTT_ResetWheelboyWins")
         net.Broadcast()
+    end
+
+    AddHook("TTTPrepareRound", "Wheelboy_TTTPrepareRound", function()
+        ResetFullState()
     end)
 
     AddHook("TTTBeginRound", "Wheelboy_TTTBeginRound", function()
-        ClearEffects()
-        spinCount = 0
-        net.Start("TTT_ResetWheelboyWins")
-        net.Broadcast()
+        ResetFullState()
     end)
 
     local function ClearEffectsAndWheel(ply)
+        if IsPlayer(ply) then
+            ply:SetNWInt("WheelboyNextSpinTime", 0)
+        end
+
         ClearEffects()
         net.Start("TTT_WheelboyStopWheel")
         if IsPlayer(ply) then
