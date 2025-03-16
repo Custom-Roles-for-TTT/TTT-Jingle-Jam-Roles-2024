@@ -127,6 +127,7 @@ if SERVER then
     util.AddNetworkString("TTT_ResetWheelboyWins")
     util.AddNetworkString("TTT_WheelboyAnnounceSound")
     util.AddNetworkString("TTT_WheelboySpinWheel")
+    util.AddNetworkString("TTT_WheelboyStopWheel")
     util.AddNetworkString("TTT_WheelboySpinResult")
 
     ------------------
@@ -246,6 +247,11 @@ if SERVER then
         net.Start("TTT_ResetWheelboyWins")
         net.Broadcast()
     end)
+
+    AddHook("TTTEndRound", "Wheelboy_TTTBeginRound", function()
+        net.Start("TTT_WheelboyStopWheel")
+        net.Broadcast()
+    end)
 end
 
 if CLIENT then
@@ -282,6 +288,21 @@ if CLIENT then
     local GetTranslation = LANG.GetTranslation
 
     local hide_role = GetConVar("ttt_hide_role")
+
+    local wheelStartTime = nil
+    local wheelEndTime = nil
+    local wheelOffset = nil
+    local lastSegment = nil
+    local blinkStart = nil
+    local anglesPerSegment = nil
+    local function ResetWheelState()
+        wheelStartTime = nil
+        wheelEndTime = nil
+        wheelOffset = nil
+        lastSegment = nil
+        blinkStart = nil
+        anglesPerSegment = nil
+    end
 
     ---------
     -- HUD --
@@ -336,6 +357,7 @@ if CLIENT then
 
     local function ResetWheelboyWin()
         wheelboyWins = false
+        ResetWheelState()
     end
     net.Receive("TTT_ResetWheelboyWins", ResetWheelboyWin)
     AddHook("TTTPrepareRound", "Wheelboy_WinTracking_TTTPrepareRound", ResetWheelboyWin)
@@ -409,18 +431,16 @@ if CLIENT then
 
     -- Start/Stop --
 
-    local wheelStartTime = nil
-    local wheelEndTime = nil
-    local wheelOffset = nil
-    local lastSegment = nil
-    local blinkStart = nil
-    local anglesPerSegment = nil
-    net.Receive("TTT_WheelboySpinWheel", function()
+        net.Receive("TTT_WheelboySpinWheel", function()
         if wheelStartTime ~= nil then return end
 
         wheelStartTime = CurTime()
         wheelEndTime = wheelStartTime + wheel_time:GetInt()
         wheelOffset = MathRand() * 360
+    end)
+
+    net.Receive("TTT_WheelboyStopWheel", function()
+        ResetWheelState()
     end)
 
     -- Pointer --
@@ -687,12 +707,7 @@ if CLIENT then
 
         -- Wait extra time and then clear everything and send it to the server
         if curTime >= wheelEndTime + wheel_end_wait_time:GetInt() then
-            wheelStartTime = nil
-            wheelEndTime = nil
-            wheelOffset = nil
-            lastSegment = nil
-            blinkStart = nil
-            anglesPerSegment = nil
+            ResetWheelState()
 
             net.Start("TTT_WheelboySpinResult")
                 net.WriteUInt(currentSegment, 4)
