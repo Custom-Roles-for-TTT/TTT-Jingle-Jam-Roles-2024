@@ -291,12 +291,13 @@ if CLIENT then
         if hide_role:GetBool() then return end
         if not client:IsActiveWheelboy() then return end
 
+        local curTime = CurTime()
         local nextSpinTime = client:GetNWInt("WheelboyNextSpinTime", nil)
         local nextSpinLabel
-        if nextSpinTime == nil or CurTime() >= nextSpinTime then
+        if nextSpinTime == nil or curTime >= nextSpinTime then
             nextSpinLabel = GetTranslation("wheelboy_spin_hud_now")
         else
-            nextSpinLabel = FormatTime(nextSpinTime, "%02i:%02i")
+            nextSpinLabel = FormatTime(nextSpinTime - curTime, "%02i:%02i")
         end
 
         SurfaceSetFont("TabLarge")
