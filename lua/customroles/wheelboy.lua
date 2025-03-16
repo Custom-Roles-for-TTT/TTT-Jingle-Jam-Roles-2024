@@ -102,7 +102,7 @@ local wheelEffects = {
         start = function(p, this)
             local speedMult = 0.8 * this.times
             AddHook("TTTSpeedMultiplier", "Wheelboy_SlowMovement_TTTSpeedMultiplier", function(ply, mults)
-                                if IsPlayer(ply) then
+                if IsPlayer(ply) then
                     TableInsert(mults, speedMult)
                 end
             end)
@@ -126,9 +126,9 @@ local wheelEffects = {
         name = "More stamina consumption",
         shared = true,
         start = function(p, this)
-local staminaLoss = 0.3 * this.times
+            local staminaLoss = 0.3 * this.times
             AddHook("TTTSprintStaminaPost", "Wheelboy_MoreStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
-                                if IsPlayer(ply) then
+                if IsPlayer(ply) then
                     return stamina - staminaLoss
                 end
             end)
@@ -203,9 +203,9 @@ local staminaLoss = 0.3 * this.times
         name = "Fast movement",
         shared = true,
         start = function(p, this)
-local speedMult = 1.2 * this.times
+            local speedMult = 1.2 * this.times
             AddHook("TTTSpeedMultiplier", "Wheelboy_FastMovement_TTTSpeedMultiplier", function(ply, mults)
-                                if IsPlayer(ply) then
+                if IsPlayer(ply) then
                     TableInsert(mults, speedMult)
                 end
             end)
@@ -229,9 +229,9 @@ local speedMult = 1.2 * this.times
         name = "Less stamina consumption",
         shared = true,
         start = function(p, this)
-local staminaGain = 0.15 * this.times
+            local staminaGain = 0.15 * this.times
             AddHook("TTTSprintStaminaPost", "Wheelboy_LessStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
-                                if IsPlayer(ply) then
+                if IsPlayer(ply) then
                     return stamina + staminaGain
                 end
             end)
@@ -261,9 +261,9 @@ local staminaGain = 0.15 * this.times
         name = "Temporary \"Infinite Ammo\"",
         start = function(p, this)
             local timerId = "Wheelboy_AmmoEffect"
--- If this effect is already active, add another 30 seconds
+            -- If this effect is already active, add another 30 seconds
             if timer.Exists(timerId) then
-local timeLeft = timer.TimeLeft(timerId)
+                local timeLeft = timer.TimeLeft(timerId)
                 timer.Adjust(timerId, timeLeft + 30)
                 return
             end
@@ -420,7 +420,7 @@ if SERVER then
         end
 
         -- Run the associated function with the chosen result
-if result.times == nil then
+        if result.times == nil then
             result.times = 0
         end
         result.times = result.times + 1
@@ -484,6 +484,8 @@ if result.times == nil then
         attacker:StripRoleWeapons()
         RunHook("PlayerLoadout", attacker)
         SendFullStateUpdate()
+
+        -- TODO: Tell the new wheelboy what happened and what to do now
     end)
 
     -------------
@@ -518,10 +520,32 @@ if result.times == nil then
         net.Broadcast()
     end)
 
-    AddHook("TTTEndRound", "Wheelboy_TTTBeginRound", function()
+    local function ClearEffectsAndWheel(ply)
         ClearEffects()
         net.Start("TTT_WheelboyStopWheel")
-        net.Broadcast()
+        if IsPlayer(ply) then
+            net.Send(ply)
+        else
+            net.Broadcast()
+        end
+    end
+
+    AddHook("TTTEndRound", "Wheelboy_TTTBeginRound", function()
+        ClearEffectsAndWheel()
+    end)
+
+    hook.Add("TTTPlayerRoleChanged", "Wheelboy_TTTPlayerRoleChanged", function(ply, oldRole, newRole)
+        if oldRole == newRole then return end
+        -- Clear effects if wheelboy's role is changed
+        -- This has the secondary effect of encouraging people to
+        -- kill wheelboy to stop any current annoying effects
+        if oldRole == ROLE_WHEELBOY then
+            ClearEffectsAndWheel(ply)
+        -- If there's a new wheelboy, reset the spin count so
+        -- they can't just build on the previous one's success
+        elseif newRole == ROLE_WHEELBOY then
+            spinCount = 0
+        end
     end)
 end
 
