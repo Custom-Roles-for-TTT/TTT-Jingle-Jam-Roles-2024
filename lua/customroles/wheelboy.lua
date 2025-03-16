@@ -288,7 +288,7 @@ if CLIENT then
     -- HUD --
     ---------
 
-    AddHook("TTTHUDInfoPaint", "DetectiveLike_TTTHUDInfoPaint", function(client, label_left, label_top, active_labels)
+    AddHook("TTTHUDInfoPaint", "Wheelboy_TTTHUDInfoPaint", function(client, label_left, label_top, active_labels)
         if hide_role:GetBool() then return end
         if not client:IsActiveWheelboy() then return end
 
