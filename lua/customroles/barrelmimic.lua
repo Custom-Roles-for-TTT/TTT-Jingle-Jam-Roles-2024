@@ -41,7 +41,8 @@ TableInsert(ROLE.convars, {
 ROLE.translations = {
     ["english"] = {
         ["bam_transformer_help_pri"] = "Use {primaryfire} to transform into an explodable barrel",
-        ["bam_transformer_help_sec"] = "Use {secondaryfire} to transform back"
+        ["bam_transformer_help_sec"] = "Use {secondaryfire} to transform back",
+        ["win_barrelmimic"] = "The {role} has exploded its way to victory!"
     }
 }
 
