@@ -1,11 +1,14 @@
 local hook = hook
+local math = math
 local net = net
 local player = player
 local table = table
 
 local AddHook = hook.Add
+local MathMax = math.max
 local PlayerIterator = player.Iterator
 local TableInsert = table.insert
+local RemoveHook = hook.Remove
 local RunHook = hook.Run
 
 local ROLE = {}
@@ -90,76 +93,206 @@ local speed_mult = CreateConVar("ttt_wheelboy_speed_mult", "1.2", FCVAR_REPLICAT
 local sprint_recovery = CreateConVar("ttt_wheelboy_sprint_recovery", "0.12", FCVAR_REPLICATED, "The amount of stamina to recover per tick", 0, 1)
 local swap_on_kill = CreateConVar("ttt_wheelboy_swap_on_kill", "0", FCVAR_REPLICATED, "Whether wheelboy's killer should become the new wheelboy (if they haven't won yet)", 0, 1)
 
--- TODO
 local wheelEffects = {
     {
+        -- 80% speed
         name = "Slow movement",
-        start = function(ply) end,
-        finish = function() end
+        shared = true,
+        start = function(p)
+            AddHook("TTTSpeedMultiplier", "Wheelboy_SlowEffect_TTTSpeedMultiplier", function(ply, mults)
+                -- Ignore Wheelboy since it has its own speed effect already
+                if IsPlayer(ply) and not ply:IsActiveWheelBoy() then
+                    TableInsert(mults, 0.8)
+                end
+            end)
+        end,
+        finish = function()
+            RemoveHook("TTTSpeedMultiplier", "Wheelboy_SlowEffect_TTTSpeedMultiplier")
+        end
     },
     {
         name = "Fast firing",
-        start = function(ply) end,
-        finish = function() end
+        start = function(p)
+            -- TODO
+            print("pew pew pew")
+        end,
+        finish = function()
+            -- TODO
+            print("pew pew")
+        end
     },
     {
+        -- Increase stamina consumption from 0.2 to 0.5, assuming default convar value
         name = "More stamina consumption",
-        start = function(ply) end,
-        finish = function() end
+        shared = true,
+        start = function(p)
+            local sprint_consume = GetConVar("ttt_sprint_consume"):GetFloat()
+            AddHook("TTTSprintStaminaPost", "Wheelboy_MoreEffect_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
+                -- Ignore Wheelboy since it has its own stamina effect already
+                if IsPlayer(ply) and not ply:IsActiveWheelBoy() then
+                    return stamina - (sprint_consume + 0.3)
+                end
+            end)
+        end,
+        finish = function()
+            RemoveHook("TTTSprintStaminaPost", "Wheelboy_MoreEffect_TTTSprintStaminaPost")
+        end
     },
     {
+        -- 50 extra HP for everyone
         name = "Extra health",
-        start = function(ply) end,
+        start = function(p)
+            for _, v in PlayerIterator() do
+                if not IsPlayer(v) then continue end
+                if not v:Alive() or v:IsSpec() then continue end
+
+                local hp = v:Health()
+                local maxHp = v:GetMaxHealth()
+                v:SetHealth(hp + 50)
+                v:SetMaxHealth(maxHp + 50)
+            end
+        end,
         finish = function() end
     },
     {
         name = "Temporary \"Bad Trip\"",
-        start = function(ply) end,
-        finish = function() end
+        start = function(p)
+            -- TODO
+            print("OH NO")
+        end,
+        finish = function()
+            -- TODO
+            print("OH YEA")
+        end
     },
     {
+        -- 50% gravity
         name = "Less gravity",
-        start = function(ply) end,
-        finish = function() end
+        start = function(p)
+            local targetGravity = 0.5
+            AddHook("TTTPlayerAliveThink", "Wheelboy_LessEffect_TTTPlayerAliveThink", function(ply)
+                if ply:GetGravity() ~= targetGravity then
+                    ply:SetGravity(targetGravity)
+                end
+            end)
+        end,
+        finish = function()
+            RemoveHook("TTTPlayerAliveThink", "Wheelboy_LessEffect_TTTPlayerAliveThink")
+        end
     },
     {
         name = "Lose a credit",
-        start = function(ply) end,
+        start = function(p)
+            for _, v in PlayerIterator() do
+                if not IsPlayer(v) then continue end
+                if not v:Alive() or v:IsSpec() then continue end
+
+                local credits = v:GetCredits()
+                if credits > 0 then
+                    v:SetCredits(credits - 1)
+                end
+            end
+        end,
         finish = function() end
     },
     {
+        -- 120% speed
         name = "Fast movement",
-        start = function(ply) end,
-        finish = function() end
+        shared = true,
+        start = function(p)
+            AddHook("TTTSpeedMultiplier", "Wheelboy_FastEffect_TTTSpeedMultiplier", function(ply, mults)
+                -- Ignore Wheelboy since it has its own speed effect already
+                if IsPlayer(ply) and not ply:IsActiveWheelBoy() then
+                    TableInsert(mults, 1.2)
+                end
+            end)
+        end,
+        finish = function()
+            RemoveHook("TTTSpeedMultiplier", "Wheelboy_FastEffect_TTTSpeedMultiplier")
+        end
     },
     {
         name = "Slow firing",
-        start = function(ply) end,
-        finish = function() end
+        start = function(p)
+            -- TODO
+            print("pew")
+        end,
+        finish = function()
+            -- TODO
+            print("pew pew")
+        end
     },
     {
+        -- Decrease stamina consumption from 0.2 to 0.05, assuming default convar value
         name = "Less stamina consumption",
-        start = function(ply) end,
-        finish = function() end
+        shared = true,
+        start = function(p)
+            local sprint_consume = GetConVar("ttt_sprint_consume"):GetFloat()
+            AddHook("TTTSprintStaminaPost", "Wheelboy_LessEffect_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
+                -- Ignore Wheelboy since it has its own stamina effect already
+                if IsPlayer(ply) and not ply:IsActiveWheelBoy() then
+                    return stamina - (sprint_consume - 0.15)
+                end
+            end)
+        end,
+        finish = function()
+            RemoveHook("TTTSprintStaminaPost", "Wheelboy_LessEffect_TTTSprintStaminaPost")
+        end
     },
     {
+        -- 25 less HP for everyone
         name = "Health reduction",
-        start = function(ply) end,
+        start = function(p)
+            for _, v in PlayerIterator() do
+                if not IsPlayer(v) then continue end
+                if not v:Alive() or v:IsSpec() then continue end
+
+                -- Don't go below 1
+                local hp = MathMax(v:Health() - 25, 1)
+                local maxHp = MathMax(v:GetMaxHealth() - 25, 1)
+                v:SetHealth(hp)
+                v:SetMaxHealth(maxHp)
+            end
+        end,
         finish = function() end
     },
     {
         name = "Temporary \"Infinite Ammo\"",
-        start = function(ply) end,
-        finish = function() end
+        start = function(p)
+            -- TODO
+            print("IT'S OVER 9000!")
+        end,
+        finish = function()
+            -- TODO
+            print("Nevermind")
+        end
     },
     {
+        -- 150% gravity
         name = "More gravity",
-        start = function(ply) end,
-        finish = function() end
+        start = function(p)
+            local targetGravity = 1.5
+            AddHook("TTTPlayerAliveThink", "Wheelboy_MoreEffect_TTTPlayerAliveThink", function(ply)
+                if ply:GetGravity() ~= targetGravity then
+                    ply:SetGravity(targetGravity)
+                end
+            end)
+        end,
+        finish = function()
+            RemoveHook("TTTPlayerAliveThink", "Wheelboy_MoreEffect_TTTPlayerAliveThink")
+        end
     },
     {
         name = "Gain a credit",
-        start = function(ply) end,
+        start = function(p)
+            for _, v in PlayerIterator() do
+                if not IsPlayer(v) then continue end
+                if not v:Alive() or v:IsSpec() then continue end
+
+                local credits = v:GetCredits()
+                v:SetCredits(credits + 1)
+            end
+        end,
         finish = function() end
     }
 }
@@ -186,6 +319,8 @@ if SERVER then
     util.AddNetworkString("TTT_WheelboySpinWheel")
     util.AddNetworkString("TTT_WheelboyStopWheel")
     util.AddNetworkString("TTT_WheelboySpinResult")
+    util.AddNetworkString("TTT_WheelboyStartEffect")
+    util.AddNetworkString("TTT_WheelboyFinishEffect")
 
     ------------------
     -- ANNOUNCEMENT --
@@ -264,6 +399,12 @@ if SERVER then
 
         -- Run the associated function with the chosen result
         result.start(ply)
+        -- If this effect is shared, then send a message to the client so it knows to do something too
+        if result.shared then
+            net.Start("TTT_WheelboyStartEffect")
+                net.WriteUInt(chosenSegment, 4)
+            net.Broadcast()
+        end
     end)
 
     ---------------
@@ -297,8 +438,15 @@ if SERVER then
 
     local function ClearEffects()
         -- End all of the effects
-        for _, effect in ipairs(wheelEffects) do
+        for effectIdx, effect in ipairs(wheelEffects) do
             effect.finish()
+
+            -- If this effect is shared, then send a message to the client so it knows to do something too
+            if effect.shared then
+                net.Start("TTT_WheelboyFinishEffect")
+                    net.WriteUInt(effectIdx, 4)
+                net.Broadcast()
+            end
         end
     end
 
@@ -328,7 +476,6 @@ if CLIENT then
     local CurTime = CurTime
     local draw = draw
     local Material = Material
-    local math = math
     local surface = surface
     local util = util
 
@@ -413,6 +560,10 @@ if CLIENT then
 
     local wheelboyWins = false
     net.Receive("TTT_UpdateWheelboyWins", function()
+        if wheelboyWins then return end
+
+        SurfacePlaySound("whl/win.mp3")
+
         -- Log the win event with an offset to force it to the end
         wheelboyWins = true
         CLSCORE:AddEvent({
@@ -436,12 +587,6 @@ if CLIENT then
                 txt = LANG.GetParamTranslation("hilite_wheelboy", { role = string.upper(ROLE_STRINGS[ROLE_WHEELBOY]) }),
                 col = ROLE_COLORS[ROLE_WHEELBOY]
             })
-        end
-    end)
-
-    AddHook("TTTChooseRoundEndSound", "Wheelboy_TTTChooseRoundEndSound", function(ply, result)
-        if result == WIN_WHEELBOY then
-            return "whl/win.mp3"
         end
     end)
 
@@ -507,6 +652,25 @@ if CLIENT then
 
     net.Receive("TTT_WheelboyStopWheel", function()
         ResetWheelState()
+    end)
+
+    -- Effects --
+
+    net.Receive("TTT_WheelboyStartEffect", function()
+        local client = LocalPlayer()
+        if not IsPlayer(client) then return end
+
+        local effectIdx = net.ReadUInt(4)
+        if effectIdx > 0 and effectIdx <= #wheelEffects then
+            wheelEffects[effectIdx].start(client)
+        end
+    end)
+
+    net.Receive("TTT_WheelboyFinishEffect", function()
+        local effectIdx = net.ReadUInt(4)
+        if effectIdx > 0 and effectIdx <= #wheelEffects then
+            wheelEffects[effectIdx].finish()
+        end
     end)
 
     -- Pointer --
