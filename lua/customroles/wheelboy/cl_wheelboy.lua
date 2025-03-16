@@ -213,7 +213,12 @@ net.Receive("TTT_WheelboyStartEffect", function()
 
     local effectIdx = net.ReadUInt(4)
     if effectIdx > 0 and effectIdx <= #WHEELBOY.Effects then
-        WHEELBOY.Effects[effectIdx].start(client)
+        local result = WHEELBOY.Effects[effectIdx]
+        if result.times == nil then
+            result.times = 0
+        end
+        result.times = result.times + 1
+        result.start(client, result)
     end
 end)
 
@@ -424,16 +429,10 @@ AddHook("HUDPaint", "Wheelboy_Wheel_HUDPaint", function()
     local baseTime = MathMin(curTime, wheelEndTime)
     local totalTime = wheelEndTime - wheelStartTime
     local timeElapsed = baseTime - wheelStartTime
-    -- TODO: Rotate at variable speed, decreasing over time
-    local anglePerSecond = 50 * (1 - (timeElapsed / totalTime))
-
+    -- Rotate at variable speed, decreasing over time
+    local anglePerSecond = 250 * (1 - (timeElapsed / (2 * totalTime)))
     -- Loop back around to 0 after we exceed 360
     local currentAngle = ReduceAngle(wheelStartAngle + (anglePerSecond * timeElapsed))
-        -- -   ^               v                              v               ~                             ~
-        -- 15	 7.291748046875	 0.51388346354167	            25.694173177083	187.35543708007	              319.99885060284
-        -- 15	 7.3056030273438 0.51295979817708	            25.647989908854	187.37403272341	              320.01744624618
-        -- 15	 7.7236328125	 0.48509114583333	            24.254557291667	187.33329455058	              319.97670807335
-print(totalTime, timeElapsed,    1 - (timeElapsed / totalTime), anglePerSecond, anglePerSecond * timeElapsed, wheelStartAngle + (anglePerSecond * timeElapsed))
 
     -- Get the current segment from the wheel, using the current angle
     -- Adjust by the angle offset so our 0 points to index 1
@@ -471,9 +470,14 @@ print(totalTime, timeElapsed,    1 - (timeElapsed / totalTime), anglePerSecond, 
         lastSegment = currentSegment
     end
 
+    local waitTime = wheel_end_wait_time:GetInt()
     local blink = false
     -- If we just finished the spin, start blinking the color to indicate which was selected
     if blinkStart == nil and curTime >= wheelEndTime then
+        -- Display message telling wheelboy what was chosen if there is a delay before it takes effect
+        if waitTime > 0 then
+            LocalPlayer():QueueMessage(MSG_PRINTBOTH, "The wheel has landed on '" .. WHEELBOY.Effects[currentSegment].name .. "'! It will take effect in " .. waitTime .. " second(s)")
+        end
         blinkStart = curTime
     end
 
@@ -495,7 +499,7 @@ print(totalTime, timeElapsed,    1 - (timeElapsed / totalTime), anglePerSecond, 
     DrawLogo(centerX, centerY)
 
     -- Wait extra time and then clear everything and send it to the server
-    if curTime >= wheelEndTime + wheel_end_wait_time:GetInt() then
+    if curTime >= wheelEndTime + waitTime then
         ResetWheelState()
 
         net.Start("TTT_WheelboySpinResult")
