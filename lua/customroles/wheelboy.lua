@@ -15,8 +15,11 @@ ROLE.nameplural = "Wheelboys"
 ROLE.nameext = "a Wheelboy"
 ROLE.nameshort = "whl"
 
-ROLE.desc = [[You are {role}! TODO]]
-ROLE.shortdesc = "TODO"
+ROLE.desc = [[You are {role}! Spin your wheel
+to trigger random effects for everyone.
+
+Spin enough times and you win!]]
+ROLE.shortdesc = "Can spin a wheel to apply random effects to everyone. Spin enough times and they win."
 
 ROLE.team = ROLE_TEAM_JESTER
 
