@@ -97,6 +97,11 @@ net.Receive("TTT_WheelboySpinResult", function(len, ply)
         end
     end
 
+    -- Let everyone know what the wheel landed on
+    for _, p in PlayerIterator() do
+        p:QueueMessage(MSG_PRINTBOTH, ROLE_STRINGS[ROLE_WHEELBOY] .. "'s wheel has landed on '" .. result.name .. "'!")
+    end
+
     -- Run the associated function with the chosen result
     if result.times == nil then
         result.times = 0
