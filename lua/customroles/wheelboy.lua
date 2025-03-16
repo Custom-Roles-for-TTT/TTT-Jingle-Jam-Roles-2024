@@ -342,7 +342,7 @@ if CLIENT then
 
             -- Handle case of a negative minimum value
             if angles.min < 0 and
-                -- Between the normalized minimum and the maximum. Handles [-12.6->347.4, 360)
+                -- Between the normalized minimum and the maximum degree of a circle. Handles [-12.6->347.4, 360)
                 ((adjustedAngle >= (angles.min + 360) and adjustedAngle < 360) or
                 -- Between 0 and the maximum. Handles [0, max)
                  (adjustedAngle >= 0 and adjustedAngle < angles.max)) then
