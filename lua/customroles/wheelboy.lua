@@ -22,6 +22,8 @@ Spin enough times and you win!]]
 ROLE.shortdesc = "Can spin a wheel to apply random effects to everyone. Spin enough times and they win."
 
 ROLE.team = ROLE_TEAM_JESTER
+ROLE.startinghealth = 150
+ROLE.maxhealth = 150
 
 ROLE.convars = {}
 TableInsert(ROLE.convars, {
