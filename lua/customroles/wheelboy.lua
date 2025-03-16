@@ -92,20 +92,76 @@ local swap_on_kill = CreateConVar("ttt_wheelboy_swap_on_kill", "0", FCVAR_REPLIC
 
 -- TODO
 local wheelEffects = {
-    { name = "Slow movement", fn = function(ply) end },
-    { name = "Slow firing", fn = function(ply) end },
-    { name = "Fast stamina consumption", fn = function(ply) end },
-    { name = "Lorem ipsum", fn = function(ply) end },
-    { name = "Etc and stuff", fn = function(ply) end },
-    { name = "More things", fn = function(ply) end },
-    { name = "This is for testing", fn = function(ply) end },
-    { name = "More words", fn = function(ply) end },
-    { name = "Words and things", fn = function(ply) end },
-    { name = "Sometimes I can even spell", fn = function(ply) end },
-    { name = "Sometimes I can't", fn = function(ply) end },
-    { name = "Aaaaaaaaaaaaaaaaah", fn = function(ply) end },
-    { name = "Just yelling into the void", fn = function(ply) end },
-    { name = "And things", fn = function(ply) end }
+    {
+        name = "Slow movement",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Fast firing",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "More stamina consumption",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Extra health",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Temporary \"Bad Trip\"",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Less gravity",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Lose a credit",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Fast movement",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Slow firing",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Less stamina consumption",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Health reduction",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Temporary \"Infinite Ammo\"",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "More gravity",
+        start = function(ply) end,
+        finish = function() end
+    },
+    {
+        name = "Gain a credit",
+        start = function(ply) end,
+        finish = function() end
+    }
 }
 
 AddHook("TTTSprintStaminaRecovery", "Wheelboy_TTTSprintStaminaRecovery", function(ply, recovery)
@@ -207,7 +263,7 @@ if SERVER then
         end
 
         -- Run the associated function with the chosen result
-        result.fn(ply)
+        result.start(ply)
     end)
 
     ---------------
@@ -239,19 +295,29 @@ if SERVER then
     -- CLEANUP --
     -------------
 
+    local function ClearEffects()
+        -- End all of the effects
+        for _, effect in ipairs(wheelEffects) do
+            effect.finish()
+        end
+    end
+
     AddHook("TTTPrepareRound", "Wheelboy_TTTPrepareRound", function()
+        ClearEffects()
         spinCount = 0
         net.Start("TTT_ResetWheelboyWins")
         net.Broadcast()
     end)
 
     AddHook("TTTBeginRound", "Wheelboy_TTTBeginRound", function()
+        ClearEffects()
         spinCount = 0
         net.Start("TTT_ResetWheelboyWins")
         net.Broadcast()
     end)
 
     AddHook("TTTEndRound", "Wheelboy_TTTBeginRound", function()
+        ClearEffects()
         net.Start("TTT_WheelboyStopWheel")
         net.Broadcast()
     end)
@@ -505,19 +571,19 @@ if CLIENT then
 
     local colors = {
         Color(76, 170, 231, 255),
-        Color(249, 67, 46, 255),
-        Color(21, 106, 46, 255),
-        Color(55, 24, 102, 255),
-        Color(239, 224, 99, 255),
-        Color(249, 67, 46, 255),
         Color(209, 98, 175, 255),
-        Color(76, 170, 231, 255),
         Color(249, 67, 46, 255),
-        Color(21, 106, 46, 255),
-        Color(55, 24, 102, 255),
         Color(239, 224, 99, 255),
+        Color(55, 24, 102, 255),
+        Color(21, 106, 46, 255),
         Color(249, 67, 46, 255),
-        Color(209, 98, 175, 255)
+        Color(76, 170, 231, 255),
+        Color(209, 98, 175, 255),
+        Color(249, 67, 46, 255),
+        Color(239, 224, 99, 255),
+        Color(55, 24, 102, 255),
+        Color(21, 106, 46, 255),
+        Color(249, 67, 46, 255)
     }
 
     local logoMat = Material("materials/vgui/ttt/roles/whl/logo.png")
