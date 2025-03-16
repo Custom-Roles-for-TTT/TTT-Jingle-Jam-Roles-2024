@@ -380,7 +380,7 @@ if SERVER then
                     oldPlayerModels[ply:SteamID64()] = ply:GetModel()
                     SetMDL(ply, "models/player/stenli/lycan_werewolf.mdl")
                 end
-            else if oldRole == ROLE_WEREWOLF and newRole ~= ROLE_WEREWOLF then
+            elseif oldRole == ROLE_WEREWOLF and newRole ~= ROLE_WEREWOLF then
                 ply:StripWeapon("weapon_wwf_claws")
                 if oldPlayerModels[ply:SteamID64()] then
                     SetMDL(ply, oldPlayerModels[ply:SteamID64()])
