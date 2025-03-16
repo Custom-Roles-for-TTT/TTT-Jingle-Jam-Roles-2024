@@ -20,6 +20,14 @@ ROLE.team = ROLE_TEAM_JESTER
 
 ROLE.convars = {}
 TableInsert(ROLE.convars, {
+    cvar = "ttt_wheelboy_wheel_recharge_time",
+    type = ROLE_CONVAR_TYPE_NUM
+})
+TableInsert(ROLE.convars, {
+    cvar = "ttt_wheelboy_wheels_to_win",
+    type = ROLE_CONVAR_TYPE_NUM
+})
+TableInsert(ROLE.convars, {
     cvar = "ttt_wheelboy_wheel_time",
     type = ROLE_CONVAR_TYPE_NUM
 })
@@ -27,12 +35,34 @@ TableInsert(ROLE.convars, {
     cvar = "ttt_wheelboy_wheel_end_wait_time",
     type = ROLE_CONVAR_TYPE_NUM
 })
+TableInsert(ROLE.convars, {
+    cvar = "ttt_wheelboy_announce_text",
+    type = ROLE_CONVAR_TYPE_BOOL
+})
+TableInsert(ROLE.convars, {
+    cvar = "ttt_wheelboy_announce_sound",
+    type = ROLE_CONVAR_TYPE_BOOL
+})
+
+ROLE.translations = {
+    ["english"] = {
+        ["whl_spinner_help_pri"] = "Use {primaryfire} to spin the wheel",
+        ["whl_spinner_help_sec"] = "Use {secondaryfire} to transform back",
+        ["ev_win_wheelboy"] = "The {role} has spun its way to cake!",
+        ["hilite_wheelboy"] = "THE {role} GOT CAKE!",
+        ["wheelboy_spin_hud"] = "Next wheel spin: {time}",
+        ["wheelboy_spin_hud_now"] = "NOW",
+    }
+}
 
 RegisterRole(ROLE)
 
--- TODO: Change default value
-local wheelboy_wheel_time = CreateConVar("ttt_wheelboy_wheel_time", 10, FCVAR_REPLICATED, "How long the wheel should spin for", 1, 30)
-local wheelboy_wheel_end_wait_time = CreateConVar("ttt_wheelboy_wheel_end_wait_time", 10, FCVAR_REPLICATED, "How long the wheel should wait at the end, showing the result, before it hides", 1, 30)
+local wheel_time = CreateConVar("ttt_wheelboy_wheel_time", 15, FCVAR_REPLICATED, "How long the wheel should spin for", 1, 30)
+CreateConVar("ttt_wheelboy_wheel_recharge_time", 60, FCVAR_REPLICATED, "How long the wheelboy must wait between wheel spins", 1, 180)
+local wheels_to_win = CreateConVar("ttt_wheelboy_wheels_to_win", 5, FCVAR_REPLICATED, "How many times the wheelboy must spin their wheel to win", 1, 20)
+local wheel_end_wait_time = CreateConVar("ttt_wheelboy_wheel_end_wait_time", 10, FCVAR_REPLICATED, "How long the wheel should wait at the end, showing the result, before it hides", 1, 30)
+local announce_text = CreateConVar("ttt_wheelboy_announce_text", "1", FCVAR_REPLICATED, "Whether to announce that there is a wheelboy via text", 0, 1)
+local announce_sound = CreateConVar("ttt_wheelboy_announce_sound", "1", FCVAR_REPLICATED, "Whether to announce that there is a wheelboy via a sound clip", 0, 1)
 
 -- TODO
 local wheelEffects = {
@@ -55,14 +85,67 @@ local wheelEffects = {
 if SERVER then
     AddCSLuaFile()
 
+    util.AddNetworkString("TTT_UpdateWheelboyWins")
+    util.AddNetworkString("TTT_ResetWheelboyWins")
+    util.AddNetworkString("TTT_WheelboyAnnounceSound")
     util.AddNetworkString("TTT_WheelboySpinWheel")
     util.AddNetworkString("TTT_WheelboySpinResult")
 
-    concommand.Add("ttt_wheelboy_test", function(ply)
-        net.Start("TTT_WheelboySpinWheel")
-        net.Send(ply)
+    ------------------
+    -- ANNOUNCEMENT --
+    ------------------
+
+    -- Warn other players that there is a wheelboy
+    AddHook("TTTBeginRound", "Wheelboy_Announce_TTTBeginRound", function()
+        if not announce_text:GetBool() and not announce_sound:GetBool() then return end
+
+        timer.Simple(1.5, function()
+            local hasWheelboy = false
+            for _, v in PlayerIterator() do
+                if v:IsWheelboy() then
+                    hasWheelboy = true
+                end
+            end
+
+            if hasWheelboy then
+                if announce_text:GetBool() then
+                    for _, v in PlayerIterator() do
+                        if v:IsWheelboy() then continue end
+                        v:QueueMessage(MSG_PRINTBOTH, "There is " .. ROLE_STRINGS_EXT[ROLE_WHEELBOY] .. ".")
+                    end
+                end
+
+                if announce_sound:GetBool() then
+                    net.Start("TTT_WheelboyAnnounceSound")
+                    net.Broadcast()
+                end
+            end
+        end)
     end)
 
+    -----------
+    -- KARMA --
+    -----------
+
+    -- Attacking the Wheelboy does not penalize karma
+    AddHook("TTTKarmaShouldGivePenalty", "Wheelboy_TTTKarmaShouldGivePenalty", function(attacker, victim)
+        if not IsPlayer(victim) or not victim:IsWheelboy() then return end
+        return false
+    end)
+
+    ----------------
+    -- WIN CHECKS --
+    ----------------
+
+    AddHook("Initialize", "Wheelboy_Initialize", function()
+        WIN_WHEELBOY = GenerateNewWinID(ROLE_WHEELBOY)
+    end)
+
+    -----------------------
+    -- WHEEL SPIN RESULT --
+    -----------------------
+
+    local spinCount = 0;
     net.Receive("TTT_WheelboySpinResult", function(len, ply)
         if not IsPlayer(ply) then return end
         -- TODO: Uncomment this
@@ -71,8 +154,36 @@ if SERVER then
         local chosenSegment = net.ReadUInt(4)
         local result = wheelEffects[chosenSegment]
 
+        -- If we haven't already won
+        if spinCount ~= nil then
+            -- Increase the tracker
+            spinCount = spinCount + 1
+            -- And check if they win this time
+            if spinCount >= wheels_to_win:GetInt() then
+                spinCount = nil
+                net.Start("TTT_UpdateWheelboyWins")
+                net.Broadcast()
+            end
+        end
+
         -- TODO
         print("Selected", result.name)
+    end)
+
+    -------------
+    -- CLEANUP --
+    -------------
+
+    AddHook("TTTPrepareRound", "Wheelboy_TTTPrepareRound", function()
+        spinCount = 0
+        net.Start("TTT_ResetWheelboyWins")
+        net.Broadcast()
+    end)
+
+    AddHook("TTTBeginRound", "Wheelboy_TTTBeginRound", function()
+        spinCount = 0
+        net.Start("TTT_ResetWheelboyWins")
+        net.Broadcast()
     end)
 end
 
@@ -83,21 +194,128 @@ if CLIENT then
     local Material = Material
     local math = math
     local surface = surface
+    local util = util
 
     local CamPopModelMatrix = cam.PopModelMatrix
     local CamPushModelMatrix = cam.PushModelMatrix
     local DrawNoTexture = draw.NoTexture
     local DrawSimpleTextOutlined = draw.SimpleTextOutlined
+    local FormatTime = util.SimpleTime
     local MathCos = math.cos
     local MathMin = math.min
     local MathRad = math.rad
     local MathRand = math.random
     local MathSin = math.sin
     local SurfaceDrawPoly = surface.DrawPoly
+    local SurfaceDrawText = surface.DrawText
     local SurfaceDrawTexturedRect = surface.DrawTexturedRect
+    local SurfaceGetTextSize = surface.GetTextSize
     local SurfacePlaySound = surface.PlaySound
     local SurfaceSetDrawColor = surface.SetDrawColor
+    local SurfaceSetFont = surface.SetFont
     local SurfaceSetMaterial = surface.SetMaterial
+    local SurfaceSetTextColor = surface.SetTextColor
+    local SurfaceSetTextPos = surface.SetTextPos
+
+    local GetPTranslation = LANG.GetParamTranslation
+    local GetTranslation = LANG.GetTranslation
+
+    ---------
+    -- HUD --
+    ---------
+
+    AddHook("TTTHUDInfoPaint", "DetectiveLike_TTTHUDInfoPaint", function(client, label_left, label_top, active_labels)
+        if hide_role:GetBool() then return end
+        if not client:IsActiveWheelboy() then return end
+
+        local nextSpinTime = client:GetNWInt("WheelboyNextSpinTime", nil)
+        local nextSpinLabel
+        if nextSpinTime == nil or CurTime() >= nextSpinTime then
+            nextSpinLabel = GetTranslation("wheelboy_spin_hud_now")
+        else
+            nextSpinLabel = FormatTime(nextSpinTime, "%02i:%02i")
+        end
+
+        SurfaceSetFont("TabLarge")
+        SurfaceSetTextColor(255, 255, 255, 230)
+
+        local text = GetPTranslation("wheelboy_spin_hud", { time = nextSpinLabel })
+        local _, h = SurfaceGetTextSize(text)
+
+        -- Move this up based on how many other labels here are
+        label_top = label_top + (20 * #active_labels)
+
+        SurfaceSetTextPos(label_left, ScrH() - label_top - h)
+        SurfaceDrawText(text)
+
+        -- Track that the label was added so others can position accurately
+        TableInsert(active_labels, "wheelboy")
+    end)
+
+    ----------------
+    -- WIN CHECKS --
+    ----------------
+
+    AddHook("TTTSyncWinIDs", "Wheelboy_TTTSyncWinIDs", function()
+        WIN_WHEELBOY = WINS_BY_ROLE[ROLE_WHEELBOY]
+    end)
+
+    local wheelboyWins = false
+    net.Receive("TTT_UpdateWheelboyWins", function()
+        -- Log the win event with an offset to force it to the end
+        wheelboyWins = true
+        CLSCORE:AddEvent({
+            id = EVENT_FINISH,
+            win = WIN_WHEELBOY
+        }, 1)
+    end)
+
+    local function ResetWheelboyWin()
+        wheelboyWins = false
+    end
+    net.Receive("TTT_ResetWheelboyWins", ResetWheelboyWin)
+    AddHook("TTTPrepareRound", "Wheelboy_WinTracking_TTTPrepareRound", ResetWheelboyWin)
+    AddHook("TTTBeginRound", "Wheelboy_WinTracking_TTTBeginRound", ResetWheelboyWin)
+
+    AddHook("TTTScoringSecondaryWins", "Wheelboy_TTTScoringSecondaryWins", function(wintype, secondary_wins)
+        if wheelboyWins then
+            TableInsert(secondary_wins, {
+                rol = ROLE_WHEELBOY,
+                txt = GetPTranslation("hilite_wheelboy", { role = string.upper(ROLE_STRINGS[ROLE_WHEELBOY]) }),
+                col = ROLE_COLORS[ROLE_WHEELBOY]
+            })
+        end
+    end)
+
+    AddHook("TTTChooseRoundEndSound", "Wheelboy_TTTChooseRoundEndSound", function(ply, result)
+        if result == WIN_WHEELBOY then
+            return "whl/win.mp3"
+        end
+    end)
+
+    ------------
+    -- EVENTS --
+    ------------
+
+    AddHook("TTTEventFinishText", "Wheelboy_TTTEventFinishText", function(e)
+        if e.win == WIN_WHEELBOY then
+            return GetPTranslation("ev_win_wheelboy", { role = string.lower(ROLE_STRINGS[ROLE_WHEELBOY]) })
+        end
+    end)
+
+    AddHook("TTTEventFinishIconText", "Wheelboy_TTTEventFinishIconText", function(e, win_string, role_string)
+        if e.win == WIN_WHEELBOY then
+            return "ev_win_icon_also", ROLE_STRINGS[ROLE_WHEELBOY]
+        end
+    end)
+
+    ------------------
+    -- ANNOUNCEMENT --
+    ------------------
+
+    net.Receive("TTT_WheelboyAnnounceSound", function()
+        SurfacePlaySound("whl/announce.mp3")
+    end)
 
     -----------
     -- WHEEL --
@@ -121,7 +339,7 @@ if CLIENT then
         if wheelStartTime ~= nil then return end
 
         wheelStartTime = CurTime()
-        wheelEndTime = wheelStartTime + wheelboy_wheel_time:GetInt()
+        wheelEndTime = wheelStartTime + wheel_time:GetInt()
         wheelOffset = MathRand() * 360
     end)
 
@@ -388,7 +606,7 @@ if CLIENT then
         DrawLogo(centerX, centerY)
 
         -- Wait extra time and then clear everything and send it to the server
-        if curTime >= wheelEndTime + wheelboy_wheel_end_wait_time:GetInt() then
+        if curTime >= wheelEndTime + wheel_end_wait_time:GetInt() then
             wheelStartTime = nil
             wheelEndTime = nil
             wheelOffset = nil
