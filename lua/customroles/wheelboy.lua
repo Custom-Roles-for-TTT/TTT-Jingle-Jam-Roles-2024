@@ -101,7 +101,7 @@ local wheelEffects = {
         start = function(p)
             AddHook("TTTSpeedMultiplier", "Wheelboy_SlowEffect_TTTSpeedMultiplier", function(ply, mults)
                 -- Ignore Wheelboy since it has its own speed effect already
-                if IsPlayer(ply) and not ply:IsActiveWheelBoy() then
+                if IsPlayer(ply) and not ply:IsActiveWheelboy() then
                     TableInsert(mults, 0.8)
                 end
             end)
@@ -128,7 +128,7 @@ local wheelEffects = {
             local sprint_consume = GetConVar("ttt_sprint_consume"):GetFloat()
             AddHook("TTTSprintStaminaPost", "Wheelboy_MoreEffect_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
                 -- Ignore Wheelboy since it has its own stamina effect already
-                if IsPlayer(ply) and not ply:IsActiveWheelBoy() then
+                if IsPlayer(ply) and not ply:IsActiveWheelboy() then
                     return stamina - (sprint_consume + 0.3)
                 end
             end)
@@ -201,7 +201,7 @@ local wheelEffects = {
         start = function(p)
             AddHook("TTTSpeedMultiplier", "Wheelboy_FastEffect_TTTSpeedMultiplier", function(ply, mults)
                 -- Ignore Wheelboy since it has its own speed effect already
-                if IsPlayer(ply) and not ply:IsActiveWheelBoy() then
+                if IsPlayer(ply) and not ply:IsActiveWheelboy() then
                     TableInsert(mults, 1.2)
                 end
             end)
@@ -228,7 +228,7 @@ local wheelEffects = {
             local sprint_consume = GetConVar("ttt_sprint_consume"):GetFloat()
             AddHook("TTTSprintStaminaPost", "Wheelboy_LessEffect_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
                 -- Ignore Wheelboy since it has its own stamina effect already
-                if IsPlayer(ply) and not ply:IsActiveWheelBoy() then
+                if IsPlayer(ply) and not ply:IsActiveWheelboy() then
                     return stamina - (sprint_consume - 0.15)
                 end
             end)
