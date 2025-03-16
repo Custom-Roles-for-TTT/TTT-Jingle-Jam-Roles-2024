@@ -1025,6 +1025,7 @@ globals = {
     "ROLE_BARRELMIMIC",
     "ROLE_HOODOO",
     "ROLE_WHEELBOY",
+    "WHEELBOY",
     "WIN_BARRELMIMIC",
     "WIN_WHEELBOY",
 
