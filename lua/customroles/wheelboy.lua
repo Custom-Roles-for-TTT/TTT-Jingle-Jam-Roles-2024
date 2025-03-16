@@ -95,14 +95,15 @@ local swap_on_kill = CreateConVar("ttt_wheelboy_swap_on_kill", "0", FCVAR_REPLIC
 
 local wheelEffects = {
     {
-        -- 80% speed
+        -- 80% speed, compounded by the number of times it hits
+        -- e.g. 80% -> 64% -> 51.2% -> 41%
         name = "Slow movement",
         shared = true,
-        start = function(p)
-            AddHook("TTTSpeedMultiplier", "Wheelboy_SlowEffect_TTTSpeedMultiplier", function(ply, mults)
-                -- Ignore Wheelboy since it has its own speed effect already
-                if IsPlayer(ply) and not ply:IsActiveWheelboy() then
-                    TableInsert(mults, 0.8)
+        start = function(p, this)
+            local speedMult = 0.8 * this.times
+            AddHook("TTTSpeedMultiplier", "Wheelboy_SlowMovement_TTTSpeedMultiplier", function(ply, mults)
+                                if IsPlayer(ply) then
+                    TableInsert(mults, speedMult)
                 end
             end)
         end,
@@ -111,10 +112,10 @@ local wheelEffects = {
         end
     },
     {
-        -- 140% speed
+        -- 20% speed increase each time it hits
         name = "Fast time",
         start = function(p, this)
-            game.SetTimeScale(1.4)
+            game.SetTimeScale(1 + (0.2 * this.times))
         end,
         finish = function()
             game.SetTimeScale(1)
@@ -125,10 +126,10 @@ local wheelEffects = {
         name = "More stamina consumption",
         shared = true,
         start = function(p, this)
+local staminaLoss = 0.3 * this.times
             AddHook("TTTSprintStaminaPost", "Wheelboy_MoreStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
-                -- Ignore Wheelboy since it has its own stamina effect already
-                if IsPlayer(ply) and not ply:IsActiveWheelboy() then
-                    return stamina - 0.3
+                                if IsPlayer(ply) then
+                    return stamina - staminaLoss
                 end
             end)
         end,
@@ -164,10 +165,10 @@ local wheelEffects = {
         end
     },
     {
-        -- 50% gravity
+        -- 15% less gravity each time it hits
         name = "Less gravity",
         start = function(p, this)
-            local targetGravity = 0.5
+            local targetGravity = 1 - (0.15 * this.times)
             AddHook("TTTPlayerAliveThink", "Wheelboy_LessGravity_TTTPlayerAliveThink", function(ply)
                 if IsPlayer(ply) and ply:GetGravity() ~= targetGravity then
                     ply:SetGravity(targetGravity)
@@ -197,14 +198,15 @@ local wheelEffects = {
         finish = function() end
     },
     {
-        -- 120% speed
+        -- 120% speed, compounded by the number of times it hits
+        -- e.g. 120% -> 144% -> 172.8% -> 207.36%
         name = "Fast movement",
         shared = true,
         start = function(p, this)
+local speedMult = 1.2 * this.times
             AddHook("TTTSpeedMultiplier", "Wheelboy_FastMovement_TTTSpeedMultiplier", function(ply, mults)
-                -- Ignore Wheelboy since it has its own speed effect already
-                if IsPlayer(ply) and not ply:IsActiveWheelboy() then
-                    TableInsert(mults, 1.2)
+                                if IsPlayer(ply) then
+                    TableInsert(mults, speedMult)
                 end
             end)
         end,
@@ -213,10 +215,10 @@ local wheelEffects = {
         end
     },
     {
-        -- 75% speed
+        -- 20% speed decrease each time it hits
         name = "Slow time",
         start = function(p, this)
-            game.SetTimeScale(0.75)
+            game.SetTimeScale(1 - (0.2 * this.times))
         end,
         finish = function()
             game.SetTimeScale(1)
@@ -227,10 +229,10 @@ local wheelEffects = {
         name = "Less stamina consumption",
         shared = true,
         start = function(p, this)
+local staminaGain = 0.15 * this.times
             AddHook("TTTSprintStaminaPost", "Wheelboy_LessStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
-                -- Ignore Wheelboy since it has its own stamina effect already
-                if IsPlayer(ply) and not ply:IsActiveWheelboy() then
-                    return stamina + 0.15
+                                if IsPlayer(ply) then
+                    return stamina + staminaGain
                 end
             end)
         end,
@@ -259,8 +261,10 @@ local wheelEffects = {
         name = "Temporary \"Infinite Ammo\"",
         start = function(p, this)
             local timerId = "Wheelboy_AmmoEffect"
+-- If this effect is already active, add another 30 seconds
             if timer.Exists(timerId) then
-                timer.Adjust(timerId, 30)
+local timeLeft = timer.TimeLeft(timerId)
+                timer.Adjust(timerId, timeLeft + 30)
                 return
             end
 
@@ -283,10 +287,10 @@ local wheelEffects = {
         end
     },
     {
-        -- 150% gravity
+        -- 15% more gravity each time it hits
         name = "More gravity",
         start = function(p, this)
-            local targetGravity = 1.5
+            local targetGravity = 1 + (0.15 * this.times)
             AddHook("TTTPlayerAliveThink", "Wheelboy_MoreGravity_TTTPlayerAliveThink", function(ply)
                 if IsPlayer(ply) and ply:GetGravity() ~= targetGravity then
                     ply:SetGravity(targetGravity)
@@ -416,6 +420,10 @@ if SERVER then
         end
 
         -- Run the associated function with the chosen result
+if result.times == nil then
+            result.times = 0
+        end
+        result.times = result.times + 1
         result.start(ply, result)
         -- If this effect is shared, then send a message to the client so it knows to do something too
         if result.shared then
