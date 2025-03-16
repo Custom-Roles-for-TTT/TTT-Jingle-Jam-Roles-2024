@@ -1026,6 +1026,7 @@ globals = {
     "ROLE_HOODOO",
     "ROLE_WHEELBOY",
     "WIN_BARRELMIMIC",
+    "WIN_WHEELBOY",
 
     -- Optional external mods
     "Randomat",
