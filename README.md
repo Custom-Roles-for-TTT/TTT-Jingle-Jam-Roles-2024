@@ -68,7 +68,9 @@ ttt_werewolf_fog_visibility_mode    1       // Which players see fog/darkness du
 ttt_werewolf_drop_weapons           0       // Whether Werewolves should drop their weapons on the ground when transforming
 ttt_werewolf_transform_model        1       // Whether Werewolves' player models should change to a Werewolf while transformed
 ttt_werewolf_hide_id                1       // Whether Werewolves' target ID (Name, health, karma etc.) should be hidden from other players' HUDs while transformed
-ttt_werewolf_vision_mode            1       // Whether Werewolves have a visible aura around other players, visible through walls. 0 - Never, 1 - While transformed, 2 - Always
+ttt_werewolf_vision_mode            1       // Whether Werewolves see a visible aura around other players, visible through walls. 0 - Never, 1 - While transformed, 2 - Always
+ttt_werewolf_show_target_icon       1       // Whether Werewolves see an icon over other players' heads showing who to kill. 0 - Never, 1 - While transformed, 2 - Always
+ttt_werewolf_seeing_red             1       // Whether Werewolves' screens should go red while transformed
 ttt_werewolf_day_length_min         90      // The minimum length of the day phase in seconds
 ttt_werewolf_day_length_max         120     // The maximum length of the day phase in seconds
 ttt_werewolf_night_length_min       45      // The minimum length of the night phase in seconds
