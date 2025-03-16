@@ -81,7 +81,7 @@ ROLE.translations = {
 RegisterRole(ROLE)
 
 local wheel_time = CreateConVar("ttt_wheelboy_wheel_time", 15, FCVAR_REPLICATED, "How long the wheel should spin for", 1, 30)
-CreateConVar("ttt_wheelboy_wheel_recharge_time", 60, FCVAR_REPLICATED, "How long the wheelboy must wait between wheel spins", 1, 180)
+local wheel_recharge_time = CreateConVar("ttt_wheelboy_wheel_recharge_time", 60, FCVAR_REPLICATED, "How long the wheelboy must wait between wheel spins", 1, 180)
 local wheels_to_win = CreateConVar("ttt_wheelboy_wheels_to_win", 5, FCVAR_REPLICATED, "How many times the wheelboy must spin their wheel to win", 1, 20)
 local wheel_end_wait_time = CreateConVar("ttt_wheelboy_wheel_end_wait_time", 5, FCVAR_REPLICATED, "How long the wheel should wait at the end, showing the result, before it hides", 1, 30)
 local announce_text = CreateConVar("ttt_wheelboy_announce_text", "1", FCVAR_REPLICATED, "Whether to announce that there is a wheelboy via text", 0, 1)
@@ -287,9 +287,6 @@ if CLIENT then
     local SurfaceSetTextColor = surface.SetTextColor
     local SurfaceSetTextPos = surface.SetTextPos
 
-    local GetPTranslation = LANG.GetParamTranslation
-    local GetTranslation = LANG.GetTranslation
-
     local hide_role = GetConVar("ttt_hide_role")
 
     local wheelStartTime = nil
@@ -319,7 +316,7 @@ if CLIENT then
         local nextSpinTime = client:GetNWInt("WheelboyNextSpinTime", nil)
         local nextSpinLabel
         if nextSpinTime == nil or curTime >= nextSpinTime then
-            nextSpinLabel = GetTranslation("wheelboy_spin_hud_now")
+            nextSpinLabel = LANG.GetTranslation("wheelboy_spin_hud_now")
         else
             nextSpinLabel = FormatTime(nextSpinTime - curTime, "%02i:%02i")
         end
@@ -327,7 +324,7 @@ if CLIENT then
         SurfaceSetFont("TabLarge")
         SurfaceSetTextColor(255, 255, 255, 230)
 
-        local text = GetPTranslation("wheelboy_spin_hud", { time = nextSpinLabel })
+        local text = LANG.GetParamTranslation("wheelboy_spin_hud", { time = nextSpinLabel })
         local _, h = SurfaceGetTextSize(text)
 
         -- Move this up based on how many other labels here are
@@ -370,7 +367,7 @@ if CLIENT then
         if wheelboyWins then
             TableInsert(secondary_wins, {
                 rol = ROLE_WHEELBOY,
-                txt = GetPTranslation("hilite_wheelboy", { role = string.upper(ROLE_STRINGS[ROLE_WHEELBOY]) }),
+                txt = LANG.GetParamTranslation("hilite_wheelboy", { role = string.upper(ROLE_STRINGS[ROLE_WHEELBOY]) }),
                 col = ROLE_COLORS[ROLE_WHEELBOY]
             })
         end
@@ -388,7 +385,7 @@ if CLIENT then
 
     AddHook("TTTEventFinishText", "Wheelboy_TTTEventFinishText", function(e)
         if e.win == WIN_WHEELBOY then
-            return GetPTranslation("ev_win_wheelboy", { role = string.lower(ROLE_STRINGS[ROLE_WHEELBOY]) })
+            return LANG.GetParamTranslation("ev_win_wheelboy", { role = string.lower(ROLE_STRINGS[ROLE_WHEELBOY]) })
         end
     end)
 
@@ -409,7 +406,7 @@ if CLIENT then
         if ply:IsWheelboy() then
             local wheelboyKilled = ply:GetNWString("WheelboyKilled", "")
             if #wheelboyKilled > 0 then
-                return roleFileName, groupingRole, roleColor, name, wheelboyKilled, LANG.GetTranslation("score_wheelboy_killed")
+                return roleFileName, groupingRole, roleColor, name, wheelboyKilled, LANG.LANG.GetTranslation("score_wheelboy_killed")
             end
         end
     end)
@@ -434,7 +431,7 @@ if CLIENT then
 
     -- Start/Stop --
 
-        net.Receive("TTT_WheelboySpinWheel", function()
+    net.Receive("TTT_WheelboySpinWheel", function()
         if wheelStartTime ~= nil then return end
 
         wheelStartTime = CurTime()
@@ -725,6 +722,34 @@ if CLIENT then
     AddHook("TTTTutorialRoleText", "Wheelboy_TTTTutorialRoleText", function(role, titleLabel)
         if role ~= ROLE_WHEELBOY then return end
 
-        -- TODO
+        local roleColor = ROLE_COLORS[ROLE_WHEELBOY]
+        local traitorColor = ROLE_COLORS[ROLE_TRAITOR]
+        local html = ROLE_STRINGS[ROLE_WHEELBOY] .. " is a <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>jester</span> role who can spin their wheel to apply a random effect to everyone."
+
+        html = html .. "<span style='display: block; margin-top: 10px;'>Some of the effects are <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>beneficial</span>, while others are <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>annoying</span>.</span>"
+        html = html .. "<span style='display: block; margin-top: 10px;'>The wheel can be spun <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>every ".. wheel_recharge_time:GetInt() .. " second(s)</span>.</span>"
+        html = html .. "<span style='display: block; margin-top: 10px;'>" .. ROLE_STRINGS[ROLE_WHEELBOY] .. " wins by <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>spinning their wheel " .. wheels_to_win:GetInt() .. " time(s)</span> before the end of the round.</span>"
+
+        local announceText = announce_text:GetBool()
+        local announceSound = announce_sound:GetBool()
+        if announceText or announceSound then
+            html = html .. "<span style='display: block; margin-top: 10px;'>The presence of " .. ROLE_STRINGS[ROLE_WHEELBOY] .. " is <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>announced</span> to everyone via "
+            if announceText then
+                html = html .. "on-screen text"
+                if announceSound then
+                     html = html .. " and "
+                end
+            end
+            if announceSound then
+                html = html .. "a sound clip"
+            end
+            html = html .. "!</span>"
+        end
+
+        if swap_on_kill:GetBool() then
+           html = html .. "<span style='display: block; margin-top: 10px;'>If " .. ROLE_STRINGS[ROLE_WHEELBOY] .. " <span style='color: rgb(" .. traitorColor.r .. ", " .. traitorColor.g .. ", " .. traitorColor.b .. ")'>is killed</span> before they win, their killer will <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>become the new " .. ROLE_STRINGS[ROLE_WHEELBOY] .. "</span>!</span>"
+        end
+
+        return html
     end)
 end
