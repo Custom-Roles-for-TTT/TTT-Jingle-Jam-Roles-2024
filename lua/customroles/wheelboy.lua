@@ -107,13 +107,13 @@ local wheelEffects = {
             end)
         end,
         finish = function()
-            RemoveHook("TTTSpeedMultiplier", "Wheelboy_SlowEffect_TTTSpeedMultiplier")
+            RemoveHook("TTTSpeedMultiplier", "Wheelboy_SlowMovement_TTTSpeedMultiplier")
         end
     },
     {
         -- 140% speed
         name = "Fast time",
-        start = function(p)
+        start = function(p, this)
             game.SetTimeScale(1.4)
         end,
         finish = function()
@@ -121,26 +121,25 @@ local wheelEffects = {
         end
     },
     {
-        -- Increase stamina consumption from 0.2 to 0.5, assuming default convar value
+        -- This runs after stamina has already been taken, so take some more
         name = "More stamina consumption",
         shared = true,
-        start = function(p)
-            local sprint_consume = GetConVar("ttt_sprint_consume"):GetFloat()
-            AddHook("TTTSprintStaminaPost", "Wheelboy_MoreEffect_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
+        start = function(p, this)
+            AddHook("TTTSprintStaminaPost", "Wheelboy_MoreStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
                 -- Ignore Wheelboy since it has its own stamina effect already
                 if IsPlayer(ply) and not ply:IsActiveWheelboy() then
-                    return stamina - (sprint_consume + 0.3)
+                    return stamina - 0.3
                 end
             end)
         end,
         finish = function()
-            RemoveHook("TTTSprintStaminaPost", "Wheelboy_MoreEffect_TTTSprintStaminaPost")
+            RemoveHook("TTTSprintStaminaPost", "Wheelboy_MoreStaminaConsumption_TTTSprintStaminaPost")
         end
     },
     {
         -- 50 extra HP for everyone
         name = "Extra health",
-        start = function(p)
+        start = function(p, this)
             for _, v in PlayerIterator() do
                 if not IsPlayer(v) then continue end
                 if not v:Alive() or v:IsSpec() then continue end
@@ -155,7 +154,7 @@ local wheelEffects = {
     },
     {
         name = "Temporary \"Bad Trip\"",
-        start = function(p)
+        start = function(p, this)
             -- TODO
             print("OH NO")
         end,
@@ -167,21 +166,24 @@ local wheelEffects = {
     {
         -- 50% gravity
         name = "Less gravity",
-        start = function(p)
+        start = function(p, this)
             local targetGravity = 0.5
-            AddHook("TTTPlayerAliveThink", "Wheelboy_LessEffect_TTTPlayerAliveThink", function(ply)
+            AddHook("TTTPlayerAliveThink", "Wheelboy_LessGravity_TTTPlayerAliveThink", function(ply)
                 if IsPlayer(ply) and ply:GetGravity() ~= targetGravity then
                     ply:SetGravity(targetGravity)
                 end
             end)
         end,
         finish = function()
-            RemoveHook("TTTPlayerAliveThink", "Wheelboy_LessEffect_TTTPlayerAliveThink")
+            for _, ply in PlayerIterator() do
+                ply:SetGravity(1)
+            end
+            RemoveHook("TTTPlayerAliveThink", "Wheelboy_LessGravity_TTTPlayerAliveThink")
         end
     },
     {
         name = "Lose a credit",
-        start = function(p)
+        start = function(p, this)
             for _, v in PlayerIterator() do
                 if not IsPlayer(v) then continue end
                 if not v:Alive() or v:IsSpec() then continue end
@@ -198,8 +200,8 @@ local wheelEffects = {
         -- 120% speed
         name = "Fast movement",
         shared = true,
-        start = function(p)
-            AddHook("TTTSpeedMultiplier", "Wheelboy_FastEffect_TTTSpeedMultiplier", function(ply, mults)
+        start = function(p, this)
+            AddHook("TTTSpeedMultiplier", "Wheelboy_FastMovement_TTTSpeedMultiplier", function(ply, mults)
                 -- Ignore Wheelboy since it has its own speed effect already
                 if IsPlayer(ply) and not ply:IsActiveWheelboy() then
                     TableInsert(mults, 1.2)
@@ -207,40 +209,39 @@ local wheelEffects = {
             end)
         end,
         finish = function()
-            RemoveHook("TTTSpeedMultiplier", "Wheelboy_FastEffect_TTTSpeedMultiplier")
+            RemoveHook("TTTSpeedMultiplier", "Wheelboy_FastMovement_TTTSpeedMultiplier")
         end
     },
     {
-        -- 85% speed
+        -- 75% speed
         name = "Slow time",
-        start = function(p)
-            game.SetTimeScale(0.85)
+        start = function(p, this)
+            game.SetTimeScale(0.75)
         end,
         finish = function()
             game.SetTimeScale(1)
         end
     },
     {
-        -- Decrease stamina consumption from 0.2 to 0.05, assuming default convar value
+        -- This runs after stamina has already been taken, so add some back
         name = "Less stamina consumption",
         shared = true,
-        start = function(p)
-            local sprint_consume = GetConVar("ttt_sprint_consume"):GetFloat()
-            AddHook("TTTSprintStaminaPost", "Wheelboy_LessEffect_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
+        start = function(p, this)
+            AddHook("TTTSprintStaminaPost", "Wheelboy_LessStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
                 -- Ignore Wheelboy since it has its own stamina effect already
                 if IsPlayer(ply) and not ply:IsActiveWheelboy() then
-                    return stamina - (sprint_consume - 0.15)
+                    return stamina + 0.15
                 end
             end)
         end,
         finish = function()
-            RemoveHook("TTTSprintStaminaPost", "Wheelboy_LessEffect_TTTSprintStaminaPost")
+            RemoveHook("TTTSprintStaminaPost", "Wheelboy_LessStaminaConsumption_TTTSprintStaminaPost")
         end
     },
     {
         -- 25 less HP for everyone
         name = "Health reduction",
-        start = function(p)
+        start = function(p, this)
             for _, v in PlayerIterator() do
                 if not IsPlayer(v) then continue end
                 if not v:Alive() or v:IsSpec() then continue end
@@ -256,8 +257,14 @@ local wheelEffects = {
     },
     {
         name = "Temporary \"Infinite Ammo\"",
-        start = function(p)
-            AddHook("TTTPlayerAliveThink", "Wheelboy_AmmoEffect_TTTPlayerAliveThink", function(ply)
+        start = function(p, this)
+            local timerId = "Wheelboy_AmmoEffect"
+            if timer.Exists(timerId) then
+                timer.Adjust(timerId, 30)
+                return
+            end
+
+            AddHook("TTTPlayerAliveThink", "Wheelboy_InfiniteAmmo_TTTPlayerAliveThink", function(ply)
                 if not IsPlayer(ply) then return end
 
                 local active_weapon = ply:GetActiveWeapon()
@@ -265,29 +272,37 @@ local wheelEffects = {
                     active_weapon:SetClip1(active_weapon.Primary.ClipSize)
                 end
             end)
+
+            timer.Create(timerId, 30, 1, function()
+                this.finish()
+            end)
         end,
         finish = function()
-            RemoveHook("TTTPlayerAliveThink", "Wheelboy_AmmoEffect_TTTPlayerAliveThink")
+            timer.Remove("Wheelboy_AmmoEffect")
+            RemoveHook("TTTPlayerAliveThink", "Wheelboy_InfiniteAmmo_TTTPlayerAliveThink")
         end
     },
     {
         -- 150% gravity
         name = "More gravity",
-        start = function(p)
+        start = function(p, this)
             local targetGravity = 1.5
-            AddHook("TTTPlayerAliveThink", "Wheelboy_MoreEffect_TTTPlayerAliveThink", function(ply)
+            AddHook("TTTPlayerAliveThink", "Wheelboy_MoreGravity_TTTPlayerAliveThink", function(ply)
                 if IsPlayer(ply) and ply:GetGravity() ~= targetGravity then
                     ply:SetGravity(targetGravity)
                 end
             end)
         end,
         finish = function()
-            RemoveHook("TTTPlayerAliveThink", "Wheelboy_MoreEffect_TTTPlayerAliveThink")
+            for _, ply in PlayerIterator() do
+                ply:SetGravity(1)
+            end
+            RemoveHook("TTTPlayerAliveThink", "Wheelboy_MoreGravity_TTTPlayerAliveThink")
         end
     },
     {
         name = "Gain a credit",
-        start = function(p)
+        start = function(p, this)
             for _, v in PlayerIterator() do
                 if not IsPlayer(v) then continue end
                 if not v:Alive() or v:IsSpec() then continue end
@@ -401,7 +416,7 @@ if SERVER then
         end
 
         -- Run the associated function with the chosen result
-        result.start(ply)
+        result.start(ply, result)
         -- If this effect is shared, then send a message to the client so it knows to do something too
         if result.shared then
             net.Start("TTT_WheelboyStartEffect")
