@@ -80,15 +80,15 @@ ROLE.translations = {
 
 RegisterRole(ROLE)
 
-local wheel_time = CreateConVar("ttt_wheelboy_wheel_time", 15, FCVAR_REPLICATED, "How long the wheel should spin for", 1, 30)
-local wheel_recharge_time = CreateConVar("ttt_wheelboy_wheel_recharge_time", 60, FCVAR_REPLICATED, "How long the wheelboy must wait between wheel spins", 1, 180)
-local wheels_to_win = CreateConVar("ttt_wheelboy_wheels_to_win", 5, FCVAR_REPLICATED, "How many times the wheelboy must spin their wheel to win", 1, 20)
-local wheel_end_wait_time = CreateConVar("ttt_wheelboy_wheel_end_wait_time", 5, FCVAR_REPLICATED, "How long the wheel should wait at the end, showing the result, before it hides", 1, 30)
+local wheel_time = CreateConVar("ttt_wheelboy_wheel_time", "15", FCVAR_REPLICATED, "How long the wheel should spin for", 1, 30)
+local wheel_recharge_time = CreateConVar("ttt_wheelboy_wheel_recharge_time", "60", FCVAR_REPLICATED, "How long wheelboy must wait between wheel spins", 1, 180)
+local wheels_to_win = CreateConVar("ttt_wheelboy_wheels_to_win", "5", FCVAR_REPLICATED, "How many times wheelboy must spin their wheel to win", 1, 20)
+local wheel_end_wait_time = CreateConVar("ttt_wheelboy_wheel_end_wait_time", "5", FCVAR_REPLICATED, "How long the wheel should wait at the end, showing the result, before it hides", 1, 30)
 local announce_text = CreateConVar("ttt_wheelboy_announce_text", "1", FCVAR_REPLICATED, "Whether to announce that there is a wheelboy via text", 0, 1)
 local announce_sound = CreateConVar("ttt_wheelboy_announce_sound", "1", FCVAR_REPLICATED, "Whether to announce that there is a wheelboy via a sound clip", 0, 1)
-local speed_mult = CreateConVar("ttt_wheelboy_speed_mult", "1.2", FCVAR_REPLICATED, "The multiplier to use on the wheelboy's movement speed (e.g. 1.2 = 120% normal speed)", 1, 2)
+local speed_mult = CreateConVar("ttt_wheelboy_speed_mult", "1.2", FCVAR_REPLICATED, "The multiplier to use on wheelboy's movement speed (e.g. 1.2 = 120% normal speed)", 1, 2)
 local sprint_recovery = CreateConVar("ttt_wheelboy_sprint_recovery", "0.12", FCVAR_REPLICATED, "The amount of stamina to recover per tick", 0, 1)
-local swap_on_kill = CreateConVar("ttt_wheelboy_swap_on_kill", "0", FCVAR_REPLICATED, "Whether the wheelboy's killer should become the new wheelboy (if they haven't won yet)", 0, 1)
+local swap_on_kill = CreateConVar("ttt_wheelboy_swap_on_kill", "0", FCVAR_REPLICATED, "Whether wheelboy's killer should become the new wheelboy (if they haven't won yet)", 0, 1)
 
 -- TODO
 local wheelEffects = {

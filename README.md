@@ -49,6 +49,29 @@ ttt_hoodoo_shop_random_percent        0      // The percent chance that a weapon
 ttt_hoodoo_shop_random_enabled        0      // Whether role shop randomization is enabled for the hoodoo
 ```
 
+## Wheelboy
+_Suggested By_: spammonster\
+Wheelboy can spin a wheel to apply random effects to everyone. Spin enough times and they win.
+\
+\
+**ConVars**
+```cpp
+ttt_wheelboy_enabled             0    // Whether or not wheelboy should spawn
+ttt_wheelboy_spawn_weight        1    // The weight assigned to spawning wheelboy
+ttt_wheelboy_min_players         0    // The minimum number of players required to spawn wheelboy
+ttt_wheelboy_starting_health     150  // The amount of health wheelboy starts with
+ttt_wheelboy_max_health          150  // The maximum amount of health wheelboy can have
+ttt_wheelboy_wheel_time          15   // How long the wheel should spin for
+ttt_wheelboy_wheel_recharge_time 50   // How long wheelboy must wait between wheel spins
+ttt_wheelboy_wheels_to_win       5    // How many times wheelboy must spin their wheel to win
+ttt_wheelboy_wheel_end_wait_time 5    // How long the wheel should wait at the end, showing the result, before it hides
+ttt_wheelboy_announce_text       1    // Whether to announce that there is a wheelboy via text
+ttt_wheelboy_announce_sound      1    // Whether to announce that there is a wheelboy via a sound clip
+ttt_wheelboy_speed_mult          1.2  // The multiplier to use on wheelboy's movement speed (e.g. 1.2 = 120% normal speed)
+ttt_wheelboy_sprint_recovery     0.12 // The amount of stamina to recover per tick
+ttt_wheelboy_swap_on_kill        0    // Whether wheelboy's killer should become the new wheelboy (if they haven't won yet)
+```
+
 # Special Thanks
 - [Game icons](https://game-icons.net/) for the role icons
 - [The Stig](https://steamcommunity.com/id/The-Stig-294) for the Randoman role that the Hoodoo was very heavily based on
