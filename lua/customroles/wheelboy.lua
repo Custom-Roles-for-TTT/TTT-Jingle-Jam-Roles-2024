@@ -92,7 +92,6 @@ if CLIENT then
     local MathMin = math.min
     local MathRad = math.rad
     local MathRand = math.random
-    local MathRound = math.Round
     local MathSin = math.sin
     local SurfaceDrawPoly = surface.DrawPoly
     local SurfaceDrawTexturedRect = surface.DrawTexturedRect
@@ -279,7 +278,8 @@ if CLIENT then
             for segmentIdx = 1, segmentCount do
                 -- Rotate to the angle of this segment
                 local segmentMat = Matrix()
-                segmentMat:Rotate(Angle(0, ((segmentIdx - 1) * anglePerSegment) - angleOffset, 0))
+                local segmentAng = ((segmentIdx - 1) * anglePerSegment) + angleOffset
+                segmentMat:Rotate(Angle(0, -segmentAng, 0))
 
                 CamPushModelMatrix(segmentMat, true)
                     DrawCircleSegment(segmentIdx, segmentCount, anglePerSegment, pointsPerSegment, radius, blink and segmentIdx == lastSegment)
@@ -308,10 +308,10 @@ if CLIENT then
         -- Offset by an additional 1/2 segment so the arrow points to the middle instead of the edge
         local angleOffset = 90 + (anglePerSegment / 2)
 
+        -- Precalculate the angle ranges for each segment, used to determine the current segment later
         if anglesPerSegment == nil then
             anglesPerSegment = {}
             local halfAngle = anglePerSegment / 2
-            -- Precalculate the angle ranges for each segment, used to determine the current segment later
             for segmentIdx = 1, segmentCount do
                 anglesPerSegment[segmentIdx] = {
                     min = halfAngle * ((2 * (segmentIdx - 1)) - 1),
@@ -326,34 +326,34 @@ if CLIENT then
 
         -- TODO: Rotate at variable speed, decreasing over time
         -- Loop back around to 0 after we exceed 360
-        local currentAngle = anglesPerSegment[1].min--ReduceAngle(wheelOffset + (baseTime * 150))
-
-        print("Current Angle", currentAngle)
+        local currentAngle = ReduceAngle(wheelOffset + (baseTime * 150))
 
         -- Get the current segment from the wheel, using the current angle
         -- Adjust by the angle offset so our 0 points to index 1
-        local adjustedAngle = ReduceAngle(currentAngle - angleOffset)
-        print("Adjusted Angle", adjustedAngle)
-        print("Finding current segment")
+        local adjustedAngle = ReduceAngle(currentAngle + angleOffset)
         local currentSegment
         for segmentIdx, angles in pairs(anglesPerSegment) do
-            print(segmentIdx, angles.min, angles.max, adjustedAngle, adjustedAngle >= angles.min, adjustedAngle < angles.max)
+            -- For some reason the segment indexes were offset by 4
+            -- I don't really understand why, but subtracting 4 from the found index produced the expected result, so here we are
             if adjustedAngle >= angles.min and adjustedAngle < angles.max then
-                currentSegment = segmentIdx
-                print("Found", currentSegment)
+                currentSegment = segmentIdx - 4
                 break
             end
 
             -- Handle case of a negative minimum value
             if angles.min < 0 and
-                -- Between the normalized minimum and the maximum. Handles [~12.5->347, 360)
-                ((adjustedAngle >= (angles.min + 360) and adjustedAngle < angles.max) or
-                -- Between 0 and the maximum. Handles [0, max]
+                -- Between the normalized minimum and the maximum. Handles [-12.6->347.4, 360)
+                ((adjustedAngle >= (angles.min + 360) and adjustedAngle < 360) or
+                -- Between 0 and the maximum. Handles [0, max)
                  (adjustedAngle >= 0 and adjustedAngle < angles.max)) then
-                currentSegment = segmentIdx
-                print("Found 2", currentSegment)
+                currentSegment = segmentIdx - 4
                 break
             end
+        end
+
+        -- Roll this over if we exceed the max
+        if currentSegment <= 0 then
+            currentSegment = currentSegment + segmentCount
         end
 
         -- Keep track of when the segment changes and use that to play the clicking sound
@@ -387,8 +387,6 @@ if CLIENT then
 
         -- Wait extra time and then clear everything and send it to the server
         if curTime >= wheelEndTime + wheelboy_wheel_end_wait_time:GetInt() then
-            print("Ending angle", currentAngle)
-            print("Ending segment", currentSegment)
             wheelStartTime = nil
             wheelEndTime = nil
             wheelOffset = nil
