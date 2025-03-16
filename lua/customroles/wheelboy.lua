@@ -1,8 +1,10 @@
 local hook = hook
 local net = net
+local player = player
 local table = table
 
 local AddHook = hook.Add
+local PlayerIterator = player.Iterator
 local TableInsert = table.insert
 
 local ROLE = {}
@@ -219,6 +221,8 @@ if CLIENT then
 
     local GetPTranslation = LANG.GetParamTranslation
     local GetTranslation = LANG.GetTranslation
+
+    local hide_role = GetConVar("ttt_hide_role")
 
     ---------
     -- HUD --
