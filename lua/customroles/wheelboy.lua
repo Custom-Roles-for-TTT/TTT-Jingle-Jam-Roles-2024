@@ -93,6 +93,16 @@ local speed_mult = CreateConVar("ttt_wheelboy_speed_mult", "1.2", FCVAR_REPLICAT
 local sprint_recovery = CreateConVar("ttt_wheelboy_sprint_recovery", "0.12", FCVAR_REPLICATED, "The amount of stamina to recover per tick", 0, 1)
 local swap_on_kill = CreateConVar("ttt_wheelboy_swap_on_kill", "0", FCVAR_REPLICATED, "Whether wheelboy's killer should become the new wheelboy (if they haven't won yet)", 0, 1)
 
+local function ScalePlayerHeads(mult)
+    local scale = Vector(mult, mult, mult)
+    for _, p in PlayerIterator() do
+        local boneId = p:LookupBone("ValveBiped.Bip01_Head1")
+        if boneId ~= nil then
+            p:ManipulateBoneScale(boneId, scale)
+        end
+    end
+end
+
 local wheelEffects = {
     {
         -- 80% speed, compounded by the number of times it hits
@@ -154,14 +164,25 @@ local wheelEffects = {
         finish = function() end
     },
     {
-        name = "Temporary \"Bad Trip\"",
+        name = "Temporary \"Big Head Mode\"",
         start = function(p, this)
-            -- TODO
-            print("OH NO")
+            local timerId = "Wheelboy_HeadEffect"
+            -- If this effect is already active, add another 30 seconds
+            if timer.Exists(timerId) then
+                local timeLeft = timer.TimeLeft(timerId)
+                timer.Adjust(timerId, timeLeft + 30)
+                return
+            end
+
+            ScalePlayerHeads(2)
+
+            timer.Create(timerId, 30, 1, function()
+                this.finish()
+            end)
         end,
         finish = function()
-            -- TODO
-            print("OH YEA")
+            ScalePlayerHeads(1)
+            timer.Remove("Wheelboy_HeadEffect")
         end
     },
     {
