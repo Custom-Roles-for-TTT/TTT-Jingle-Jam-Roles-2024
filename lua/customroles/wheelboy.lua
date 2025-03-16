@@ -22,7 +22,7 @@ ROLE.nameshort = "whl"
 ROLE.desc = [[You are {role}! Spin your wheel
 to trigger random effects for everyone.
 
-Spin enough times and you win!]]
+Spin {times} time(s) and you win!]]
 ROLE.shortdesc = "Can spin a wheel to apply random effects to everyone. Spin enough times and they win."
 
 ROLE.team = ROLE_TEAM_JESTER
@@ -485,7 +485,9 @@ if SERVER then
         RunHook("PlayerLoadout", attacker)
         SendFullStateUpdate()
 
-        -- TODO: Tell the new wheelboy what happened and what to do now
+        -- Tell the new wheelboy what happened and what to do now
+        attacker:QueueMessage(MSG_PRINTBOTH, "You killed " .. ROLE_STRINGS[ROLE_WHEELBOY] .. " and have become the new " .. ROLE_STRINGS[ROLE_WHEELBOY])
+        attacker:QueueMessage(MSG_PRINTBOTH, "Spin your wheel " .. wheels_to_win:GetInt() .. " time(s) to win")
     end)
 
     -------------
@@ -594,6 +596,16 @@ if CLIENT then
         blinkStart = nil
         anglesPerSegment = nil
     end
+
+    ----------------
+    -- ROLE POPUP --
+    ----------------
+
+    AddHook("TTTRolePopupParams", "Wheelboy_TTTRolePopupParams", function(cli)
+        if cli:IsWheelboy() then
+            return { times = wheels_to_win:GetInt() }
+        end
+    end)
 
     ---------
     -- HUD --
