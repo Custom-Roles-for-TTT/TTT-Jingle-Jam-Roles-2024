@@ -111,14 +111,13 @@ local wheelEffects = {
         end
     },
     {
-        name = "Fast firing",
+        -- 140% speed
+        name = "Fast time",
         start = function(p)
-            -- TODO
-            print("pew pew pew")
+            game.SetTimeScale(1.4)
         end,
         finish = function()
-            -- TODO
-            print("pew pew")
+            game.SetTimeScale(1)
         end
     },
     {
@@ -171,7 +170,7 @@ local wheelEffects = {
         start = function(p)
             local targetGravity = 0.5
             AddHook("TTTPlayerAliveThink", "Wheelboy_LessEffect_TTTPlayerAliveThink", function(ply)
-                if ply:GetGravity() ~= targetGravity then
+                if IsPlayer(ply) and ply:GetGravity() ~= targetGravity then
                     ply:SetGravity(targetGravity)
                 end
             end)
@@ -212,14 +211,13 @@ local wheelEffects = {
         end
     },
     {
-        name = "Slow firing",
+        -- 85% speed
+        name = "Slow time",
         start = function(p)
-            -- TODO
-            print("pew")
+            game.SetTimeScale(0.85)
         end,
         finish = function()
-            -- TODO
-            print("pew pew")
+            game.SetTimeScale(1)
         end
     },
     {
@@ -259,12 +257,17 @@ local wheelEffects = {
     {
         name = "Temporary \"Infinite Ammo\"",
         start = function(p)
-            -- TODO
-            print("IT'S OVER 9000!")
+            AddHook("TTTPlayerAliveThink", "Wheelboy_AmmoEffect_TTTPlayerAliveThink", function(ply)
+                if not IsPlayer(ply) then return end
+
+                local active_weapon = ply:GetActiveWeapon()
+                if IsValid(active_weapon) and active_weapon.Primary and active_weapon.AutoSpawnable then
+                    active_weapon:SetClip1(active_weapon.Primary.ClipSize)
+                end
+            end)
         end,
         finish = function()
-            -- TODO
-            print("Nevermind")
+            RemoveHook("TTTPlayerAliveThink", "Wheelboy_AmmoEffect_TTTPlayerAliveThink")
         end
     },
     {
@@ -273,7 +276,7 @@ local wheelEffects = {
         start = function(p)
             local targetGravity = 1.5
             AddHook("TTTPlayerAliveThink", "Wheelboy_MoreEffect_TTTPlayerAliveThink", function(ply)
-                if ply:GetGravity() ~= targetGravity then
+                if IsPlayer(ply) and ply:GetGravity() ~= targetGravity then
                     ply:SetGravity(targetGravity)
                 end
             end)
@@ -404,6 +407,34 @@ if SERVER then
             net.Start("TTT_WheelboyStartEffect")
                 net.WriteUInt(chosenSegment, 4)
             net.Broadcast()
+        end
+    end)
+
+    local blockedEvents = {
+        -- Time scale
+        ["timewarp"] = "conflicts with one of their effects",
+        ["reversetimewarp"] = "conflicts with one of their effects",
+        ["timeflip"] = "conflicts with one of their effects",
+        ["flash"] = "conflicts with one of their effects",
+        -- Stamina consumption
+        ["olympicsprint"] = "conflicts with one of their effects",
+        -- Gravity
+        ["moongravity"] = "conflicts with one of their effects",
+        ["scoutsonly"] = "conflicts with one of their effects",
+        -- Credits
+        ["credits"] = "conflicts with one of their effects",
+        -- Infinite ammo
+        ["ammo"] = "conflicts with one of their effects"
+    }
+
+    -- Prevents a randomat from ever triggering if wheelboy is in the round
+    AddHook("TTTRandomatCanEventRun", "Wheelboy_TTTRandomatCanEventRun", function(event)
+        if not blockedEvents[event.Id] then return end
+
+        for _, ply in PlayerIterator() do
+            if ply:IsWheelboy() then
+                return false, ROLE_STRINGS[ROLE_WHEELBOY] .. " is in the round and this event " .. blockedEvents[event.Id]
+            end
         end
     end)
 
