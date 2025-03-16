@@ -186,8 +186,7 @@ if SERVER then
     local spinCount = 0;
     net.Receive("TTT_WheelboySpinResult", function(len, ply)
         if not IsPlayer(ply) then return end
-        -- TODO: Uncomment this
-        --if not ply:IsActiveWheelboy() then return end
+        if not ply:IsActiveWheelboy() then return end
 
         local chosenSegment = net.ReadUInt(4)
         local result = wheelEffects[chosenSegment]
