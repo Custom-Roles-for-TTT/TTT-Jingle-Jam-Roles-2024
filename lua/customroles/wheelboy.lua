@@ -43,6 +43,10 @@ TableInsert(ROLE.convars, {
     type = ROLE_CONVAR_TYPE_NUM
 })
 TableInsert(ROLE.convars, {
+    cvar = "ttt_wheelboy_swap_on_kill",
+    type = ROLE_CONVAR_TYPE_BOOL
+})
+TableInsert(ROLE.convars, {
     cvar = "ttt_wheelboy_announce_text",
     type = ROLE_CONVAR_TYPE_BOOL
 })
@@ -69,6 +73,7 @@ ROLE.translations = {
         ["hilite_wheelboy"] = "THE {role} GOT CAKE!",
         ["wheelboy_spin_hud"] = "Next wheel spin: {time}",
         ["wheelboy_spin_hud_now"] = "NOW",
+        ["score_wheelboy_killed"] = "Killed"
     }
 }
 
@@ -82,6 +87,7 @@ local announce_text = CreateConVar("ttt_wheelboy_announce_text", "1", FCVAR_REPL
 local announce_sound = CreateConVar("ttt_wheelboy_announce_sound", "1", FCVAR_REPLICATED, "Whether to announce that there is a wheelboy via a sound clip", 0, 1)
 local speed_mult = CreateConVar("ttt_wheelboy_speed_mult", "1.2", FCVAR_REPLICATED, "The multiplier to use on the wheelboy's movement speed (e.g. 1.2 = 120% normal speed)", 1, 2)
 local sprint_recovery = CreateConVar("ttt_wheelboy_sprint_recovery", "0.12", FCVAR_REPLICATED, "The amount of stamina to recover per tick", 0, 1)
+local swap_on_kill = CreateConVar("ttt_wheelboy_swap_on_kill", "0", FCVAR_REPLICATED, "Whether the wheelboy's killer should become the new wheelboy (if they haven't won yet)", 0, 1)
 
 -- TODO
 local wheelEffects = {
@@ -201,6 +207,29 @@ if SERVER then
 
         -- Run the associated function with the chosen result
         result.fn(ply)
+    end)
+
+    ---------------
+    -- ROLE SWAP --
+    ---------------
+
+    AddHook("PlayerDeath", "Wheelboy_Swap_PlayerDeath", function(victim, infl, attacker)
+        -- This gets set to nil when the spin count exceeds the win condition (aka, the wheelboy has won)
+        if spinCount ~= nil then return end
+        if not swap_on_kill:GetBool() then return end
+
+        local valid_kill = IsPlayer(attacker) and attacker ~= victim and GetRoundState() == ROUND_ACTIVE
+        if not valid_kill then return end
+        if not victim:IsWheelboy() then return end
+
+        -- Keep track o the killer for the scoreboard
+        attacker:SetNWString("WheelboyKilled", victim:Nick())
+
+        -- Swap roles
+        victim:SetRole(attacker:GetRole())
+        attacker:MoveRoleState(victim)
+        attacker:SetRole(ROLE_WHEELBOY)
+        SendFullStateUpdate()
     end)
 
     -------------
@@ -341,6 +370,22 @@ if CLIENT then
     AddHook("TTTEventFinishIconText", "Wheelboy_TTTEventFinishIconText", function(e, win_string, role_string)
         if e.win == WIN_WHEELBOY then
             return "ev_win_icon_also", ROLE_STRINGS[ROLE_WHEELBOY]
+        end
+    end)
+
+    -------------
+    -- SCORING --
+    -------------
+
+    -- Show who the current wheelboy killed (if anyone)
+    AddHook("TTTScoringSummaryRender", "Wheelboy_TTTScoringSummaryRender", function(ply, roleFileName, groupingRole, roleColor, name, startingRole, finalRole)
+        if not IsPlayer(ply) then return end
+
+        if ply:IsWheelboy() then
+            local wheelboyKilled = ply:GetNWString("WheelboyKilled", "")
+            if #wheelboyKilled > 0 then
+                return roleFileName, groupingRole, roleColor, name, wheelboyKilled, LANG.GetTranslation("score_wheelboy_killed")
+            end
         end
     end)
 
