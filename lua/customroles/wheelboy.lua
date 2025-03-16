@@ -68,20 +68,20 @@ local announce_sound = CreateConVar("ttt_wheelboy_announce_sound", "1", FCVAR_RE
 
 -- TODO
 local wheelEffects = {
-    { name = "Slow movement", fn = function() end },
-    { name = "Slow firing", fn = function() end },
-    { name = "Fast stamina consumption", fn = function() end },
-    { name = "Lorem ipsum", fn = function() end },
-    { name = "Etc and stuff", fn = function() end },
-    { name = "More things", fn = function() end },
-    { name = "This is for testing", fn = function() end },
-    { name = "More words", fn = function() end },
-    { name = "Words and things", fn = function() end },
-    { name = "Sometimes I can even spell", fn = function() end },
-    { name = "Sometimes I can't", fn = function() end },
-    { name = "Aaaaaaaaaaaaaaaaah", fn = function() end },
-    { name = "Just yelling into the void", fn = function() end },
-    { name = "And things", fn = function() end }
+    { name = "Slow movement", fn = function(ply) end },
+    { name = "Slow firing", fn = function(ply) end },
+    { name = "Fast stamina consumption", fn = function(ply) end },
+    { name = "Lorem ipsum", fn = function(ply) end },
+    { name = "Etc and stuff", fn = function(ply) end },
+    { name = "More things", fn = function(ply) end },
+    { name = "This is for testing", fn = function(ply) end },
+    { name = "More words", fn = function(ply) end },
+    { name = "Words and things", fn = function(ply) end },
+    { name = "Sometimes I can even spell", fn = function(ply) end },
+    { name = "Sometimes I can't", fn = function(ply) end },
+    { name = "Aaaaaaaaaaaaaaaaah", fn = function(ply) end },
+    { name = "Just yelling into the void", fn = function(ply) end },
+    { name = "And things", fn = function(ply) end }
 }
 
 if SERVER then
@@ -155,6 +155,7 @@ if SERVER then
 
         local chosenSegment = net.ReadUInt(4)
         local result = wheelEffects[chosenSegment]
+        if not result then return end
 
         -- If we haven't already won
         if spinCount ~= nil then
@@ -168,8 +169,8 @@ if SERVER then
             end
         end
 
-        -- TODO
-        print("Selected", result.name)
+        -- Run the associated function with the chosen result
+        result.fn(ply)
     end)
 
     -------------
