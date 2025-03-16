@@ -78,8 +78,11 @@ ttt_werewolf_night_length_min       45      // The minimum length of the night p
 ttt_werewolf_night_length_max       60      // The maximum length of the night phase in seconds
 ttt_werewolf_day_damage_penalty     0.5     // Damage penalty applied to damage dealt by Werewolves during the day (e.g. 0.5 = 50% less damage)
 ttt_werewolf_night_damage_reduction 1       // Damage reduction applied to damage dealt to Werewolves during the night (e.g. 0.5 = 50% less damage)
-ttt_werewolf_night_speed_mult       1.2     // The multiplier to use on Werewolves' movement speed during the night (e.g. 1.2 = 120% normal speed)
+ttt_werewolf_night_speed_mult       1.3     // The multiplier to use on Werewolves' movement speed during the night (e.g. 1.2 = 120% normal speed)
 ttt_werewolf_night_sprint_recovery  0.12    // The amount of stamina Werewolves recover per tick at night
+ttt_werewolf_leap_enabled           1       // Whether Werewolves have their leap attack enabled
+ttt_werewolf_attack_damage          75      // The amount of a damage Werewolves do with their claws
+ttt_werewolf_attack_delay           0.7     // The amount of time between Werewolves' claw attacks
 ttt_werewolf_can_see_jesters        1       // Whether jesters are revealed (via head icons, color/icon on the scoreboard, etc.) to Werewolves
 ttt_werewolf_update_scoreboard      1       // Whether Werewolves see dead players as missing in action on the scoreboard
 ```

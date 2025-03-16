@@ -1,3 +1,5 @@
+local SetMDL = FindMetaTable("Entity").SetModel
+
 local ROLE = {}
 
 ROLE.nameraw = "werewolf"
@@ -118,6 +120,20 @@ ROLE.convars = {
         cvar = "ttt_werewolf_night_sprint_recovery",
         type = ROLE_CONVAR_TYPE_NUM,
         decimal = 2
+    },
+    {
+        cvar = "ttt_werewolf_leap_enabled",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_werewolf_attack_damage",
+        type = ROLE_CONVAR_TYPE_NUM,
+        decimal = 0
+    },
+    {
+        cvar = "ttt_werewolf_attack_delay",
+        type = ROLE_CONVAR_TYPE_NUM,
+        decimal = 1
     }
 }
 
@@ -126,7 +142,9 @@ ROLE.translations = {
         ["ev_win_werewolf"] = "The beastly {role} has won the round!",
         ["win_werewolf"] = "The {role} has slaughtered you all!",
         ["werewolf_timer_night"] = "Night falls in: {time}",
-        ["werewolf_timer_day"] = "The sun rises in: {time}"
+        ["werewolf_timer_day"] = "The sun rises in: {time}",
+        ["wwf_claws_help_pri"] = "Press {primaryfire} to attack.",
+        ["wwf_claws_help_sec"] = "Press {secondaryfire} to leap."
     }
 }
 
@@ -149,7 +167,7 @@ local werewolf_night_length_min = CreateConVar("ttt_werewolf_night_length_min", 
 local werewolf_night_length_max = CreateConVar("ttt_werewolf_night_length_max", 60, FCVAR_REPLICATED, "The maximum length of the night phase in seconds", 1, 300)
 local werewolf_day_damage_penalty = CreateConVar("ttt_werewolf_day_damage_penalty", 0.5, FCVAR_REPLICATED, "Damage penalty applied to damage dealt by Werewolves during the day", 0, 1)
 local werewolf_night_damage_reduction = CreateConVar("ttt_werewolf_night_damage_reduction", 1, FCVAR_REPLICATED, "Damage reduction applied to damage dealt to Werewolves during the night", 0, 1)
-local werewolf_night_speed_mult = CreateConVar("ttt_werewolf_night_speed_mult", 1.2, FCVAR_REPLICATED, "The multiplier to use on Werewolves' movement speed during the night", 1, 2)
+local werewolf_night_speed_mult = CreateConVar("ttt_werewolf_night_speed_mult", 1.3, FCVAR_REPLICATED, "The multiplier to use on Werewolves' movement speed during the night", 1, 2)
 local werewolf_night_sprint_recovery = CreateConVar("ttt_werewolf_night_sprint_recovery", 0.12, FCVAR_REPLICATED, "The amount of stamina Werewolves recover per tick at night", 0, 1)
 
 WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES = 0
@@ -183,6 +201,8 @@ if SERVER then
     -- DAY/NIGHT TRACKING --
     ------------------------
 
+    local oldPlayerModels = {}
+
     WEREWOLF.ChangeTime = function(forceDay, hideMessages, blockTimers)
         local min, max
         if WEREWOLF.isNight or forceDay then
@@ -211,9 +231,10 @@ if SERVER then
         net.WriteUInt(length, 10)
         net.Broadcast()
 
-        if not hideMessages then
-            local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
-            for _, v in player.Iterator() do
+
+        local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
+        for _, v in player.Iterator() do
+            if not hideMessages then
                 if v:IsActiveWerewolf() or night_visibility_mode >= WEREWOLF_NIGHT_SHOW_IF_HAS_WEREWOLF then
                     if WEREWOLF.isNight then
                         v:QueueMessage(MSG_PRINTTALK, "Night falls...")
@@ -222,6 +243,37 @@ if SERVER then
                     end
                 end
             end
+
+            if v:IsActiveWerewolf() then
+                if WEREWOLF.isNight then
+                    local drop_weapons = werewolf_drop_weapons:GetBool()
+                    if drop_weapons then
+                        for _, wep in pairs(v:GetWeapons()) do
+                            local class = WEPS.GetClass(wep)
+                            if class ~= "weapon_zm_improvised" and class ~= "weapon_wwf_claws" and wep.AllowDrop then
+                                v:DropWeapon(wep)
+                            end
+                        end
+                    end
+                    v:Give("weapon_wwf_claws")
+                    v:SelectWeapon("weapon_wwf_claws")
+
+                    local transform_model = werewolf_transform_model:GetBool()
+                    if transform_model then
+                        oldPlayerModels[v:SteamID64()] = v:GetModel()
+                        SetMDL(v, "models/player/stenli/lycan_werewolf.mdl")
+                    end
+                else
+                    v:StripWeapon("weapon_wwf_claws")
+                    if oldPlayerModels[v:SteamID64()] then
+                        SetMDL(v, oldPlayerModels[v:SteamID64()])
+                    end
+                end
+            end
+        end
+
+        if not WEREWOLF.isNight then
+            table.Empty(oldPlayerModels)
         end
 
         if not blockTimers then
@@ -308,6 +360,45 @@ if SERVER then
 
     hook.Add("TTTPlayerRoleChanged", "Werewolf_TTTPlayerRoleChanged", function(ply, oldRole, newRole)
         CheckForActiveWerewolf()
+
+        if WEREWOLF.isNight and newRole == ROLE_WEREWOLF and oldRole ~= ROLE_WEREWOLF then
+            local drop_weapons = werewolf_drop_weapons:GetBool()
+            if drop_weapons then
+                for _, wep in pairs(ply:GetWeapons()) do
+                    local class = WEPS.GetClass(wep)
+                    if class ~= "weapon_zm_improvised" and class ~= "weapon_wwf_claws" and wep.AllowDrop then
+                        ply:DropWeapon(wep)
+                    end
+                end
+            end
+            ply:Give("weapon_wwf_claws")
+            ply:SelectWeapon("weapon_wwf_claws")
+
+            local transform_model = werewolf_transform_model:GetBool()
+            if transform_model then
+                oldPlayerModels[ply:SteamID64()] = ply:GetModel()
+                SetMDL(ply, "models/player/stenli/lycan_werewolf.mdl")
+
+            end
+        end
+    end)
+
+    ---------------------
+    -- DISABLE WEAPONS --
+    ---------------------
+
+    hook.Add("PlayerCanPickupWeapon", "Werewolf_PlayerCanPickupWeapon", function(ply, wep)
+        if not IsValid(wep) or not IsValid(ply) then return end
+        if ply:IsSpec() then return false end
+
+        if WEREWOLF.isNight and ply:IsWerewolf() then return false end
+    end)
+
+    hook.Add("PlayerSwitchWeapon", "Werewolf_PlayerCanPickupWeapon", function(ply, old, new)
+        if not IsValid(old) or not IsValid(new) or not IsValid(ply) then return end
+        if WEREWOLF.isNight and ply:IsWerewolf() and (WEPS.GetClass(old) == "weapon_wwf_claws" or WEPS.GetClass(new) ~= "weapon_wwf_claws") then
+            return true
+        end
     end)
 
     ----------------
