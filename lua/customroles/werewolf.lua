@@ -72,7 +72,11 @@ ROLE.convars = {
         isNumeric = true
     },
     {
-        cvar = "ttt_werewolf_seeing_red",
+        cvar = "ttt_werewolf_bloodthirst_tint",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_werewolf_night_tint",
         type = ROLE_CONVAR_TYPE_BOOL
     },
     {
@@ -131,13 +135,14 @@ RegisterRole(ROLE)
 local werewolf_is_monster = CreateConVar("ttt_werewolf_is_monster", 0, FCVAR_REPLICATED, "Whether Werewolves should be treated as members of the monster team")
 local werewolf_night_visibility_mode = CreateConVar("ttt_werewolf_night_visibility_mode", 1, FCVAR_REPLICATED, "Which players know when it is night", 0, 3)
 local werewolf_timer_visibility_mode = CreateConVar("ttt_werewolf_timer_visibility_mode", 1, FCVAR_REPLICATED, "Which players see a timer showing when it will change to/from night", 0, 2)
-local werewolf_fog_visibility_mode = CreateConVar("ttt_werewolf_fog_visibility_mode", 1, FCVAR_REPLICATED, "Which players see fog/darkness during the night", 0, 2)
+local werewolf_fog_visibility_mode = CreateConVar("ttt_werewolf_fog_visibility_mode", 2, FCVAR_REPLICATED, "Which players see fog/darkness during the night", 0, 2)
 local werewolf_drop_weapons = CreateConVar("ttt_werewolf_drop_weapons", 0, FCVAR_REPLICATED, "Whether Werewolves should drop their weapons on the ground when transforming")
 local werewolf_transform_model = CreateConVar("ttt_werewolf_transform_model", 1, FCVAR_REPLICATED, "Whether the Werewolves' player models should change to a Werewolf while transformed")
 local werewolf_hide_id = CreateConVar("ttt_werewolf_hide_id", 1, FCVAR_REPLICATED, "Whether Werewolves' target ID (Name, health, karma etc.) should be hidden from other players' HUDs while transformed")
 local werewolf_vision_mode = CreateConVar("ttt_werewolf_vision_mode", 1, FCVAR_REPLICATED, "Whether Werewolves see a visible aura around other players, visible through walls", 0, 2)
 local werewolf_show_target_icon = CreateConVar("ttt_werewolf_show_target_icon", 1, FCVAR_REPLICATED, "Whether Werewolves see an icon over other players' heads showing who to kill", 0, 2)
-local werewolf_seeing_red = CreateConVar("ttt_werewolf_seeing_red", 1, FCVAR_REPLICATED, "Whether Werewolves' vision should go red while transformed")
+local werewolf_bloodthirst_tint = CreateConVar("ttt_werewolf_bloodthirst_tint", 1, FCVAR_REPLICATED, "Whether Werewolves' screens should go red while transformed")
+local werewolf_night_tint = CreateConVar("ttt_werewolf_night_tint", 1, FCVAR_REPLICATED, "Whether players' screens should be tinted during the night")
 local werewolf_day_length_min = CreateConVar("ttt_werewolf_day_length_min", 90, FCVAR_REPLICATED, "The minimum length of the day phase in seconds", 1, 300)
 local werewolf_day_length_max = CreateConVar("ttt_werewolf_day_length_max", 120, FCVAR_REPLICATED, "The maximum length of the day phase in seconds", 1, 300)
 local werewolf_night_length_min = CreateConVar("ttt_werewolf_night_length_min", 45, FCVAR_REPLICATED, "The minimum length of the night phase in seconds", 1, 300)
@@ -209,7 +214,7 @@ if SERVER then
         if not hideMessages then
             local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
             for _, v in player.Iterator() do
-                if v:IsWerewolf() or night_visibility_mode >= WEREWOLF_NIGHT_SHOW_IF_HAS_WEREWOLF then
+                if v:IsActiveWerewolf() or night_visibility_mode >= WEREWOLF_NIGHT_SHOW_IF_HAS_WEREWOLF then
                     if WEREWOLF.isNight then
                         v:QueueMessage(MSG_PRINTBOTH, "Night falls...")
                     else
@@ -229,6 +234,12 @@ if SERVER then
     hook.Add("TTTBeginRound", "Werewolf_TTTBeginRound", function()
         local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
         if night_visibility_mode == WEREWOLF_NIGHT_ALWAYS_SHOW and util.CanRoleSpawn(ROLE_WEREWOLF) and not timer.Exists("TTTWerewolfTimeChange") then
+            WEREWOLF.ChangeTime(true, true, false)
+        end
+    end)
+
+    hook.Add("PlayerSpawn", "Werewolf_PlayerSpawn", function(ply)
+        if ply:IsWerewolf() and not timer.Exists("TTTWerewolfTimeChange") then
             WEREWOLF.ChangeTime(true, true, false)
         end
     end)
@@ -373,35 +384,38 @@ if CLIENT then
     -- NIGHT FOG --
     ---------------
 
-    local fogDensity = 0
+    local nightIntensity = 0
 
     hook.Add("SetupWorldFog", "Werewolf_SetupWorldFog", function()
         if not IsPlayer(client) then
             client = LocalPlayer()
         end
 
-        if not WEREWOLF.isNight and fogDensity == 0 then return end
+        if not WEREWOLF.isNight and nightIntensity == 0 then return end
+
+        if WEREWOLF.isNight and nightIntensity < 1 then
+            nightIntensity = nightIntensity + 0.01
+            if nightIntensity > 1 then nightIntensity = 1 end
+        elseif not WEREWOLF.isNight and nightIntensity > 0 then
+            nightIntensity = nightIntensity - 0.01
+            if nightIntensity < 0 then nightIntensity = 0 end
+        end
 
         local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
-        if not client:IsWerewolf() and night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES then return end
+        if not client:IsActiveWerewolf() and night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES then return end
 
         local fog_visibility_mode = werewolf_fog_visibility_mode:GetInt()
         if fog_visibility_mode == WEREWOLF_FOG_NONE then return end
         if client:IsActiveWerewolf() and fog_visibility_mode == WEREWOLF_FOG_NONWEREWOLVES then return end
 
-        if WEREWOLF.isNight and fogDensity < 1 then
-            fogDensity = fogDensity + 0.01
-            if fogDensity > 1 then fogDensity = 1 end
-        elseif not WEREWOLF.isNight and fogDensity > 0 then
-            fogDensity = fogDensity - 0.01
-            if fogDensity < 0 then fogDensity = 0 end
-        end
+        local werewolfScale = 1
+        if client:IsActiveWerewolf() then werewolfScale = 2 end
 
         render.FogMode(MATERIAL_FOG_LINEAR)
-        render.FogMaxDensity(fogDensity)
+        render.FogMaxDensity(nightIntensity)
         render.FogColor(0, 0, 0)
-        render.FogStart(50)
-        render.FogEnd(600)
+        render.FogStart((50 + ((1 - nightIntensity) * 1000)) * werewolfScale)
+        render.FogEnd((600 + ((1 - nightIntensity) * 1000)) * werewolfScale)
         return true
     end)
 
@@ -410,70 +424,92 @@ if CLIENT then
             client = LocalPlayer()
         end
 
-        if not WEREWOLF.isNight and fogDensity == 0 then return end
+        if not WEREWOLF.isNight and nightIntensity == 0 then return end
 
         local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
-        if not client:IsWerewolf() and night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES then return end
+        if not client:IsActiveWerewolf() and night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES then return end
 
         local fog_visibility_mode = werewolf_fog_visibility_mode:GetInt()
         if fog_visibility_mode == WEREWOLF_FOG_NONE then return end
         if client:IsActiveWerewolf() and fog_visibility_mode == WEREWOLF_FOG_NONWEREWOLVES then return end
 
+        local werewolfScale = 1
+        if client:IsActiveWerewolf() then werewolfScale = 2 end
+
         render.FogMode(MATERIAL_FOG_LINEAR)
-        render.FogMaxDensity(fogDensity)
+        render.FogMaxDensity(nightIntensity)
         render.FogColor(0, 0, 0)
-        render.FogStart(50 * scale)
-        render.FogEnd(600 * scale)
+        render.FogStart((50 + ((1 - nightIntensity) * 1000)) * werewolfScale * scale)
+        render.FogEnd((600 + ((1 - nightIntensity) * 1000)) * werewolfScale * scale)
         return true
     end)
 
-    ----------------
-    -- SEEING RED --
-    ----------------
-
-    local redStrength = 0
+    ------------------
+    -- SCREEN TINTS --
+    ------------------
 
     hook.Add("RenderScreenspaceEffects", "Werewolf_RenderScreenspaceEffects", function()
-        if not werewolf_seeing_red:GetBool() then return end
-
-        if WEREWOLF.isNight and redStrength < 1 then
-            redStrength = redStrength + 0.01
-            if redStrength > 1 then redStrength = 1 end
-        elseif not WEREWOLF.isNight and redStrength > 0 then
-            redStrength = redStrength - 0.01
-            if redStrength < 0 then redStrength = 0 end
-        end
-
-        if not WEREWOLF.isNight and redStrength == 0 then return end
+        if not WEREWOLF.isNight and nightIntensity == 0 then return end
 
         if not IsPlayer(client) then
             client = LocalPlayer()
         end
-        if not client:IsActiveWerewolf() then return end
+        local bloodthirst_tint = werewolf_bloodthirst_tint:GetBool()
+        if client:IsActiveWerewolf() and bloodthirst_tint then
+            DrawColorModify({
+                ["$pp_colour_addr"] = 0,
+                ["$pp_colour_addg"] = 0,
+                ["$pp_colour_addb"] = 0,
+                ["$pp_colour_brightness"] = 0,
+                ["$pp_colour_contrast"] = 1,
+                ["$pp_colour_colour"] = 1 - (nightIntensity * 0.7),
+                ["$pp_colour_mulr"] = 0,
+                ["$pp_colour_mulg"] = 0,
+                ["$pp_colour_mulb"] = 0
+            })
 
-        DrawColorModify({
-            ["$pp_colour_addr"] = 0,
-            ["$pp_colour_addg"] = 0,
-            ["$pp_colour_addb"] = 0,
-            ["$pp_colour_brightness"] = 0,
-            ["$pp_colour_contrast"] = 1,
-            ["$pp_colour_colour"] = 1 - (redStrength * 0.75),
-            ["$pp_colour_mulr"] = 0,
-            ["$pp_colour_mulg"] = 0,
-            ["$pp_colour_mulb"] = 0
-        })
+            DrawColorModify({
+                ["$pp_colour_addr"] = 0,
+                ["$pp_colour_addg"] = (nightIntensity * -0.5),
+                ["$pp_colour_addb"] = (nightIntensity * -0.5),
+                ["$pp_colour_brightness"] = 0,
+                ["$pp_colour_contrast"] = 1,
+                ["$pp_colour_colour"] = 1,
+                ["$pp_colour_mulr"] = 0,
+                ["$pp_colour_mulg"] = 0,
+                ["$pp_colour_mulb"] = 0
+            })
+        else
+            local night_tint = werewolf_night_tint:GetBool()
+            if not night_tint then return end
 
-        DrawColorModify({
-            ["$pp_colour_addr"] = 0,
-            ["$pp_colour_addg"] = (redStrength * -0.5),
-            ["$pp_colour_addb"] = (redStrength * -0.5),
-            ["$pp_colour_brightness"] = 0,
-            ["$pp_colour_contrast"] = 1,
-            ["$pp_colour_colour"] = 1,
-            ["$pp_colour_mulr"] = 0,
-            ["$pp_colour_mulg"] = 0,
-            ["$pp_colour_mulb"] = 0
-        })
+            local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
+            if not client:IsActiveWerewolf() and night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES then return end
+
+            DrawColorModify({
+                ["$pp_colour_addr"] = 0,
+                ["$pp_colour_addg"] = 0,
+                ["$pp_colour_addb"] = 0,
+                ["$pp_colour_brightness"] = 0,
+                ["$pp_colour_contrast"] = 1,
+                ["$pp_colour_colour"] = 1 - (nightIntensity * 0.2),
+                ["$pp_colour_mulr"] = 0,
+                ["$pp_colour_mulg"] = 0,
+                ["$pp_colour_mulb"] = 0
+            })
+
+            DrawColorModify({
+                ["$pp_colour_addr"] = (nightIntensity * -0.5),
+                ["$pp_colour_addg"] = (nightIntensity * -0.2),
+                ["$pp_colour_addb"] = 0,
+                ["$pp_colour_brightness"] = 0,
+                ["$pp_colour_contrast"] = 1,
+                ["$pp_colour_colour"] = 1,
+                ["$pp_colour_mulr"] = 0,
+                ["$pp_colour_mulg"] = 0,
+                ["$pp_colour_mulb"] = 0
+            })
+        end
     end)
 
     ---------------
