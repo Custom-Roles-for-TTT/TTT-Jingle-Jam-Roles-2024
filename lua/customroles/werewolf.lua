@@ -714,15 +714,15 @@ if CLIENT then
 
     local hide_role = GetConVar("ttt_hide_role")
 
-    hook.Add("TTTHUDInfoPaint", "Werewolf_TTTHUDInfoPaint", function(client, label_left, label_top, active_labels)
+    hook.Add("TTTHUDInfoPaint", "Werewolf_TTTHUDInfoPaint", function(ply, label_left, label_top, active_labels)
         if WEREWOLF.nightTime == 0 then return end
 
         local timer_visibility_mode = werewolf_timer_visibility_mode:GetInt()
         if timer_visibility_mode == WEREWOLF_TIMER_NONE then return end
-        if timer_visibility_mode == WEREWOLF_TIMER_WEREWOLVES and (not client:IsWerewolf() or hide_role:GetBool()) then return end
+        if timer_visibility_mode == WEREWOLF_TIMER_WEREWOLVES and (not ply:IsWerewolf() or hide_role:GetBool()) then return end
 
         local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
-        if night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES and (not client:IsWerewolf() or hide_role:GetBool()) then return end
+        if night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES and (not ply:IsWerewolf() or hide_role:GetBool()) then return end
 
         surface.SetFont("TabLarge")
         surface.SetTextColor(255, 255, 255, 230)
