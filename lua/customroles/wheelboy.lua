@@ -50,6 +50,16 @@ TableInsert(ROLE.convars, {
     cvar = "ttt_wheelboy_announce_sound",
     type = ROLE_CONVAR_TYPE_BOOL
 })
+TableInsert(ROLE.convars, {
+    cvar = "ttt_wheelboy_speed_mult",
+    type = ROLE_CONVAR_TYPE_NUM,
+    decimal = 1
+})
+TableInsert(ROLE.convars, {
+    cvar = "ttt_wheelboy_sprint_recovery",
+    type = ROLE_CONVAR_TYPE_NUM,
+    decimal = 2
+})
 
 ROLE.translations = {
     ["english"] = {
@@ -70,6 +80,8 @@ local wheels_to_win = CreateConVar("ttt_wheelboy_wheels_to_win", 5, FCVAR_REPLIC
 local wheel_end_wait_time = CreateConVar("ttt_wheelboy_wheel_end_wait_time", 10, FCVAR_REPLICATED, "How long the wheel should wait at the end, showing the result, before it hides", 1, 30)
 local announce_text = CreateConVar("ttt_wheelboy_announce_text", "1", FCVAR_REPLICATED, "Whether to announce that there is a wheelboy via text", 0, 1)
 local announce_sound = CreateConVar("ttt_wheelboy_announce_sound", "1", FCVAR_REPLICATED, "Whether to announce that there is a wheelboy via a sound clip", 0, 1)
+local speed_mult = CreateConVar("ttt_wheelboy_speed_mult", "1.2", FCVAR_REPLICATED, "The multiplier to use on the wheelboy's movement speed (e.g. 1.2 = 120% normal speed)", 1, 2)
+local sprint_recovery = CreateConVar("ttt_wheelboy_sprint_recovery", "0.12", FCVAR_REPLICATED, "The amount of stamina to recover per tick", 0, 1)
 
 -- TODO
 local wheelEffects = {
@@ -88,6 +100,19 @@ local wheelEffects = {
     { name = "Just yelling into the void", fn = function(ply) end },
     { name = "And things", fn = function(ply) end }
 }
+
+AddHook("TTTSprintStaminaRecovery", "Wheelboy_TTTSprintStaminaRecovery", function(ply, recovery)
+    if IsPlayer(ply) and ply:IsActiveWheelboy() then
+        return sprint_recovery:GetFloat()
+    end
+end)
+
+AddHook("TTTSpeedMultiplier", "Wheelboy_TTTSpeedMultiplier", function(ply, mults)
+    if IsPlayer(ply) and ply:IsActiveWheelboy() then
+        TableInsert(mults, speed_mult:GetFloat())
+    end
+end)
+
 
 if SERVER then
     AddCSLuaFile()
