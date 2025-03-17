@@ -94,7 +94,7 @@ Wheel Boy can spin a wheel to apply random effects to everyone. Spin enough time
 \
 \
 **ConVars**
-```
+```cpp
 ttt_wheelboy_enabled             0    // Whether or not wheel boy should spawn
 ttt_wheelboy_spawn_weight        1    // The weight assigned to spawning wheel boy
 ttt_wheelboy_min_players         0    // The minimum number of players required to spawn wheel boy
