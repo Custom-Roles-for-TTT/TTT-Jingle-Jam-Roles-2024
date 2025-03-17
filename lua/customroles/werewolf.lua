@@ -881,11 +881,11 @@ if CLIENT then
                 table.insert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>move faster</span>")
             end
             local leap_enabled = GetConVar("ttt_werewolf_leap_enabled"):GetBool()
-            if night_speed_mult > 1 or night_sprint_recovery > default_sprint_recovery then
+            if leap_enabled then
                 table.insert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>leap into the air</span>")
             end
             local hide_id = werewolf_hide_id:GetBool()
-            if night_speed_mult > 1 or night_sprint_recovery > default_sprint_recovery then
+            if hide_id then
                 table.insert(additionalBuffs, "their name is <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>hidden</span> from other players")
             end
             if #additionalBuffs > 0 then
