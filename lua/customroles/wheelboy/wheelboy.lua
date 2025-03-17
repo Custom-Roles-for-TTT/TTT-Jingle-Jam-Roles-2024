@@ -17,7 +17,7 @@ util.AddNetworkString("TTT_WheelboySpinResult")
 util.AddNetworkString("TTT_WheelboyStartEffect")
 util.AddNetworkString("TTT_WheelboyFinishEffect")
 
-local wheels_to_win = GetConVar("ttt_wheelboy_wheels_to_win")
+local spins_to_win = GetConVar("ttt_wheelboy_spins_to_win")
 local announce_text = GetConVar("ttt_wheelboy_announce_text")
 local announce_sound = GetConVar("ttt_wheelboy_announce_sound")
 local swap_on_kill = GetConVar("ttt_wheelboy_swap_on_kill")
@@ -90,7 +90,7 @@ net.Receive("TTT_WheelboySpinResult", function(len, ply)
         -- Increase the tracker
         spinCount = spinCount + 1
         -- And check if they win this time
-        if spinCount >= wheels_to_win:GetInt() then
+        if spinCount >= spins_to_win:GetInt() then
             spinCount = nil
             net.Start("TTT_UpdateWheelboyWins")
             net.Broadcast()
@@ -170,7 +170,7 @@ AddHook("PlayerDeath", "Wheelboy_Swap_PlayerDeath", function(victim, infl, attac
 
     -- Tell the new wheelboy what happened and what to do now
     attacker:QueueMessage(MSG_PRINTBOTH, "You killed " .. ROLE_STRINGS[ROLE_WHEELBOY] .. " and have become the new " .. ROLE_STRINGS[ROLE_WHEELBOY])
-    attacker:QueueMessage(MSG_PRINTBOTH, "Spin your wheel " .. wheels_to_win:GetInt() .. " time(s) to win")
+    attacker:QueueMessage(MSG_PRINTBOTH, "Spin your wheel " .. spins_to_win:GetInt() .. " time(s) to win")
 end)
 
 -------------
