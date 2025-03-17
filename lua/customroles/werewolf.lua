@@ -791,6 +791,7 @@ if CLIENT then
             local roleTeam = player.GetRoleTeam(ROLE_WEREWOLF, true)
             local _, roleTeamColor = GetRoleTeamInfo(roleTeam, true)
 
+            -- Introduction
             local html = "The " .. ROLE_STRINGS[ROLE_WEREWOLF] .. " is "
             if roleTeam == ROLE_TEAM_INDEPENDENT then
                 html = html .. "an <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>independent</span> role"
@@ -803,8 +804,7 @@ if CLIENT then
                 html = html .. " They win if they are the <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>last player standing</span>."
             end
 
-
-
+            -- Night Visibility
             html = html .. "<span style='display: block; margin-top: 10px;'>The " .. ROLE_STRINGS[ROLE_WEREWOLF] .. " adds <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>day</span> and <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>night</span> phases to the game which "
             local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
             if night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES then
@@ -817,6 +817,7 @@ if CLIENT then
                 html = html .. "are visible to all players.</span>"
             end
 
+            -- Day and Night Length
             html = html .. "<span style='display: block; margin-top: 10px;'>Rounds start during the <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>day phase</span> which lasts "
             local day_length_min = werewolf_day_length_min:GetInt()
             local day_length_max = werewolf_day_length_max:GetInt()
@@ -849,6 +850,7 @@ if CLIENT then
             end
             html = html .. "</span>"
 
+            -- Highlighting and Target Icons
             local vision_mode = werewolf_vision_mode:GetInt()
             local show_target_icon = werewolf_show_target_icon:GetInt()
             if vision_mode == WEREWOLF_VISION_ALWAYS then
@@ -863,10 +865,13 @@ if CLIENT then
 
             local day_damage_penalty = werewolf_day_damage_penalty:GetFloat()
             if day_damage_penalty > 0 then
-                html = html .. "<span style='display: block; margin-top: 10px;'>During the day " .. ROLE_STRINGS_PLURAL[ROLE_WEREWOLF] .. " deal <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>reduced damage</span>, but they are stronger at night.</span>"
+                html = html .. "<span style='display: block; margin-top: 10px;'>During the day " .. ROLE_STRINGS_PLURAL[ROLE_WEREWOLF] .. " deal <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>reduced damage</span>. "
+            else
+                html = html .. "<span style='display: block; margin-top: 10px;'>"
             end
 
-            html = html .. "<span style='display: block; margin-top: 10px;'>At night " .. ROLE_STRINGS_PLURAL[ROLE_WEREWOLF] .. " <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>transform</span> and gain a powerful melee attack, but they are unable to use any other weapons."
+            -- Day and Night Effects
+            html = html .. "At night " .. ROLE_STRINGS_PLURAL[ROLE_WEREWOLF] .. " <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>transform</span> and gain a powerful melee attack, but they are unable to use any other weapons."
             local additionalBuffs = {}
             local night_damage_reduction = werewolf_night_damage_reduction:GetFloat()
             if night_damage_reduction >= 1 then
@@ -887,6 +892,9 @@ if CLIENT then
             local hide_id = werewolf_hide_id:GetBool()
             if hide_id then
                 table.insert(additionalBuffs, "their name is <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>hidden</span> from other players")
+            end
+            if (vision_mode == WEREWOLF_VISION_TRANSFORMED or show_target_icon == WEREWOLF_VISION_TRANSFORMED) and vision_mode ~= WEREWOLF_VISION_ALWAYS and show_target_icon ~= WEREWOLF_VISION_ALWAYS then
+                table.insert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>see other players though walls</span>")
             end
             if #additionalBuffs > 0 then
                 html = html .. " In addition, " .. util.FormattedList(additionalBuffs)
