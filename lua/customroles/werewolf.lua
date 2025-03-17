@@ -228,6 +228,7 @@ if SERVER then
         if transform_model and util.IsValidModel("models/player/captainPawn/fenrir.mdl") then
             oldPlayerModels[ply:SteamID64()] = ply:GetModel()
             SetMDL(ply, "models/player/captainPawn/fenrir.mdl")
+            ply:SetupHands()
         end
     end
 
@@ -282,6 +283,7 @@ if SERVER then
                     v:StripWeapon("weapon_wwf_claws")
                     if oldPlayerModels[v:SteamID64()] then
                         SetMDL(v, oldPlayerModels[v:SteamID64()])
+                        v:SetupHands()
                     end
                 end
             end
@@ -384,6 +386,7 @@ if SERVER then
             ply:StripWeapon("weapon_wwf_claws")
             if oldPlayerModels[ply:SteamID64()] then
                 SetMDL(ply, oldPlayerModels[ply:SteamID64()])
+                ply:SetupHands()
             end
         end
     end)
@@ -445,6 +448,7 @@ if SERVER then
         for _, v in player.Iterator() do
             if oldPlayerModels[v:SteamID64()] then
                 SetMDL(v, oldPlayerModels[v:SteamID64()])
+                v:SetupHands()
             end
         end
         table.Empty(oldPlayerModels)
