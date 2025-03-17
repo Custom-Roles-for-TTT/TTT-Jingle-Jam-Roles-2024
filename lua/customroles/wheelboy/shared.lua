@@ -27,45 +27,47 @@ ROLE.team = ROLE_TEAM_JESTER
 ROLE.startinghealth = 150
 ROLE.maxhealth = 150
 
-ROLE.convars = {}
-TableInsert(ROLE.convars, {
-    cvar = "ttt_wheelboy_wheel_recharge_time",
-    type = ROLE_CONVAR_TYPE_NUM
-})
-TableInsert(ROLE.convars, {
-    cvar = "ttt_wheelboy_wheels_to_win",
-    type = ROLE_CONVAR_TYPE_NUM
-})
-TableInsert(ROLE.convars, {
-    cvar = "ttt_wheelboy_wheel_time",
-    type = ROLE_CONVAR_TYPE_NUM
-})
-TableInsert(ROLE.convars, {
-    cvar = "ttt_wheelboy_wheel_end_wait_time",
-    type = ROLE_CONVAR_TYPE_NUM
-})
-TableInsert(ROLE.convars, {
-    cvar = "ttt_wheelboy_swap_on_kill",
-    type = ROLE_CONVAR_TYPE_BOOL
-})
-TableInsert(ROLE.convars, {
-    cvar = "ttt_wheelboy_announce_text",
-    type = ROLE_CONVAR_TYPE_BOOL
-})
-TableInsert(ROLE.convars, {
-    cvar = "ttt_wheelboy_announce_sound",
-    type = ROLE_CONVAR_TYPE_BOOL
-})
-TableInsert(ROLE.convars, {
-    cvar = "ttt_wheelboy_speed_mult",
-    type = ROLE_CONVAR_TYPE_NUM,
-    decimal = 1
-})
-TableInsert(ROLE.convars, {
-    cvar = "ttt_wheelboy_sprint_recovery",
-    type = ROLE_CONVAR_TYPE_NUM,
-    decimal = 2
-})
+ROLE.convars =
+{
+    {
+        cvar = "ttt_wheelboy_wheel_recharge_time",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
+        cvar = "ttt_wheelboy_wheels_to_win",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
+        cvar = "ttt_wheelboy_wheel_time",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
+        cvar = "ttt_wheelboy_wheel_end_wait_time",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
+        cvar = "ttt_wheelboy_swap_on_kill",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_wheelboy_announce_text",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_wheelboy_announce_sound",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_wheelboy_speed_mult",
+        type = ROLE_CONVAR_TYPE_NUM,
+        decimal = 1
+    },
+    {
+        cvar = "ttt_wheelboy_sprint_recovery",
+        type = ROLE_CONVAR_TYPE_NUM,
+        decimal = 2
+    }
+}
 
 ROLE.translations = {
     ["english"] = {
@@ -75,7 +77,10 @@ ROLE.translations = {
         ["hilite_wheelboy"] = "AND THE {role} GOT CAKE!",
         ["wheelboy_spin_hud"] = "Next wheel spin: {time}",
         ["wheelboy_spin_hud_now"] = "NOW",
-        ["score_wheelboy_killed"] = "Killed"
+        ["score_wheelboy_killed"] = "Killed",
+        ["wheelboy_config_wheel_offset_x"] = "Wheel position, X-axis offset",
+        ["wheelboy_config_wheel_offset_y"] = "Wheel position, Y-axis offset",
+        ["wheelboy_config_wheel_offset_reset"] = "Reset wheel position to default"
     }
 }
 
