@@ -43,6 +43,11 @@ local announce_text = GetConVar("ttt_wheelboy_announce_text")
 local announce_sound = GetConVar("ttt_wheelboy_announce_sound")
 local swap_on_kill = GetConVar("ttt_wheelboy_swap_on_kill")
 
+local wheel_offset_x = CreateClientConVar("ttt_wheelboy_wheel_offset_x", "0", true, false, "The screen offset from the right to render the wheel at, on the x axis (left-and-right)")
+local wheel_offset_y = CreateClientConVar("ttt_wheelboy_wheel_offset_y", "0", true, false, "The screen offset from the center to render the wheel at, on the y axes (up-and-down)")
+
+local wheelRadius = 250
+
 local wheelStartTime = nil
 local wheelEndTime = nil
 local wheelStartAngle = nil
@@ -57,6 +62,26 @@ local function ResetWheelState()
     blinkStart = nil
     anglesPerSegment = nil
 end
+
+-------------
+-- CONVARS --
+-------------
+
+concommand.Add("ttt_wheelboy_wheel_offset_reset", function()
+    wheel_offset_x:SetInt(wheel_offset_x:GetDefault())
+    wheel_offset_y:SetInt(wheel_offset_y:GetDefault())
+end)
+
+AddHook("TTTSettingsRolesTabSections", "Wheelboy_TTTSettingsRolesTabSections", function(role, parentForm)
+    if role ~= ROLE_WHEELBOY then return end
+
+    -- Let the user move the wheel within the bounds of the window
+    local height = (ScrH() / 2) - wheelRadius
+    parentForm:NumSlider(LANG.GetTranslation("wheelboy_config_wheel_offset_x"), "ttt_wheelboy_wheel_offset_x", 0, ScrW() - (wheelRadius * 2), 0)
+    parentForm:NumSlider(LANG.GetTranslation("wheelboy_config_wheel_offset_y"), "ttt_wheelboy_wheel_offset_y", -height, height, 0)
+    parentForm:Button(LANG.GetTranslation("wheelboy_config_wheel_offset_reset"), "ttt_wheelboy_wheel_offset_reset")
+    return true
+end)
 
 ----------------
 -- ROLE POPUP --
@@ -492,11 +517,12 @@ AddHook("HUDPaint", "Wheelboy_Wheel_HUDPaint", function()
     end
 
     -- Draw everything
-    local centerX, centerY = ScrW() / 2, ScrH() / 2
-    DrawCircle(centerX, centerY, 247, 60)
-    DrawSegmentedCircle(centerX, centerY, 250, segmentCount, anglePerSegment, 30, currentAngle, angleOffset, blink)
-    DrawPointer(centerX, centerY)
-    DrawLogo(centerX, centerY)
+    local x = ScrW() - wheelRadius - wheel_offset_x:GetInt()
+    local y = (ScrH() / 2) - wheel_offset_y:GetInt()
+    DrawCircle(x, y, 247, 60)
+    DrawSegmentedCircle(x, y, wheelRadius, segmentCount, anglePerSegment, 30, currentAngle, angleOffset, blink)
+    DrawPointer(x, y)
+    DrawLogo(x, y)
 
     -- Wait extra time and then clear everything and send it to the server
     if curTime >= wheelEndTime + waitTime then
