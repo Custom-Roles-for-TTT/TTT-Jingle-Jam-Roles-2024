@@ -1,3 +1,17 @@
+local hook = hook
+local player = player
+local table = table
+local math = math
+
+local AddHook = hook.Add
+local RemoveHook = hook.Remove
+local PlayerIterator = player.Iterator
+local TableInsert = table.insert
+local TableRandom = table.Random
+local TableEmpty = table.Empty
+local MathRandom = math.random
+local MathMax = math.max
+
 local SetMDL = FindMetaTable("Entity").SetModel
 
 local ROLE = {}
@@ -193,12 +207,6 @@ WEREWOLF = {
     nightTime = 0
 }
 
-local transformSounds = {
-    "wwf/transform1.wav",
-    "wwf/transform2.wav",
-    "wwf/transform3.wav"
-}
-
 if SERVER then
     AddCSLuaFile()
 
@@ -213,6 +221,12 @@ if SERVER then
 
     local oldPlayerModels = {}
 
+    local transformSounds = {
+        "wwf/transform1.wav",
+        "wwf/transform2.wav",
+        "wwf/transform3.wav"
+    }
+
     local function TransformWerewolf(ply)
         local drop_weapons = werewolf_drop_weapons:GetBool()
         if drop_weapons then
@@ -226,7 +240,7 @@ if SERVER then
         ply:Give("weapon_wwf_claws")
         ply:SelectWeapon("weapon_wwf_claws")
         ply:DoAnimationEvent(ACT_GMOD_GESTURE_TAUNT_ZOMBIE)
-        ply:EmitSound(table.Random(transformSounds))
+        ply:EmitSound(TableRandom(transformSounds))
 
         local transform_model = werewolf_transform_model:GetBool()
         if transform_model and util.IsValidModel("models/player/captainPawn/fenrir.mdl") then
@@ -255,7 +269,7 @@ if SERVER then
         if max < min then
             max = min
         end
-        local length = math.random(min, max)
+        local length = MathRandom(min, max)
         if blockTimers then
             length = 0
             WEREWOLF.nightTime = 0
@@ -269,7 +283,7 @@ if SERVER then
         net.Broadcast()
 
         local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
-        for _, v in player.Iterator() do
+        for _, v in PlayerIterator() do
             if not hideMessages then
                 if v:IsActiveWerewolf() or night_visibility_mode >= WEREWOLF_NIGHT_SHOW_IF_HAS_WEREWOLF then
                     if WEREWOLF.isNight then
@@ -294,7 +308,7 @@ if SERVER then
         end
 
         if not WEREWOLF.isNight then
-            table.Empty(oldPlayerModels)
+            TableEmpty(oldPlayerModels)
         end
 
         if not blockTimers then
@@ -304,14 +318,14 @@ if SERVER then
         end
     end
 
-    hook.Add("TTTBeginRound", "Werewolf_TTTBeginRound", function()
+    AddHook("TTTBeginRound", "Werewolf_TTTBeginRound", function()
         local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
         if night_visibility_mode == WEREWOLF_NIGHT_ALWAYS_SHOW and util.CanRoleSpawn(ROLE_WEREWOLF) and not timer.Exists("TTTWerewolfTimeChange") then
             WEREWOLF.ChangeTime(true, true, false)
         end
     end)
 
-    hook.Add("PlayerSpawn", "Werewolf_PlayerSpawn", function(ply)
+    AddHook("PlayerSpawn", "Werewolf_PlayerSpawn", function(ply)
         if ply:IsWerewolf() and not timer.Exists("TTTWerewolfTimeChange") then
             WEREWOLF.ChangeTime(true, true, false)
         end
@@ -321,7 +335,7 @@ if SERVER then
     -- DAMAGE REDUCTIONS --
     -----------------------
 
-    hook.Add("EntityTakeDamage", "Werewolf_EntityTakeDamage", function(ent, dmginfo)
+    AddHook("EntityTakeDamage", "Werewolf_EntityTakeDamage", function(ent, dmginfo)
         if GetRoundState() < ROUND_ACTIVE then return end
 
         if WEREWOLF.isNight then
@@ -338,7 +352,7 @@ if SERVER then
         end
     end)
 
-    hook.Add("TTTDrawHitMarker", "Werewolf_TTTDrawHitMarker", function(victim, dmginfo)
+    AddHook("TTTDrawHitMarker", "Werewolf_TTTDrawHitMarker", function(victim, dmginfo)
         if not WEREWOLF.isNight then return end
 
         local reduction = werewolf_night_damage_reduction:GetFloat()
@@ -352,7 +366,7 @@ if SERVER then
         end
     end)
 
-    hook.Add("OnPlayerHitGround", "Werewolf_OnPlayerHitGround", function(ply, in_water, on_floater, speed)
+    AddHook("OnPlayerHitGround", "Werewolf_OnPlayerHitGround", function(ply, in_water, on_floater, speed)
         if WEREWOLF.isNight and ply:IsWerewolf() and GetRoundState() >= ROUND_ACTIVE then
             return true
         end
@@ -377,15 +391,15 @@ if SERVER then
         end
     end
 
-    hook.Add("PlayerDeath", "Werewolf_PlayerDeath", function(victim, infl, attacker)
+    AddHook("PlayerDeath", "Werewolf_PlayerDeath", function(victim, infl, attacker)
         CheckForActiveWerewolf()
     end)
 
-    hook.Add("PlayerDisconnected", "Werewolf_PlayerDisconnected", function(ply)
+    AddHook("PlayerDisconnected", "Werewolf_PlayerDisconnected", function(ply)
         CheckForActiveWerewolf()
     end)
 
-    hook.Add("TTTPlayerRoleChanged", "Werewolf_TTTPlayerRoleChanged", function(ply, oldRole, newRole)
+    AddHook("TTTPlayerRoleChanged", "Werewolf_TTTPlayerRoleChanged", function(ply, oldRole, newRole)
         CheckForActiveWerewolf()
 
         if not WEREWOLF.isNight then return end
@@ -405,7 +419,7 @@ if SERVER then
     -- DISABLE WEAPONS --
     ---------------------
 
-    hook.Add("PlayerCanPickupWeapon", "Werewolf_PlayerCanPickupWeapon", function(ply, wep)
+    AddHook("PlayerCanPickupWeapon", "Werewolf_PlayerCanPickupWeapon", function(ply, wep)
         if not IsValid(wep) or not IsValid(ply) then return end
         if ply:IsSpec() then return false end
 
@@ -416,16 +430,16 @@ if SERVER then
     -- WIN CHECKS --
     ----------------
 
-    hook.Add("Initialize", "Werewolf_Initialize", function()
+    AddHook("Initialize", "Werewolf_Initialize", function()
         WIN_WEREWOLF = GenerateNewWinID(ROLE_WEREWOLF)
     end)
 
-    hook.Add("TTTCheckForWin", "Werewolf_CheckForWin", function()
+    AddHook("TTTCheckForWin", "Werewolf_CheckForWin", function()
         if not INDEPENDENT_ROLES[ROLE_WEREWOLF] then return end
 
         local werewolf_alive = false
         local other_alive = false
-        for _, v in player.Iterator() do
+        for _, v in PlayerIterator() do
             if v:Alive() and v:IsTerror() then
                 if v:IsWerewolf() then
                     werewolf_alive = true
@@ -442,7 +456,7 @@ if SERVER then
         end
     end)
 
-    hook.Add("TTTPrintResultMessage", "Werewolf_PrintResultMessage", function(type)
+    AddHook("TTTPrintResultMessage", "Werewolf_PrintResultMessage", function(type)
         if type == WIN_WEREWOLF then
             LANG.Msg("win_werewolf", { role = ROLE_STRINGS[ROLE_WEREWOLF] })
             ServerLog("Result: " .. ROLE_STRINGS[ROLE_WEREWOLF] .. " wins.\n")
@@ -454,20 +468,20 @@ if SERVER then
     -- CLEANUP --
     -------------
 
-    hook.Add("TTTEndRound", "RemoveHypnotisedHide", function()
-        for _, v in player.Iterator() do
+    AddHook("TTTEndRound", "RemoveHypnotisedHide", function()
+        for _, v in PlayerIterator() do
             if oldPlayerModels[v:SteamID64()] then
                 SetMDL(v, oldPlayerModels[v:SteamID64()])
                 v:SetupHands()
             end
         end
-        table.Empty(oldPlayerModels)
+        TableEmpty(oldPlayerModels)
 
         timer.Remove("TTTWerewolfTimeChange")
         WEREWOLF.ChangeTime(true, true, true)
     end)
 
-    hook.Add("TTTPrepareRound", "Werewolf_TTTPrepareRound", function()
+    AddHook("TTTPrepareRound", "Werewolf_TTTPrepareRound", function()
         timer.Remove("TTTWerewolfTimeChange")
         WEREWOLF.ChangeTime(true, true, true)
     end)
@@ -496,7 +510,7 @@ if CLIENT then
 
     local nightIntensity = 0
 
-    hook.Add("SetupWorldFog", "Werewolf_SetupWorldFog", function()
+    AddHook("SetupWorldFog", "Werewolf_SetupWorldFog", function()
         if not IsPlayer(client) then
             client = LocalPlayer()
         end
@@ -529,7 +543,7 @@ if CLIENT then
         return true
     end)
 
-    hook.Add("SetupSkyboxFog", "Werewolf_SetupSkyboxFog", function(scale)
+    AddHook("SetupSkyboxFog", "Werewolf_SetupSkyboxFog", function(scale)
         if not IsPlayer(client) then
             client = LocalPlayer()
         end
@@ -558,7 +572,7 @@ if CLIENT then
     -- SCREEN TINTS --
     ------------------
 
-    hook.Add("RenderScreenspaceEffects", "Werewolf_RenderScreenspaceEffects", function()
+    AddHook("RenderScreenspaceEffects", "Werewolf_RenderScreenspaceEffects", function()
         if not WEREWOLF.isNight and nightIntensity == 0 then return end
 
         if not IsPlayer(client) then
@@ -626,14 +640,14 @@ if CLIENT then
     -- TARGET ID --
     ---------------
 
-    hook.Add("TTTTargetIDPlayerTargetIcon", "Werewolf_TTTTargetIDPlayerTargetIcon", function(ply, cli, showJester)
+    AddHook("TTTTargetIDPlayerTargetIcon", "Werewolf_TTTTargetIDPlayerTargetIcon", function(ply, cli, showJester)
         local show_target_icon = werewolf_show_target_icon:GetInt()
         if cli:IsActiveWerewolf() and (show_target_icon == WEREWOLF_VISION_ALWAYS or (show_target_icon == WEREWOLF_VISION_TRANSFORMED and WEREWOLF.isNight)) and not showJester and not cli:IsSameTeam(ply) then
             return "kill", true, ROLE_COLORS_SPRITE[ROLE_WEREWOLF], "down"
         end
     end)
 
-    hook.Add("TTTTargetIDPlayerBlockIcon", "Werewolf_TTTTargetIDPlayerBlockIcon", function(ply, cli)
+    AddHook("TTTTargetIDPlayerBlockIcon", "Werewolf_TTTTargetIDPlayerBlockIcon", function(ply, cli)
         if not ply:IsPlayer() or not cli:IsPlayer() then return end
         if not WEREWOLF.isNight then return end
 
@@ -643,7 +657,7 @@ if CLIENT then
         if ply:IsActiveWerewolf() then return true end
     end)
 
-    hook.Add("TTTTargetIDPlayerBlockInfo", "Werewolf_TTTTargetIDPlayerBlockInfo", function(ply, cli)
+    AddHook("TTTTargetIDPlayerBlockInfo", "Werewolf_TTTTargetIDPlayerBlockInfo", function(ply, cli)
         if not ply:IsPlayer() or not cli:IsPlayer() then return end
         if not WEREWOLF.isNight then return end
 
@@ -666,7 +680,7 @@ if CLIENT then
     local can_see_jesters_monster = false
 
     local function EnableWerewolfHighlights()
-        hook.Add("PreDrawHalos", "Werewolf_Highlight_PreDrawHalos", function()
+        AddHook("PreDrawHalos", "Werewolf_Highlight_PreDrawHalos", function()
             local allies
             local can_see_jesters
             if INDEPENDENT_ROLES[ROLE_WEREWOLF] then
@@ -680,7 +694,7 @@ if CLIENT then
         end)
     end
 
-    hook.Add("TTTUpdateRoleState", "Werewolf_Highlight_TTTUpdateRoleState", function()
+    AddHook("TTTUpdateRoleState", "Werewolf_Highlight_TTTUpdateRoleState", function()
         if not IsPlayer(client) then
             client = LocalPlayer()
         end
@@ -691,12 +705,12 @@ if CLIENT then
         can_see_jesters_monster = jesters_visible_to_monsters:GetBool()
 
         if vision_enabled then
-            hook.Remove("PreDrawHalos", "Werewolf_Highlight_PreDrawHalos")
+            RemoveHook("PreDrawHalos", "Werewolf_Highlight_PreDrawHalos")
             vision_enabled = false
         end
     end)
 
-    hook.Add("Think", "Werewolf_Highlight_Think", function()
+    AddHook("Think", "Werewolf_Highlight_Think", function()
         if not IsPlayer(client) or not client:Alive() or client:IsSpec() then return end
 
         if werewolf_vision and client:IsWerewolf() then
@@ -712,7 +726,7 @@ if CLIENT then
         end
 
         if werewolf_vision and not vision_enabled then
-            hook.Remove("PreDrawHalos", "Werewolf_Highlight_PreDrawHalos")
+            RemoveHook("PreDrawHalos", "Werewolf_Highlight_PreDrawHalos")
         end
     end)
 
@@ -727,7 +741,7 @@ if CLIENT then
 
     local hide_role = GetConVar("ttt_hide_role")
 
-    hook.Add("TTTHUDInfoPaint", "Werewolf_TTTHUDInfoPaint", function(ply, label_left, label_top, active_labels)
+    AddHook("TTTHUDInfoPaint", "Werewolf_TTTHUDInfoPaint", function(ply, label_left, label_top, active_labels)
         if WEREWOLF.nightTime == 0 then return end
 
         local timer_visibility_mode = werewolf_timer_visibility_mode:GetInt()
@@ -740,7 +754,7 @@ if CLIENT then
         surface.SetFont("TabLarge")
         surface.SetTextColor(255, 255, 255, 230)
 
-        local remaining = math.max(0, WEREWOLF.nightTime - CurTime())
+        local remaining = MathMax(0, WEREWOLF.nightTime - CurTime())
         local translation = "werewolf_timer_night"
         if WEREWOLF.isNight then
             translation = "werewolf_timer_day"
@@ -753,30 +767,30 @@ if CLIENT then
         surface.SetTextPos(label_left, ScrH() - label_top - h)
         surface.DrawText(text)
 
-        table.insert(active_labels, "werewolf")
+        TableInsert(active_labels, "werewolf")
     end)
 
     ----------------
     -- WIN EVENTS --
     ----------------
 
-    hook.Add("TTTSyncWinIDs", "Werewolf_TTTWinIDsSynced", function()
+    AddHook("TTTSyncWinIDs", "Werewolf_TTTWinIDsSynced", function()
         WIN_WEREWOLF = WINS_BY_ROLE[ROLE_WEREWOLF]
     end)
 
-    hook.Add("TTTEventFinishText", "Werewolf_EventFinishText", function(e)
+    AddHook("TTTEventFinishText", "Werewolf_EventFinishText", function(e)
         if e.win == WIN_WEREWOLF then
             return LANG.GetParamTranslation("ev_win_werewolf", { role = string.lower(ROLE_STRINGS[ROLE_WEREWOLF]) })
         end
     end)
 
-    hook.Add("TTTEventFinishIconText", "Werewolf_EventFinishIconText", function(e, win_string, role_string)
+    AddHook("TTTEventFinishIconText", "Werewolf_EventFinishIconText", function(e, win_string, role_string)
         if e.win == WIN_WEREWOLF then
             return win_string, ROLE_STRINGS_PLURAL[ROLE_WEREWOLF]
         end
     end)
 
-    hook.Add("TTTScoringWinTitle", "Werewolf_ScoringWinTitle", function(wintype, wintitles, title, secondaryWinRole)
+    AddHook("TTTScoringWinTitle", "Werewolf_ScoringWinTitle", function(wintype, wintitles, title, secondaryWinRole)
         if wintype == WIN_WEREWOLF then
             return { txt = "hilite_win_role_singular", params = { role = string.upper(ROLE_STRINGS[ROLE_WEREWOLF]) }, c = ROLE_COLORS[ROLE_WEREWOLF] }
         end
@@ -786,7 +800,7 @@ if CLIENT then
     -- TUTORIAL --
     --------------
 
-    hook.Add("TTTTutorialRoleText", "Werewolf_TTTTutorialRoleText", function(role, titleLabel)
+    AddHook("TTTTutorialRoleText", "Werewolf_TTTTutorialRoleText", function(role, titleLabel)
         if role == ROLE_WEREWOLF then
             local roleTeam = player.GetRoleTeam(ROLE_WEREWOLF, true)
             local _, roleTeamColor = GetRoleTeamInfo(roleTeam, true)
@@ -875,26 +889,26 @@ if CLIENT then
             local additionalBuffs = {}
             local night_damage_reduction = werewolf_night_damage_reduction:GetFloat()
             if night_damage_reduction >= 1 then
-                table.insert(additionalBuffs, "they are <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>invulnerable</span>")
+                TableInsert(additionalBuffs, "they are <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>invulnerable</span>")
             elseif night_damage_reduction > 0 then
-                table.insert(additionalBuffs, "they take <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>reduced damage</span>")
+                TableInsert(additionalBuffs, "they take <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>reduced damage</span>")
             end
             local night_speed_mult = werewolf_night_speed_mult:GetFloat()
             local night_sprint_recovery = werewolf_night_sprint_recovery:GetFloat()
             local default_sprint_recovery = GetConVar("ttt_sprint_regenerate_traitor"):GetFloat()
             if night_speed_mult > 1 or night_sprint_recovery > default_sprint_recovery then
-                table.insert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>move faster</span>")
+                TableInsert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>move faster</span>")
             end
             local leap_enabled = GetConVar("ttt_werewolf_leap_enabled"):GetBool()
             if leap_enabled then
-                table.insert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>leap into the air</span>")
+                TableInsert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>leap into the air</span>")
             end
             local hide_id = werewolf_hide_id:GetBool()
             if hide_id then
-                table.insert(additionalBuffs, "their name is <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>hidden</span> from other players")
+                TableInsert(additionalBuffs, "their name is <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>hidden</span> from other players")
             end
             if (vision_mode == WEREWOLF_VISION_TRANSFORMED or show_target_icon == WEREWOLF_VISION_TRANSFORMED) and vision_mode ~= WEREWOLF_VISION_ALWAYS and show_target_icon ~= WEREWOLF_VISION_ALWAYS then
-                table.insert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>see other players though walls</span>")
+                TableInsert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>see other players though walls</span>")
             end
             if #additionalBuffs > 0 then
                 html = html .. " In addition, " .. util.FormattedList(additionalBuffs)
@@ -910,13 +924,13 @@ end
 -- SPEED AND STAMINA BUFFS --
 -----------------------------
 
-hook.Add("TTTSpeedMultiplier", "Werewolf_TTTSpeedMultiplier", function(ply, mults)
+AddHook("TTTSpeedMultiplier", "Werewolf_TTTSpeedMultiplier", function(ply, mults)
     if WEREWOLF.isNight and IsPlayer(ply) and ply:IsActiveWerewolf() then
-        table.insert(mults, werewolf_night_speed_mult:GetFloat())
+        TableInsert(mults, werewolf_night_speed_mult:GetFloat())
     end
 end)
 
-hook.Add("TTTSprintStaminaRecovery", "Werewolf_TTTSprintStaminaRecovery", function(ply, recovery)
+AddHook("TTTSprintStaminaRecovery", "Werewolf_TTTSprintStaminaRecovery", function(ply, recovery)
     if WEREWOLF.isNight and IsPlayer(ply) and ply:IsActiveWerewolf() then
         return werewolf_night_sprint_recovery:GetFloat()
     end
@@ -926,7 +940,7 @@ end)
 -- MONSTER TEAM OPTION --
 -------------------------
 
-hook.Add("TTTUpdateRoleState", "Werewolf_TTTUpdateRoleState", function()
+AddHook("TTTUpdateRoleState", "Werewolf_TTTUpdateRoleState", function()
     local is_monster = werewolf_is_monster:GetBool()
     MONSTER_ROLES[ROLE_WEREWOLF] = is_monster
     INDEPENDENT_ROLES[ROLE_WEREWOLF] = not is_monster
