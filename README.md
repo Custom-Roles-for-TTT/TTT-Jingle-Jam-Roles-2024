@@ -73,14 +73,14 @@ ttt_werewolf_vision_mode            1       // Whether Werewolves see a visible 
 ttt_werewolf_show_target_icon       1       // Whether Werewolves see an icon over other players' heads showing who to kill. 0 - Never, 1 - While transformed, 2 - Always
 ttt_werewolf_bloodthirst_tint       1       // Whether Werewolves' screens should go red while transformed
 ttt_werewolf_night_tint             1       // Whether players' screens should be tinted during the night
-ttt_werewolf_day_length_min         90      // The minimum length of the day phase in seconds
-ttt_werewolf_day_length_max         120     // The maximum length of the day phase in seconds
-ttt_werewolf_night_length_min       45      // The minimum length of the night phase in seconds
-ttt_werewolf_night_length_max       60      // The maximum length of the night phase in seconds
+ttt_werewolf_day_length_min         75      // The minimum length of the day phase in seconds
+ttt_werewolf_day_length_max         105     // The maximum length of the day phase in seconds
+ttt_werewolf_night_length_min       20      // The minimum length of the night phase in seconds
+ttt_werewolf_night_length_max       40      // The maximum length of the night phase in seconds
 ttt_werewolf_day_damage_penalty     0.5     // Damage penalty applied to damage dealt by Werewolves during the day (e.g. 0.5 = 50% less damage)
 ttt_werewolf_night_damage_reduction 1       // Damage reduction applied to damage dealt to Werewolves during the night (e.g. 0.5 = 50% less damage)
 ttt_werewolf_night_speed_mult       1.3     // The multiplier to use on Werewolves' movement speed during the night (e.g. 1.2 = 120% normal speed)
-ttt_werewolf_night_sprint_recovery  0.12    // The amount of stamina Werewolves recover per tick at night
+ttt_werewolf_night_sprint_recovery  0.15    // The amount of stamina Werewolves recover per tick at night
 ttt_werewolf_leap_enabled           1       // Whether Werewolves have their leap attack enabled
 ttt_werewolf_attack_damage          75      // The amount of a damage Werewolves do with their claws
 ttt_werewolf_attack_delay           0.7     // The amount of time between Werewolves' claw attacks

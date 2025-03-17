@@ -8,8 +8,10 @@ ROLE.nameplural = "Werewolves"
 ROLE.nameext = "a Werewolf"
 ROLE.nameshort = "wwf"
 
-ROLE.desc = [[You are {role}!]]
-ROLE.shortdesc = ""
+ROLE.desc = [[You are {role}! You are weak during the day but transform into a powerful beast at night!
+Try to kill everyone and be the last one standing!]]
+
+ROLE.shortdesc = "Weak during the day and strong at night. They win if they are the last player alive."
 
 ROLE.team = ROLE_TEAM_INDEPENDENT
 
@@ -154,21 +156,20 @@ local werewolf_is_monster = CreateConVar("ttt_werewolf_is_monster", 0, FCVAR_REP
 local werewolf_night_visibility_mode = CreateConVar("ttt_werewolf_night_visibility_mode", 1, FCVAR_REPLICATED, "Which players know when it is night", 0, 3)
 local werewolf_timer_visibility_mode = CreateConVar("ttt_werewolf_timer_visibility_mode", 1, FCVAR_REPLICATED, "Which players see a timer showing when it will change to/from night", 0, 2)
 local werewolf_fog_visibility_mode = CreateConVar("ttt_werewolf_fog_visibility_mode", 2, FCVAR_REPLICATED, "Which players see fog/darkness during the night", 0, 2)
-local werewolf_drop_weapons = CreateConVar("ttt_werewolf_drop_weapons", 0, FCVAR_REPLICATED, "Whether Werewolves should drop their weapons on the ground when transforming")
-local werewolf_transform_model = CreateConVar("ttt_werewolf_transform_model", 1, FCVAR_REPLICATED, "Whether the Werewolves' player models should change to a Werewolf while transformed")
 local werewolf_hide_id = CreateConVar("ttt_werewolf_hide_id", 1, FCVAR_REPLICATED, "Whether Werewolves' target ID (Name, health, karma etc.) should be hidden from other players' HUDs while transformed")
 local werewolf_vision_mode = CreateConVar("ttt_werewolf_vision_mode", 1, FCVAR_REPLICATED, "Whether Werewolves see a visible aura around other players, visible through walls", 0, 2)
 local werewolf_show_target_icon = CreateConVar("ttt_werewolf_show_target_icon", 1, FCVAR_REPLICATED, "Whether Werewolves see an icon over other players' heads showing who to kill", 0, 2)
 local werewolf_bloodthirst_tint = CreateConVar("ttt_werewolf_bloodthirst_tint", 1, FCVAR_REPLICATED, "Whether Werewolves' screens should go red while transformed")
 local werewolf_night_tint = CreateConVar("ttt_werewolf_night_tint", 1, FCVAR_REPLICATED, "Whether players' screens should be tinted during the night")
-local werewolf_day_length_min = CreateConVar("ttt_werewolf_day_length_min", 90, FCVAR_REPLICATED, "The minimum length of the day phase in seconds", 1, 300)
-local werewolf_day_length_max = CreateConVar("ttt_werewolf_day_length_max", 120, FCVAR_REPLICATED, "The maximum length of the day phase in seconds", 1, 300)
-local werewolf_night_length_min = CreateConVar("ttt_werewolf_night_length_min", 45, FCVAR_REPLICATED, "The minimum length of the night phase in seconds", 1, 300)
-local werewolf_night_length_max = CreateConVar("ttt_werewolf_night_length_max", 60, FCVAR_REPLICATED, "The maximum length of the night phase in seconds", 1, 300)
+local werewolf_day_length_min = CreateConVar("ttt_werewolf_day_length_min", 75, FCVAR_REPLICATED, "The minimum length of the day phase in seconds", 1, 300)
+local werewolf_day_length_max = CreateConVar("ttt_werewolf_day_length_max", 105, FCVAR_REPLICATED, "The maximum length of the day phase in seconds", 1, 300)
+local werewolf_night_length_min = CreateConVar("ttt_werewolf_night_length_min", 20, FCVAR_REPLICATED, "The minimum length of the night phase in seconds", 1, 300)
+local werewolf_night_length_max = CreateConVar("ttt_werewolf_night_length_max", 40, FCVAR_REPLICATED, "The maximum length of the night phase in seconds", 1, 300)
 local werewolf_day_damage_penalty = CreateConVar("ttt_werewolf_day_damage_penalty", 0.5, FCVAR_REPLICATED, "Damage penalty applied to damage dealt by Werewolves during the day", 0, 1)
 local werewolf_night_damage_reduction = CreateConVar("ttt_werewolf_night_damage_reduction", 1, FCVAR_REPLICATED, "Damage reduction applied to damage dealt to Werewolves during the night", 0, 1)
 local werewolf_night_speed_mult = CreateConVar("ttt_werewolf_night_speed_mult", 1.3, FCVAR_REPLICATED, "The multiplier to use on Werewolves' movement speed during the night", 1, 2)
-local werewolf_night_sprint_recovery = CreateConVar("ttt_werewolf_night_sprint_recovery", 0.12, FCVAR_REPLICATED, "The amount of stamina Werewolves recover per tick at night", 0, 1)
+local werewolf_night_sprint_recovery = CreateConVar("ttt_werewolf_night_sprint_recovery", 0.15, FCVAR_REPLICATED, "The amount of stamina Werewolves recover per tick at night", 0, 1)
+
 
 WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES = 0
 WEREWOLF_NIGHT_SHOW_IF_HAS_WEREWOLF = 1
@@ -202,6 +203,9 @@ if SERVER then
     AddCSLuaFile()
 
     util.AddNetworkString("TTT_WerewolfSetNight")
+
+    local werewolf_drop_weapons = CreateConVar("ttt_werewolf_drop_weapons", 0, FCVAR_NONE, "Whether Werewolves should drop their weapons on the ground when transforming")
+    local werewolf_transform_model = CreateConVar("ttt_werewolf_transform_model", 1, FCVAR_NONE, "Whether the Werewolves' player models should change to a Werewolf while transformed")
 
     --------------------
     -- TRANSFORMATION --
@@ -775,6 +779,121 @@ if CLIENT then
     hook.Add("TTTScoringWinTitle", "Werewolf_ScoringWinTitle", function(wintype, wintitles, title, secondaryWinRole)
         if wintype == WIN_WEREWOLF then
             return { txt = "hilite_win_role_singular", params = { role = string.upper(ROLE_STRINGS[ROLE_WEREWOLF]) }, c = ROLE_COLORS[ROLE_WEREWOLF] }
+        end
+    end)
+
+    --------------
+    -- TUTORIAL --
+    --------------
+
+    hook.Add("TTTTutorialRoleText", "Werewolf_TTTTutorialRoleText", function(role, titleLabel)
+        if role == ROLE_WEREWOLF then
+            local roleTeam = player.GetRoleTeam(ROLE_WEREWOLF, true)
+            local _, roleTeamColor = GetRoleTeamInfo(roleTeam, true)
+
+            local html = "The " .. ROLE_STRINGS[ROLE_WEREWOLF] .. " is "
+            if roleTeam == ROLE_TEAM_INDEPENDENT then
+                html = html .. "an <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>independent</span> role"
+            else
+                html = html .. "a member of the <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>monster team</span>"
+            end
+            html = html .. " who is weak during the day but transforms into a powerful monster at night."
+
+            if roleTeam == ROLE_TEAM_INDEPENDENT then
+                html = html .. " They win if they are the <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>last player standing</span>."
+            end
+
+
+
+            html = html .. "<span style='display: block; margin-top: 10px;'>The " .. ROLE_STRINGS[ROLE_WEREWOLF] .. " adds <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>day</span> and <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>night</span> phases to the game which "
+            local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
+            if night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES then
+                html = html .. "are only visible to " .. ROLE_STRINGS_PLURAL[ROLE_WEREWOLF] .. ".</span>"
+            elseif night_visibility_mode == WEREWOLF_NIGHT_SHOW_IF_HAS_WEREWOLF then
+                html = html .. "are visible to all players if " .. ROLE_STRINGS_EXT[ROLE_WEREWOLF] .. " is alive.</span>"
+            elseif night_visibility_mode == WEREWOLF_NIGHT_SHOW_IF_HAD_WEREWOLF then
+                html = html .. "are visible to all players if " .. ROLE_STRINGS_EXT[ROLE_WEREWOLF] .. " is in the round.</span>"
+            else
+                html = html .. "are visible to all players.</span>"
+            end
+
+            html = html .. "<span style='display: block; margin-top: 10px;'>Rounds start during the <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>day phase</span> which lasts "
+            local day_length_min = werewolf_day_length_min:GetInt()
+            local day_length_max = werewolf_day_length_max:GetInt()
+            if day_length_min == day_length_max then
+                html = html .. day_length_min
+            elseif day_length_min < day_length_max then
+                html = html .. "between " .. day_length_min .. " and " .. day_length_max
+            else
+                html = html .. "between " .. day_length_max .. " and " .. day_length_min
+            end
+            html = html .. " seconds. After which the <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>night phase</span> begins which lasts "
+            local night_length_min = werewolf_night_length_min:GetInt()
+            local night_length_max = werewolf_night_length_max:GetInt()
+            if night_length_min == night_length_max then
+                html = html .. night_length_min
+            elseif night_length_min < night_length_max then
+                html = html .. "between " .. night_length_min .. " and " .. night_length_max
+            else
+                html = html .. "between " .. night_length_max .. " and " .. night_length_min
+            end
+            html = html .. " seconds. Day and night will continue to alternate throughout the round."
+            local timer_visibility_mode = werewolf_timer_visibility_mode:GetInt()
+            if timer_visibility_mode ~= WEREWOLF_TIMER_NONE then
+                if timer_visibility_mode == WEREWOLF_TIMER_WEREWOLVES or night_visibility_mode == WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES then
+                    html = html .. " " .. ROLE_STRINGS_PLURAL[ROLE_WEREWOLF]
+                else
+                    html = html .. " Players"
+                end
+                html = html .. " can see a timer showing how long until nightfall/sunrise."
+            end
+            html = html .. "</span>"
+
+            local vision_mode = werewolf_vision_mode:GetInt()
+            local show_target_icon = werewolf_show_target_icon:GetInt()
+            if vision_mode == WEREWOLF_VISION_ALWAYS then
+                html = html .. "<span style='display: block; margin-top: 10px;'>Their <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>blood lust</span> helps them see their targets through walls by highlighting their enemies"
+                if show_target_icon == WEREWOLF_VISION_ALWAYS then
+                    html = html .. " and marking them with an icon"
+                end
+                html = html .. ".</span>"
+            elseif show_target_icon == WEREWOLF_VISION_ALWAYS then
+                html = html .. "<span style='display: block; margin-top: 10px;'>Their <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>blood lust</span> helps them see their targets through walls by marking their enemies with an icon.</span>"
+            end
+
+            local day_damage_penalty = werewolf_day_damage_penalty:GetFloat()
+            if day_damage_penalty > 0 then
+                html = html .. "<span style='display: block; margin-top: 10px;'>During the day " .. ROLE_STRINGS_PLURAL[ROLE_WEREWOLF] .. " deal <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>reduced damage</span>, but they are stronger at night.</span>"
+            end
+
+            html = html .. "<span style='display: block; margin-top: 10px;'>At night " .. ROLE_STRINGS_PLURAL[ROLE_WEREWOLF] .. " <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>transform</span> and gain a powerful melee attack, but they are unable to use any other weapons."
+            local additionalBuffs = {}
+            local night_damage_reduction = werewolf_night_damage_reduction:GetFloat()
+            if night_damage_reduction >= 1 then
+                table.insert(additionalBuffs, "they are <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>invulnerable</span>")
+            elseif night_damage_reduction > 0 then
+                table.insert(additionalBuffs, "they take <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>reduced damage</span>")
+            end
+            local night_speed_mult = werewolf_night_speed_mult:GetFloat()
+            local night_sprint_recovery = werewolf_night_sprint_recovery:GetFloat()
+            local default_sprint_recovery = GetConVar("ttt_sprint_regenerate_traitor"):GetFloat()
+            if night_speed_mult > 1 or night_sprint_recovery > default_sprint_recovery then
+                table.insert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>move faster</span>")
+            end
+            local leap_enabled = GetConVar("ttt_werewolf_leap_enabled"):GetBool()
+            if night_speed_mult > 1 or night_sprint_recovery > default_sprint_recovery then
+                table.insert(additionalBuffs, "they can <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>leap into the air</span>")
+            end
+            local hide_id = werewolf_hide_id:GetBool()
+            if night_speed_mult > 1 or night_sprint_recovery > default_sprint_recovery then
+                table.insert(additionalBuffs, "their name is <span style='color: rgb(" .. roleTeamColor.r .. ", " .. roleTeamColor.g .. ", " .. roleTeamColor.b .. ")'>hidden</span> from other players")
+            end
+            if #additionalBuffs > 0 then
+                html = html .. " In addition, " .. util.FormattedList(additionalBuffs)
+            end
+            html = html .. "</span>"
+
+            return html
         end
     end)
 end
