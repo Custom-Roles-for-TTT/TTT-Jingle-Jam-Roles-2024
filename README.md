@@ -76,4 +76,4 @@ ttt_wheelboy_swap_on_kill        0    // Whether wheel boy's killer should becom
 - [Game icons](https://game-icons.net/) for the role icons
 - [The Stig](https://steamcommunity.com/id/The-Stig-294) for the Randoman role that the Hoodoo was very heavily based on
 - Angela from the [Lonely Yogs](https://lonely-yogs.co.uk/) for her help with the math for drawing Wheel Boy's segmented wheel
-- The Yogscast for clips from their videos for the Wheelboy role
+- The Yogscast for clips from their videos for the Wheel Boy role

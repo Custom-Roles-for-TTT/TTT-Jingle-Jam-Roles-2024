@@ -8,14 +8,14 @@ local AddHook = hook.Add
 local PlayerIterator = player.Iterator
 local RunHook = hook.Run
 
-util.AddNetworkString("TTT_UpdateWheelboyWins")
-util.AddNetworkString("TTT_ResetWheelboyWins")
-util.AddNetworkString("TTT_WheelboyAnnounceSound")
-util.AddNetworkString("TTT_WheelboySpinWheel")
-util.AddNetworkString("TTT_WheelboyStopWheel")
-util.AddNetworkString("TTT_WheelboySpinResult")
-util.AddNetworkString("TTT_WheelboyStartEffect")
-util.AddNetworkString("TTT_WheelboyFinishEffect")
+util.AddNetworkString("TTT_UpdateWheelBoyWins")
+util.AddNetworkString("TTT_ResetWheelBoyWins")
+util.AddNetworkString("TTT_WheelBoyAnnounceSound")
+util.AddNetworkString("TTT_WheelBoySpinWheel")
+util.AddNetworkString("TTT_WheelBoyStopWheel")
+util.AddNetworkString("TTT_WheelBoySpinResult")
+util.AddNetworkString("TTT_WheelBoyStartEffect")
+util.AddNetworkString("TTT_WheelBoyFinishEffect")
 
 local spins_to_win = GetConVar("ttt_wheelboy_spins_to_win")
 local announce_text = GetConVar("ttt_wheelboy_announce_text")
@@ -27,27 +27,27 @@ local swap_on_kill = GetConVar("ttt_wheelboy_swap_on_kill")
 ------------------
 
 -- Warn other players that there is a wheelboy
-AddHook("TTTBeginRound", "Wheelboy_Announce_TTTBeginRound", function()
+AddHook("TTTBeginRound", "WheelBoy_Announce_TTTBeginRound", function()
     if not announce_text:GetBool() and not announce_sound:GetBool() then return end
 
     timer.Simple(1.5, function()
-        local hasWheelboy = false
+        local hasWheelBoy = false
         for _, v in PlayerIterator() do
-            if v:IsWheelboy() then
-                hasWheelboy = true
+            if v:IsWheelBoy() then
+                hasWheelBoy = true
             end
         end
 
-        if hasWheelboy then
+        if hasWheelBoy then
             if announce_text:GetBool() then
                 for _, v in PlayerIterator() do
-                    if v:IsWheelboy() then continue end
+                    if v:IsWheelBoy() then continue end
                     v:QueueMessage(MSG_PRINTBOTH, "There is " .. ROLE_STRINGS_EXT[ROLE_WHEELBOY] .. ".")
                 end
             end
 
             if announce_sound:GetBool() then
-                net.Start("TTT_WheelboyAnnounceSound")
+                net.Start("TTT_WheelBoyAnnounceSound")
                 net.Broadcast()
             end
         end
@@ -58,9 +58,9 @@ end)
 -- KARMA --
 -----------
 
--- Attacking the Wheelboy does not penalize karma
-AddHook("TTTKarmaShouldGivePenalty", "Wheelboy_TTTKarmaShouldGivePenalty", function(attacker, victim)
-    if not IsPlayer(victim) or not victim:IsWheelboy() then return end
+-- Attacking Wheel Boy does not penalize karma
+AddHook("TTTKarmaShouldGivePenalty", "WheelBoy_TTTKarmaShouldGivePenalty", function(attacker, victim)
+    if not IsPlayer(victim) or not victim:IsWheelBoy() then return end
     return false
 end)
 
@@ -68,7 +68,7 @@ end)
 -- WIN CHECKS --
 ----------------
 
-AddHook("Initialize", "Wheelboy_Initialize", function()
+AddHook("Initialize", "WheelBoy_Initialize", function()
     WIN_WHEELBOY = GenerateNewWinID(ROLE_WHEELBOY)
 end)
 
@@ -77,9 +77,9 @@ end)
 -----------------------
 
 local spinCount = 0;
-net.Receive("TTT_WheelboySpinResult", function(len, ply)
+net.Receive("TTT_WheelBoySpinResult", function(len, ply)
     if not IsPlayer(ply) then return end
-    if not ply:IsActiveWheelboy() then return end
+    if not ply:IsActiveWheelBoy() then return end
 
     local chosenSegment = net.ReadUInt(4)
     local result = WHEELBOY.Effects[chosenSegment]
@@ -92,7 +92,7 @@ net.Receive("TTT_WheelboySpinResult", function(len, ply)
         -- And check if they win this time
         if spinCount >= spins_to_win:GetInt() then
             spinCount = nil
-            net.Start("TTT_UpdateWheelboyWins")
+            net.Start("TTT_UpdateWheelBoyWins")
             net.Broadcast()
         end
     end
@@ -110,7 +110,7 @@ net.Receive("TTT_WheelboySpinResult", function(len, ply)
     result.start(ply, result)
     -- If this effect is shared, then send a message to the client so it knows to do something too
     if result.shared then
-        net.Start("TTT_WheelboyStartEffect")
+        net.Start("TTT_WheelBoyStartEffect")
             net.WriteUInt(chosenSegment, 4)
         net.Broadcast()
     end
@@ -134,11 +134,11 @@ local blockedEvents = {
 }
 
 -- Prevents a randomat from ever triggering if wheelboy is in the round
-AddHook("TTTRandomatCanEventRun", "Wheelboy_TTTRandomatCanEventRun", function(event)
+AddHook("TTTRandomatCanEventRun", "WheelBoy_TTTRandomatCanEventRun", function(event)
     if not blockedEvents[event.Id] then return end
 
     for _, ply in PlayerIterator() do
-        if ply:IsWheelboy() then
+        if ply:IsWheelBoy() then
             return false, ROLE_STRINGS[ROLE_WHEELBOY] .. " is in the round and this event " .. blockedEvents[event.Id]
         end
     end
@@ -148,17 +148,17 @@ end)
 -- ROLE SWAP --
 ---------------
 
-AddHook("PlayerDeath", "Wheelboy_Swap_PlayerDeath", function(victim, infl, attacker)
+AddHook("PlayerDeath", "WheelBoy_Swap_PlayerDeath", function(victim, infl, attacker)
     -- This gets set to nil when the spin count exceeds the win condition (aka, the wheelboy has won)
     if spinCount == nil then return end
     if not swap_on_kill:GetBool() then return end
 
     local valid_kill = IsPlayer(attacker) and attacker ~= victim and GetRoundState() == ROUND_ACTIVE
     if not valid_kill then return end
-    if not victim:IsWheelboy() then return end
+    if not victim:IsWheelBoy() then return end
 
     -- Keep track o the killer for the scoreboard
-    attacker:SetNWString("WheelboyKilled", victim:Nick())
+    attacker:SetNWString("WheelBoyKilled", victim:Nick())
 
     -- Swap roles
     victim:SetRole(attacker:GetRole())
@@ -184,7 +184,7 @@ local function ClearEffects()
 
         -- If this effect is shared, then send a message to the client so it knows to do something too
         if effect.shared then
-            net.Start("TTT_WheelboyFinishEffect")
+            net.Start("TTT_WheelBoyFinishEffect")
                 net.WriteUInt(effectIdx, 4)
             net.Broadcast()
         end
@@ -193,29 +193,29 @@ end
 
 local function ResetFullState()
     for _, p in PlayerIterator() do
-        p:SetNWInt("WheelboyNextSpinTime", 0)
+        p:SetNWInt("WheelBoyNextSpinTime", 0)
     end
     ClearEffects()
     spinCount = 0
-    net.Start("TTT_ResetWheelboyWins")
+    net.Start("TTT_ResetWheelBoyWins")
     net.Broadcast()
 end
 
-AddHook("TTTPrepareRound", "Wheelboy_TTTPrepareRound", function()
+AddHook("TTTPrepareRound", "WheelBoy_TTTPrepareRound", function()
     ResetFullState()
 end)
 
-AddHook("TTTBeginRound", "Wheelboy_TTTBeginRound", function()
+AddHook("TTTBeginRound", "WheelBoy_TTTBeginRound", function()
     ResetFullState()
 end)
 
 local function ClearEffectsAndWheel(ply)
     if IsPlayer(ply) then
-        ply:SetNWInt("WheelboyNextSpinTime", 0)
+        ply:SetNWInt("WheelBoyNextSpinTime", 0)
     end
 
     ClearEffects()
-    net.Start("TTT_WheelboyStopWheel")
+    net.Start("TTT_WheelBoyStopWheel")
     if IsPlayer(ply) then
         net.Send(ply)
     else
@@ -223,11 +223,11 @@ local function ClearEffectsAndWheel(ply)
     end
 end
 
-AddHook("TTTEndRound", "Wheelboy_TTTBeginRound", function()
+AddHook("TTTEndRound", "WheelBoy_TTTBeginRound", function()
     ClearEffectsAndWheel()
 end)
 
-AddHook("TTTPlayerRoleChanged", "Wheelboy_TTTPlayerRoleChanged", function(ply, oldRole, newRole)
+AddHook("TTTPlayerRoleChanged", "WheelBoy_TTTPlayerRoleChanged", function(ply, oldRole, newRole)
     if oldRole == newRole then return end
     -- Clear effects if wheelboy's role is changed
     -- This has the secondary effect of encouraging people to

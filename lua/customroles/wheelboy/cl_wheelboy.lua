@@ -72,7 +72,7 @@ concommand.Add("ttt_wheelboy_wheel_offset_reset", function()
     wheel_offset_y:SetInt(wheel_offset_y:GetDefault())
 end)
 
-AddHook("TTTSettingsRolesTabSections", "Wheelboy_TTTSettingsRolesTabSections", function(role, parentForm)
+AddHook("TTTSettingsRolesTabSections", "WheelBoy_TTTSettingsRolesTabSections", function(role, parentForm)
     if role ~= ROLE_WHEELBOY then return end
 
     -- Let the user move the wheel within the bounds of the window
@@ -87,8 +87,8 @@ end)
 -- ROLE POPUP --
 ----------------
 
-AddHook("TTTRolePopupParams", "Wheelboy_TTTRolePopupParams", function(cli)
-    if cli:IsWheelboy() then
+AddHook("TTTRolePopupParams", "WheelBoy_TTTRolePopupParams", function(cli)
+    if cli:IsWheelBoy() then
         return { times = spins_to_win:GetInt() }
     end
 end)
@@ -97,12 +97,12 @@ end)
 -- HUD --
 ---------
 
-AddHook("TTTHUDInfoPaint", "Wheelboy_TTTHUDInfoPaint", function(client, label_left, label_top, active_labels)
+AddHook("TTTHUDInfoPaint", "WheelBoy_TTTHUDInfoPaint", function(client, label_left, label_top, active_labels)
     if hide_role:GetBool() then return end
-    if not client:IsActiveWheelboy() then return end
+    if not client:IsActiveWheelBoy() then return end
 
     local curTime = CurTime()
-    local nextSpinTime = client:GetNWInt("WheelboyNextSpinTime", nil)
+    local nextSpinTime = client:GetNWInt("WheelBoyNextSpinTime", nil)
     local nextSpinLabel
     if nextSpinTime == nil or curTime >= nextSpinTime then
         nextSpinLabel = LANG.GetTranslation("wheelboy_spin_hud_now")
@@ -130,12 +130,12 @@ end)
 -- WIN CHECKS --
 ----------------
 
-AddHook("TTTSyncWinIDs", "Wheelboy_TTTSyncWinIDs", function()
+AddHook("TTTSyncWinIDs", "WheelBoy_TTTSyncWinIDs", function()
     WIN_WHEELBOY = WINS_BY_ROLE[ROLE_WHEELBOY]
 end)
 
 local wheelboyWins = false
-net.Receive("TTT_UpdateWheelboyWins", function()
+net.Receive("TTT_UpdateWheelBoyWins", function()
     if wheelboyWins then return end
 
     SurfacePlaySound("whl/win.mp3")
@@ -148,15 +148,15 @@ net.Receive("TTT_UpdateWheelboyWins", function()
     }, 1)
 end)
 
-local function ResetWheelboyWin()
+local function ResetWheelBoyWin()
     wheelboyWins = false
     ResetWheelState()
 end
-net.Receive("TTT_ResetWheelboyWins", ResetWheelboyWin)
-AddHook("TTTPrepareRound", "Wheelboy_WinTracking_TTTPrepareRound", ResetWheelboyWin)
-AddHook("TTTBeginRound", "Wheelboy_WinTracking_TTTBeginRound", ResetWheelboyWin)
+net.Receive("TTT_ResetWheelBoyWins", ResetWheelBoyWin)
+AddHook("TTTPrepareRound", "WheelBoy_WinTracking_TTTPrepareRound", ResetWheelBoyWin)
+AddHook("TTTBeginRound", "WheelBoy_WinTracking_TTTBeginRound", ResetWheelBoyWin)
 
-AddHook("TTTScoringSecondaryWins", "Wheelboy_TTTScoringSecondaryWins", function(wintype, secondary_wins)
+AddHook("TTTScoringSecondaryWins", "WheelBoy_TTTScoringSecondaryWins", function(wintype, secondary_wins)
     if wheelboyWins then
         TableInsert(secondary_wins, {
             rol = ROLE_WHEELBOY,
@@ -170,13 +170,13 @@ end)
 -- EVENTS --
 ------------
 
-AddHook("TTTEventFinishText", "Wheelboy_TTTEventFinishText", function(e)
+AddHook("TTTEventFinishText", "WheelBoy_TTTEventFinishText", function(e)
     if e.win == WIN_WHEELBOY then
         return LANG.GetParamTranslation("ev_win_wheelboy", { role = string.lower(ROLE_STRINGS[ROLE_WHEELBOY]) })
     end
 end)
 
-AddHook("TTTEventFinishIconText", "Wheelboy_TTTEventFinishIconText", function(e, win_string, role_string)
+AddHook("TTTEventFinishIconText", "WheelBoy_TTTEventFinishIconText", function(e, win_string, role_string)
     if e.win == WIN_WHEELBOY then
         return "ev_win_icon_also", ROLE_STRINGS[ROLE_WHEELBOY]
     end
@@ -187,11 +187,11 @@ end)
 -------------
 
 -- Show who the current wheelboy killed (if anyone)
-AddHook("TTTScoringSummaryRender", "Wheelboy_TTTScoringSummaryRender", function(ply, roleFileName, groupingRole, roleColor, name, startingRole, finalRole)
+AddHook("TTTScoringSummaryRender", "WheelBoy_TTTScoringSummaryRender", function(ply, roleFileName, groupingRole, roleColor, name, startingRole, finalRole)
     if not IsPlayer(ply) then return end
 
-    if ply:IsWheelboy() then
-        local wheelboyKilled = ply:GetNWString("WheelboyKilled", "")
+    if ply:IsWheelBoy() then
+        local wheelboyKilled = ply:GetNWString("WheelBoyKilled", "")
         if #wheelboyKilled > 0 then
             return roleFileName, groupingRole, roleColor, name, wheelboyKilled, LANG.LANG.GetTranslation("score_wheelboy_killed")
         end
@@ -202,7 +202,7 @@ end)
 -- ANNOUNCEMENT --
 ------------------
 
-net.Receive("TTT_WheelboyAnnounceSound", function()
+net.Receive("TTT_WheelBoyAnnounceSound", function()
     SurfacePlaySound("whl/announce.mp3")
 end)
 
@@ -210,7 +210,7 @@ end)
 -- WHEEL --
 -----------
 
-surface.CreateFont("WheelboyLabels", {
+surface.CreateFont("WheelBoyLabels", {
     font = "Tahoma",
     size = 16,
     weight = 1000
@@ -218,7 +218,7 @@ surface.CreateFont("WheelboyLabels", {
 
 -- Start/Stop --
 
-net.Receive("TTT_WheelboySpinWheel", function()
+net.Receive("TTT_WheelBoySpinWheel", function()
     if wheelStartTime ~= nil then return end
 
     wheelStartTime = CurTime()
@@ -226,13 +226,13 @@ net.Receive("TTT_WheelboySpinWheel", function()
     wheelStartAngle = MathRand() * 360
 end)
 
-net.Receive("TTT_WheelboyStopWheel", function()
+net.Receive("TTT_WheelBoyStopWheel", function()
     ResetWheelState()
 end)
 
 -- Effects --
 
-net.Receive("TTT_WheelboyStartEffect", function()
+net.Receive("TTT_WheelBoyStartEffect", function()
     local client = LocalPlayer()
     if not IsPlayer(client) then return end
 
@@ -247,7 +247,7 @@ net.Receive("TTT_WheelboyStartEffect", function()
     end
 end)
 
-net.Receive("TTT_WheelboyFinishEffect", function()
+net.Receive("TTT_WheelBoyFinishEffect", function()
     local effectIdx = net.ReadUInt(4)
     if effectIdx > 0 and effectIdx <= #WHEELBOY.Effects then
         WHEELBOY.Effects[effectIdx].finish()
@@ -393,7 +393,7 @@ local function DrawCircleSegment(segmentIdx, segmentCount, anglePerSegment, poin
 
     CamPushModelMatrix(textMat, true)
         -- Displace to ensure the text doesn't get cut off below y=0 (in text render space)
-        DrawSimpleTextOutlined(text, "WheelboyLabels", 0, textRenderDisplacement, COLOR_WHITE, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, COLOR_BLACK)
+        DrawSimpleTextOutlined(text, "WheelBoyLabels", 0, textRenderDisplacement, COLOR_WHITE, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, COLOR_BLACK)
     CamPopModelMatrix()
 end
 
@@ -427,7 +427,7 @@ local function ReduceAngle(ang)
     return ang
 end
 
-AddHook("HUDPaint", "Wheelboy_Wheel_HUDPaint", function()
+AddHook("HUDPaint", "WheelBoy_Wheel_HUDPaint", function()
     if not wheelStartTime then return end
 
     local segmentCount = #colors
@@ -528,7 +528,7 @@ AddHook("HUDPaint", "Wheelboy_Wheel_HUDPaint", function()
     if curTime >= wheelEndTime + waitTime then
         ResetWheelState()
 
-        net.Start("TTT_WheelboySpinResult")
+        net.Start("TTT_WheelBoySpinResult")
             net.WriteUInt(currentSegment, 4)
         net.SendToServer()
     end
@@ -538,7 +538,7 @@ end)
 -- TUTORIAL --
 --------------
 
-AddHook("TTTTutorialRoleText", "Wheelboy_TTTTutorialRoleText", function(role, titleLabel)
+AddHook("TTTTutorialRoleText", "WheelBoy_TTTTutorialRoleText", function(role, titleLabel)
     if role ~= ROLE_WHEELBOY then return end
 
     local roleColor = ROLE_COLORS[ROLE_WHEELBOY]

@@ -115,14 +115,14 @@ WHEELBOY.Effects = {
         shared = true,
         start = function(p, this)
             local speedMult = 0.8 * this.times
-            AddHook("TTTSpeedMultiplier", "Wheelboy_SlowMovement_TTTSpeedMultiplier", function(ply, mults)
+            AddHook("TTTSpeedMultiplier", "WheelBoy_SlowMovement_TTTSpeedMultiplier", function(ply, mults)
                 if IsPlayer(ply) then
                     TableInsert(mults, speedMult)
                 end
             end)
         end,
         finish = function()
-            RemoveHook("TTTSpeedMultiplier", "Wheelboy_SlowMovement_TTTSpeedMultiplier")
+            RemoveHook("TTTSpeedMultiplier", "WheelBoy_SlowMovement_TTTSpeedMultiplier")
         end
     },
     {
@@ -141,14 +141,14 @@ WHEELBOY.Effects = {
         shared = true,
         start = function(p, this)
             local staminaLoss = 0.3 * this.times
-            AddHook("TTTSprintStaminaPost", "Wheelboy_MoreStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
+            AddHook("TTTSprintStaminaPost", "WheelBoy_MoreStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
                 if IsPlayer(ply) then
                     return stamina - staminaLoss
                 end
             end)
         end,
         finish = function()
-            RemoveHook("TTTSprintStaminaPost", "Wheelboy_MoreStaminaConsumption_TTTSprintStaminaPost")
+            RemoveHook("TTTSprintStaminaPost", "WheelBoy_MoreStaminaConsumption_TTTSprintStaminaPost")
         end
     },
     {
@@ -170,7 +170,7 @@ WHEELBOY.Effects = {
     {
         name = "Temporary \"Big Head Mode\"",
         start = function(p, this)
-            local timerId = "Wheelboy_HeadEffect"
+            local timerId = "WheelBoy_HeadEffect"
             -- If this effect is already active, add another 30 seconds
             if timer.Exists(timerId) then
                 local timeLeft = timer.TimeLeft(timerId)
@@ -186,7 +186,7 @@ WHEELBOY.Effects = {
         end,
         finish = function()
             ScalePlayerHeads(1)
-            timer.Remove("Wheelboy_HeadEffect")
+            timer.Remove("WheelBoy_HeadEffect")
         end
     },
     {
@@ -194,7 +194,7 @@ WHEELBOY.Effects = {
         name = "Less gravity",
         start = function(p, this)
             local targetGravity = 1 - (0.15 * this.times)
-            AddHook("TTTPlayerAliveThink", "Wheelboy_LessGravity_TTTPlayerAliveThink", function(ply)
+            AddHook("TTTPlayerAliveThink", "WheelBoy_LessGravity_TTTPlayerAliveThink", function(ply)
                 if IsPlayer(ply) and ply:GetGravity() ~= targetGravity then
                     ply:SetGravity(targetGravity)
                 end
@@ -204,7 +204,7 @@ WHEELBOY.Effects = {
             for _, ply in PlayerIterator() do
                 ply:SetGravity(1)
             end
-            RemoveHook("TTTPlayerAliveThink", "Wheelboy_LessGravity_TTTPlayerAliveThink")
+            RemoveHook("TTTPlayerAliveThink", "WheelBoy_LessGravity_TTTPlayerAliveThink")
         end
     },
     {
@@ -229,14 +229,14 @@ WHEELBOY.Effects = {
         shared = true,
         start = function(p, this)
             local speedMult = 1.2 * this.times
-            AddHook("TTTSpeedMultiplier", "Wheelboy_FastMovement_TTTSpeedMultiplier", function(ply, mults)
+            AddHook("TTTSpeedMultiplier", "WheelBoy_FastMovement_TTTSpeedMultiplier", function(ply, mults)
                 if IsPlayer(ply) then
                     TableInsert(mults, speedMult)
                 end
             end)
         end,
         finish = function()
-            RemoveHook("TTTSpeedMultiplier", "Wheelboy_FastMovement_TTTSpeedMultiplier")
+            RemoveHook("TTTSpeedMultiplier", "WheelBoy_FastMovement_TTTSpeedMultiplier")
         end
     },
     {
@@ -255,14 +255,14 @@ WHEELBOY.Effects = {
         shared = true,
         start = function(p, this)
             local staminaGain = 0.15 * this.times
-            AddHook("TTTSprintStaminaPost", "Wheelboy_LessStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
+            AddHook("TTTSprintStaminaPost", "WheelBoy_LessStaminaConsumption_TTTSprintStaminaPost", function(ply, stamina, sprintTimer, consumption)
                 if IsPlayer(ply) then
                     return stamina + staminaGain
                 end
             end)
         end,
         finish = function()
-            RemoveHook("TTTSprintStaminaPost", "Wheelboy_LessStaminaConsumption_TTTSprintStaminaPost")
+            RemoveHook("TTTSprintStaminaPost", "WheelBoy_LessStaminaConsumption_TTTSprintStaminaPost")
         end
     },
     {
@@ -285,7 +285,7 @@ WHEELBOY.Effects = {
     {
         name = "Temporary \"Infinite Ammo\"",
         start = function(p, this)
-            local timerId = "Wheelboy_AmmoEffect"
+            local timerId = "WheelBoy_AmmoEffect"
             -- If this effect is already active, add another 30 seconds
             if timer.Exists(timerId) then
                 local timeLeft = timer.TimeLeft(timerId)
@@ -293,7 +293,7 @@ WHEELBOY.Effects = {
                 return
             end
 
-            AddHook("TTTPlayerAliveThink", "Wheelboy_InfiniteAmmo_TTTPlayerAliveThink", function(ply)
+            AddHook("TTTPlayerAliveThink", "WheelBoy_InfiniteAmmo_TTTPlayerAliveThink", function(ply)
                 if not IsPlayer(ply) then return end
 
                 local active_weapon = ply:GetActiveWeapon()
@@ -307,8 +307,8 @@ WHEELBOY.Effects = {
             end)
         end,
         finish = function()
-            timer.Remove("Wheelboy_AmmoEffect")
-            RemoveHook("TTTPlayerAliveThink", "Wheelboy_InfiniteAmmo_TTTPlayerAliveThink")
+            timer.Remove("WheelBoy_AmmoEffect")
+            RemoveHook("TTTPlayerAliveThink", "WheelBoy_InfiniteAmmo_TTTPlayerAliveThink")
         end
     },
     {
@@ -316,7 +316,7 @@ WHEELBOY.Effects = {
         name = "More gravity",
         start = function(p, this)
             local targetGravity = 1 + (0.15 * this.times)
-            AddHook("TTTPlayerAliveThink", "Wheelboy_MoreGravity_TTTPlayerAliveThink", function(ply)
+            AddHook("TTTPlayerAliveThink", "WheelBoy_MoreGravity_TTTPlayerAliveThink", function(ply)
                 if IsPlayer(ply) and ply:GetGravity() ~= targetGravity then
                     ply:SetGravity(targetGravity)
                 end
@@ -326,7 +326,7 @@ WHEELBOY.Effects = {
             for _, ply in PlayerIterator() do
                 ply:SetGravity(1)
             end
-            RemoveHook("TTTPlayerAliveThink", "Wheelboy_MoreGravity_TTTPlayerAliveThink")
+            RemoveHook("TTTPlayerAliveThink", "WheelBoy_MoreGravity_TTTPlayerAliveThink")
         end
     },
     {
@@ -344,14 +344,14 @@ WHEELBOY.Effects = {
     }
 }
 
-AddHook("TTTSprintStaminaRecovery", "Wheelboy_TTTSprintStaminaRecovery", function(ply, recovery)
-    if IsPlayer(ply) and ply:IsActiveWheelboy() then
+AddHook("TTTSprintStaminaRecovery", "WheelBoy_TTTSprintStaminaRecovery", function(ply, recovery)
+    if IsPlayer(ply) and ply:IsActiveWheelBoy() then
         return sprint_recovery:GetFloat()
     end
 end)
 
-AddHook("TTTSpeedMultiplier", "Wheelboy_TTTSpeedMultiplier", function(ply, mults)
-    if IsPlayer(ply) and ply:IsActiveWheelboy() then
+AddHook("TTTSpeedMultiplier", "WheelBoy_TTTSpeedMultiplier", function(ply, mults)
+    if IsPlayer(ply) and ply:IsActiveWheelBoy() then
         TableInsert(mults, speed_mult:GetFloat())
     end
 end)

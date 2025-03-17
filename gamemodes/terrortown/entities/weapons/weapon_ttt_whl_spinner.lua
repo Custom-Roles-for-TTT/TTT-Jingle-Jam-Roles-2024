@@ -66,11 +66,11 @@ function SWEP:PrimaryAttack()
     if not IsPlayer(owner) then return end
 
     local curTime = CurTime()
-    local nextSpinTime = owner:GetNWInt("WheelboyNextSpinTime", nil)
+    local nextSpinTime = owner:GetNWInt("WheelBoyNextSpinTime", nil)
     if nextSpinTime == nil or curTime >= nextSpinTime then
         local recharge_time = GetConVar("ttt_wheelboy_wheel_recharge_time"):GetInt()
-        owner:SetNWInt("WheelboyNextSpinTime", curTime + recharge_time)
-        net.Start("TTT_WheelboySpinWheel")
+        owner:SetNWInt("WheelBoyNextSpinTime", curTime + recharge_time)
+        net.Start("TTT_WheelBoySpinWheel")
         net.Send(owner)
     else
         owner:QueueMessage(MSG_PRINTCENTER, "Your weak muscles haven't recovered enough to spin again yet...")
