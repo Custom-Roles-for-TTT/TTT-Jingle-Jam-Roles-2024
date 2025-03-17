@@ -143,8 +143,8 @@ function SWEP:PrimaryAttack()
     local hitEnt = tr_main.Entity
 
     if SERVER then
-        owner:EmitSound(table.Random(swingSounds))
-        owner:EmitSound(table.Random(attackSounds), 60)
+        owner:EmitSound(swingSounds[math.random(1, #swingSounds)])
+        owner:EmitSound(attackSounds[math.random(1, #attackSounds)], 60)
     end
 
     if IsValid(hitEnt) or tr_main.HitWorld then
@@ -164,11 +164,11 @@ function SWEP:PrimaryAttack()
                 owner:LagCompensation(false)
                 owner:FireBullets({ Num = 1, Src = spos, Dir = owner:GetAimVector(), Spread = vector_origin, Tracer = 0, Force = 1, Damage = 0 })
 
-                owner:EmitSound(table.Random(fleshSounds), 75)
+                owner:EmitSound(fleshSounds[math.random(1, #fleshSounds)])
             else
                 util.Effect("Impact", edata)
 
-                owner:EmitSound(table.Random(hitSounds), 75)
+                owner:EmitSound(hitSounds[math.random(1, #hitSounds)])
             end
         end
     else
@@ -208,7 +208,7 @@ function SWEP:SecondaryAttack()
 
     if SERVER then
         owner:SetVelocity(owner:GetForward() * 200 + Vector(0,0,400))
-        owner:EmitSound(table.Random(leapSounds))
+        owner:EmitSound(leapSounds[math.random(1, #leapSounds)])
     end
 
     -- Make this use the leap animation

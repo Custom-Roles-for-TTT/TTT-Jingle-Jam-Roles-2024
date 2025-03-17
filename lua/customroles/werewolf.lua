@@ -240,7 +240,7 @@ if SERVER then
         ply:Give("weapon_wwf_claws")
         ply:SelectWeapon("weapon_wwf_claws")
         ply:DoAnimationEvent(ACT_GMOD_GESTURE_TAUNT_ZOMBIE)
-        ply:EmitSound(TableRandom(transformSounds))
+        ply:EmitSound(transformSounds[MathRandom(1, #transformSounds)])
 
         local transform_model = werewolf_transform_model:GetBool()
         if transform_model and util.IsValidModel("models/player/captainPawn/fenrir.mdl") then
