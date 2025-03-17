@@ -7,7 +7,6 @@ local AddHook = hook.Add
 local RemoveHook = hook.Remove
 local PlayerIterator = player.Iterator
 local TableInsert = table.insert
-local TableRandom = table.Random
 local TableEmpty = table.Empty
 local MathRandom = math.random
 local MathMax = math.max
