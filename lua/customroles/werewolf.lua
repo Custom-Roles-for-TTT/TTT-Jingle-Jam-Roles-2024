@@ -348,6 +348,12 @@ if SERVER then
         end
     end)
 
+    hook.Add("OnPlayerHitGround", "Werewolf_OnPlayerHitGround", function(ply, in_water, on_floater, speed)
+        if WEREWOLF.isNight and ply:IsWerewolf() and GetRoundState() >= ROUND_ACTIVE then
+            return true
+        end
+    end)
+
     ----------------------------
     -- ACTIVE WEREWOLF CHECKS --
     ----------------------------
