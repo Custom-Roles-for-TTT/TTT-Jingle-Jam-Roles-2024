@@ -50,8 +50,9 @@ ttt_hoodoo_shop_random_enabled        0      // Whether role shop randomization 
 ```
 
 ## Werewolf
-_Suggested By_: Nick\
+_Contributed By_: Nick\
 The Werewolf is an independent role who wins by being the last one standing, but can only kill under the cover of night.
+_[Fenrir (Smite) Playermodel](https://steamcommunity.com/sharedfiles/filedetails/?id=497666467) required for visual werewolf transformation._
 \
 \
 **ConVars**
@@ -86,7 +87,6 @@ ttt_werewolf_attack_delay           0.7     // The amount of time between Werewo
 ttt_werewolf_can_see_jesters        1       // Whether jesters are revealed (via head icons, color/icon on the scoreboard, etc.) to Werewolves
 ttt_werewolf_update_scoreboard      1       // Whether Werewolves see dead players as missing in action on the scoreboard
 ```
-
 
 # Special Thanks
 - [Game icons](https://game-icons.net/) for the role icons

@@ -192,16 +192,48 @@ WEREWOLF = {
     nightTime = 0
 }
 
+local transformSounds = {
+    "wwf/transform1.wav",
+    "wwf/transform2.wav",
+    "wwf/transform3.wav"
+}
+
 if SERVER then
     AddCSLuaFile()
 
     util.AddNetworkString("TTT_WerewolfSetNight")
 
+    --------------------
+    -- TRANSFORMATION --
+    --------------------
+
+    local oldPlayerModels = {}
+
+    local function TransformWerewolf(ply)
+        local drop_weapons = werewolf_drop_weapons:GetBool()
+        if drop_weapons then
+            for _, wep in pairs(ply:GetWeapons()) do
+                local class = WEPS.GetClass(wep)
+                if class ~= "weapon_zm_improvised" and class ~= "weapon_wwf_claws" and wep.AllowDrop then
+                    ply:DropWeapon(wep)
+                end
+            end
+        end
+        ply:Give("weapon_wwf_claws")
+        ply:SelectWeapon("weapon_wwf_claws")
+        ply:DoAnimationEvent(ACT_GMOD_GESTURE_TAUNT_ZOMBIE)
+        ply:EmitSound(table.Random(transformSounds))
+
+        local transform_model = werewolf_transform_model:GetBool()
+        if transform_model and util.IsValidModel("models/player/captainPawn/fenrir.mdl") then
+            oldPlayerModels[ply:SteamID64()] = ply:GetModel()
+            SetMDL(ply, "models/player/captainPawn/fenrir.mdl")
+        end
+    end
+
     ------------------------
     -- DAY/NIGHT TRACKING --
     ------------------------
-
-    local oldPlayerModels = {}
 
     WEREWOLF.ChangeTime = function(forceDay, hideMessages, blockTimers)
         local min, max
@@ -231,7 +263,6 @@ if SERVER then
         net.WriteUInt(length, 10)
         net.Broadcast()
 
-
         local night_visibility_mode = werewolf_night_visibility_mode:GetInt()
         for _, v in player.Iterator() do
             if not hideMessages then
@@ -246,23 +277,7 @@ if SERVER then
 
             if v:IsActiveWerewolf() then
                 if WEREWOLF.isNight then
-                    local drop_weapons = werewolf_drop_weapons:GetBool()
-                    if drop_weapons then
-                        for _, wep in pairs(v:GetWeapons()) do
-                            local class = WEPS.GetClass(wep)
-                            if class ~= "weapon_zm_improvised" and class ~= "weapon_wwf_claws" and wep.AllowDrop then
-                                v:DropWeapon(wep)
-                            end
-                        end
-                    end
-                    v:Give("weapon_wwf_claws")
-                    v:SelectWeapon("weapon_wwf_claws")
-
-                    local transform_model = werewolf_transform_model:GetBool()
-                    if transform_model then
-                        oldPlayerModels[v:SteamID64()] = v:GetModel()
-                        SetMDL(v, "models/player/stenli/lycan_werewolf.mdl")
-                    end
+                    TransformWerewolf(v)
                 else
                     v:StripWeapon("weapon_wwf_claws")
                     if oldPlayerModels[v:SteamID64()] then
@@ -361,30 +376,14 @@ if SERVER then
     hook.Add("TTTPlayerRoleChanged", "Werewolf_TTTPlayerRoleChanged", function(ply, oldRole, newRole)
         CheckForActiveWerewolf()
 
-        if WEREWOLF.isNight then
-            if newRole == ROLE_WEREWOLF and oldRole ~= ROLE_WEREWOLF then
-                local drop_weapons = werewolf_drop_weapons:GetBool()
-                if drop_weapons then
-                    for _, wep in pairs(ply:GetWeapons()) do
-                        local class = WEPS.GetClass(wep)
-                        if class ~= "weapon_zm_improvised" and class ~= "weapon_wwf_claws" and wep.AllowDrop then
-                            ply:DropWeapon(wep)
-                        end
-                    end
-                end
-                ply:Give("weapon_wwf_claws")
-                ply:SelectWeapon("weapon_wwf_claws")
+        if not WEREWOLF.isNight then return end
 
-                local transform_model = werewolf_transform_model:GetBool()
-                if transform_model then
-                    oldPlayerModels[ply:SteamID64()] = ply:GetModel()
-                    SetMDL(ply, "models/player/stenli/lycan_werewolf.mdl")
-                end
-            elseif oldRole == ROLE_WEREWOLF and newRole ~= ROLE_WEREWOLF then
-                ply:StripWeapon("weapon_wwf_claws")
-                if oldPlayerModels[ply:SteamID64()] then
-                    SetMDL(ply, oldPlayerModels[ply:SteamID64()])
-                end
+        if newRole == ROLE_WEREWOLF and oldRole ~= ROLE_WEREWOLF then
+            TransformWerewolf(ply)
+        elseif oldRole == ROLE_WEREWOLF and newRole ~= ROLE_WEREWOLF then
+            ply:StripWeapon("weapon_wwf_claws")
+            if oldPlayerModels[ply:SteamID64()] then
+                SetMDL(ply, oldPlayerModels[ply:SteamID64()])
             end
         end
     end)
@@ -398,13 +397,6 @@ if SERVER then
         if ply:IsSpec() then return false end
 
         if WEREWOLF.isNight and ply:IsWerewolf() and WEPS.GetClass(wep) ~= "weapon_wwf_claws" then return false end
-    end)
-
-    hook.Add("PlayerSwitchWeapon", "Werewolf_PlayerCanPickupWeapon", function(ply, old, new)
-        if not IsValid(old) or not IsValid(new) or not IsValid(ply) then return end
-        if WEREWOLF.isNight and ply:IsWerewolf() and (WEPS.GetClass(old) == "weapon_wwf_claws" or WEPS.GetClass(new) ~= "weapon_wwf_claws") then
-            return true
-        end
     end)
 
     ----------------
@@ -450,6 +442,13 @@ if SERVER then
     -------------
 
     hook.Add("TTTEndRound", "RemoveHypnotisedHide", function()
+        for _, v in player.Iterator() do
+            if oldPlayerModels[v:SteamID64()] then
+                SetMDL(v, oldPlayerModels[v:SteamID64()])
+            end
+        end
+        table.Empty(oldPlayerModels)
+
         timer.Remove("TTTWerewolfTimeChange")
         WEREWOLF.ChangeTime(true, true, true)
     end)

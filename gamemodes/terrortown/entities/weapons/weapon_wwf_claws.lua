@@ -24,7 +24,7 @@ end
 SWEP.Base = "weapon_tttbase"
 SWEP.Category = WEAPON_CATEGORY_ROLE
 
-SWEP.HoldType = "fist"
+SWEP.HoldType = "knife"
 
 SWEP.ViewModel = Model("models/weapons/c_arms.mdl")
 SWEP.WorldModel = ""
@@ -54,7 +54,32 @@ SWEP.NextReload = CurTime()
 
 -- Pull out faster than standard guns
 SWEP.DeploySpeed = 2
-local sound_single = Sound("Weapon_Crowbar.Single")
+
+local hitSounds = {
+    "npc/zombie/claw_strike1.wav",
+    "npc/zombie/claw_strike2.wav",
+    "npc/zombie/claw_strike3.wav"
+}
+local swingSounds = {
+    "npc/zombie/claw_miss1.wav",
+    "npc/zombie/claw_miss2.wav"
+}
+local attackSounds = {
+    "npc/antlion_guard/angry1.wav",
+    "npc/antlion_guard/angry2.wav",
+    "npc/antlion_guard/angry3.wav"
+}
+local fleshSounds = {
+    "physics/flesh/flesh_squishy_impact_hard1.wav",
+    "physics/flesh/flesh_squishy_impact_hard2.wav",
+    "physics/flesh/flesh_squishy_impact_hard3.wav",
+    "physics/flesh/flesh_squishy_impact_hard4.wav"
+}
+local leapSounds = {
+    "wwf/leap1.wav",
+    "wwf/leap2.wav",
+    "wwf/leap3.wav"
+}
 
 local werewolf_leap_enabled = CreateConVar("ttt_werewolf_leap_enabled", "1", FCVAR_REPLICATED)
 local werewolf_attack_damage = CreateConVar("ttt_werewolf_attack_damage", "75", FCVAR_REPLICATED, "The amount of a damage Werewolves do with their claws", 1, 100)
@@ -79,11 +104,6 @@ function SWEP:SetWeaponHoldType(t)
         self.ActivityTranslate = {}
     end
 
-    self.ActivityTranslate[ACT_MP_STAND_IDLE]                  = ACT_HL2MP_IDLE_ZOMBIE
-    self.ActivityTranslate[ACT_MP_WALK]                        = ACT_HL2MP_WALK_ZOMBIE_01
-    self.ActivityTranslate[ACT_MP_RUN]                         = ACT_HL2MP_RUN_ZOMBIE
-    self.ActivityTranslate[ACT_MP_CROUCH_IDLE]                 = ACT_HL2MP_IDLE_CROUCH_ZOMBIE
-    self.ActivityTranslate[ACT_MP_CROUCHWALK]                  = ACT_HL2MP_WALK_CROUCH_ZOMBIE_01
     self.ActivityTranslate[ACT_MP_ATTACK_STAND_PRIMARYFIRE]    = ACT_GMOD_GESTURE_RANGE_ZOMBIE
     self.ActivityTranslate[ACT_MP_ATTACK_CROUCH_PRIMARYFIRE]   = ACT_GMOD_GESTURE_RANGE_ZOMBIE
     self.ActivityTranslate[ACT_RANGE_ATTACK1]                  = ACT_GMOD_GESTURE_RANGE_ZOMBIE
@@ -122,7 +142,10 @@ function SWEP:PrimaryAttack()
     local tr_main = util.TraceHull({start=spos, endpos=sdest, filter=owner, mask=MASK_SHOT_HULL, mins=kmins, maxs=kmaxs})
     local hitEnt = tr_main.Entity
 
-    self:EmitSound(sound_single)
+    if SERVER then
+        owner:EmitSound(table.Random(swingSounds))
+        owner:EmitSound(table.Random(attackSounds), 60)
+    end
 
     if IsValid(hitEnt) or tr_main.HitWorld then
         self:SendWeaponAnim(ACT_VM_HITCENTER)
@@ -140,8 +163,12 @@ function SWEP:PrimaryAttack()
                 util.Effect("BloodImpact", edata)
                 owner:LagCompensation(false)
                 owner:FireBullets({ Num = 1, Src = spos, Dir = owner:GetAimVector(), Spread = vector_origin, Tracer = 0, Force = 1, Damage = 0 })
+
+                owner:EmitSound(table.Random(fleshSounds), 75)
             else
                 util.Effect("Impact", edata)
+
+                owner:EmitSound(table.Random(hitSounds), 75)
             end
         end
     else
@@ -181,6 +208,7 @@ function SWEP:SecondaryAttack()
 
     if SERVER then
         owner:SetVelocity(owner:GetForward() * 200 + Vector(0,0,400))
+        owner:EmitSound(table.Random(leapSounds))
     end
 
     -- Make this use the leap animation
@@ -228,17 +256,8 @@ function SWEP:Deploy()
     vm:SendViewModelMatchingSequence(vm:LookupSequence("fists_draw"))
 end
 
-function SWEP:Holster(weap)
-    if CLIENT and IsValid(weap) then
-        local owner = weap:GetOwner()
-        if not IsPlayer(owner) then return end
-
-        local vm = owner:GetViewModel()
-        if not IsValid(vm) or vm:GetColor() == COLOR_WHITE then return end
-
-        vm:SetColor(COLOR_WHITE)
-    end
-    return true
+function SWEP:Holster()
+    return false
 end
 
 if CLIENT then
@@ -249,7 +268,7 @@ if CLIENT then
         hook.Run("DoAnimationEvent", ply, PLAYERANIMEVENT_JUMP)
 
         local wep = ply:GetActiveWeapon()
-        if IsValid(wep) and WEPS.GetClass(wep) == "weapon_zom_claws" and wep.ActivityTranslate then
+        if IsValid(wep) and WEPS.GetClass(wep) == "weapon_wwf_claws" and wep.ActivityTranslate then
             wep.ActivityTranslate[ACT_MP_JUMP] = ACT_ZOMBIE_LEAPING
         end
     end)
