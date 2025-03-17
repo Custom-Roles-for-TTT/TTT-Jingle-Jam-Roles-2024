@@ -13,7 +13,7 @@ local ROLE = {}
 
 ROLE.nameraw = "barrelmimic"
 ROLE.name = "Barrel Mimic"
-ROLE.nameplural = "Barrel Mimic"
+ROLE.nameplural = "Barrel Mimics"
 ROLE.nameext = "a Barrel Mimic"
 ROLE.nameshort = "bam"
 
@@ -41,7 +41,8 @@ TableInsert(ROLE.convars, {
 ROLE.translations = {
     ["english"] = {
         ["bam_transformer_help_pri"] = "Use {primaryfire} to transform into an explodable barrel",
-        ["bam_transformer_help_sec"] = "Use {secondaryfire} to transform back"
+        ["bam_transformer_help_sec"] = "Use {secondaryfire} to transform back",
+        ["ev_win_barrelmimic"] = "The {role} has exploded its way to victory!"
     }
 }
 
@@ -215,14 +216,6 @@ if SERVER then
         WIN_BARRELMIMIC = GenerateNewWinID(ROLE_BARRELMIMIC)
     end)
 
-    AddHook("TTTPrintResultMessage", "BarrelMimic_TTTPrintResultMessage", function(type)
-        if type == WIN_BARRELMIMIC then
-            LANG.Msg("win_barrelmimic", { role = ROLE_STRINGS[ROLE_BARRELMIMIC] })
-            ServerLog("Result: " .. ROLE_STRINGS[ROLE_BARRELMIMIC] .. " wins.\n")
-            return true
-        end
-    end)
-
     -------------
     -- CLEANUP --
     -------------
@@ -279,6 +272,22 @@ if CLIENT then
     AddHook("TTTScoringSecondaryWins", "BarrelMimic_TTTScoringSecondaryWins", function(wintype, secondary_wins)
         if barrelMimicWins then
             TableInsert(secondary_wins, ROLE_BARRELMIMIC)
+        end
+    end)
+
+    ------------
+    -- EVENTS --
+    ------------
+
+    AddHook("TTTEventFinishText", "BarrelMimic_TTTEventFinishText", function(e)
+        if e.win == WIN_BARRELMIMIC then
+            return LANG.GetParamTranslation("ev_win_barrelmimic", { role = string.lower(ROLE_STRINGS[ROLE_BARRELMIMIC]) })
+        end
+    end)
+
+    AddHook("TTTEventFinishIconText", "BarrelMimic_TTTEventFinishIconText", function(e, win_string, role_string)
+        if e.win == WIN_BARRELMIMIC then
+            return "ev_win_icon_also", ROLE_STRINGS[ROLE_BARRELMIMIC]
         end
     end)
 
