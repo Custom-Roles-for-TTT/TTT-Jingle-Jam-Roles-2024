@@ -37,7 +37,7 @@ local hide_role = GetConVar("ttt_hide_role")
 
 local wheel_time = GetConVar("ttt_wheelboy_wheel_time")
 local wheel_recharge_time = GetConVar("ttt_wheelboy_wheel_recharge_time")
-local wheels_to_win = GetConVar("ttt_wheelboy_wheels_to_win")
+local spins_to_win = GetConVar("ttt_wheelboy_spins_to_win")
 local wheel_end_wait_time = GetConVar("ttt_wheelboy_wheel_end_wait_time")
 local announce_text = GetConVar("ttt_wheelboy_announce_text")
 local announce_sound = GetConVar("ttt_wheelboy_announce_sound")
@@ -89,7 +89,7 @@ end)
 
 AddHook("TTTRolePopupParams", "Wheelboy_TTTRolePopupParams", function(cli)
     if cli:IsWheelboy() then
-        return { times = wheels_to_win:GetInt() }
+        return { times = spins_to_win:GetInt() }
     end
 end)
 
@@ -547,7 +547,7 @@ AddHook("TTTTutorialRoleText", "Wheelboy_TTTTutorialRoleText", function(role, ti
 
     html = html .. "<span style='display: block; margin-top: 10px;'>Some of the effects are <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>beneficial</span>, while others are <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>annoying</span>.</span>"
     html = html .. "<span style='display: block; margin-top: 10px;'>The wheel can be spun <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>every " .. wheel_recharge_time:GetInt() .. " second(s)</span>.</span>"
-    html = html .. "<span style='display: block; margin-top: 10px;'>" .. ROLE_STRINGS[ROLE_WHEELBOY] .. " wins by <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>spinning their wheel " .. wheels_to_win:GetInt() .. " time(s)</span> before the end of the round.</span>"
+    html = html .. "<span style='display: block; margin-top: 10px;'>" .. ROLE_STRINGS[ROLE_WHEELBOY] .. " wins by <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>spinning their wheel " .. spins_to_win:GetInt() .. " time(s)</span> before the end of the round.</span>"
 
     local announceText = announce_text:GetBool()
     local announceSound = announce_sound:GetBool()
