@@ -45,6 +45,26 @@ ROLE.convars = {
     {
         cvar = "ttt_pharaoh_ankh_health",
         type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
+        cvar = "ttt_pharaoh_innocent_steal",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_pharaoh_traitor_steal",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_pharaoh_jester_steal",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_pharaoh_independent_steal",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_pharaoh_monster_steal",
+        type = ROLE_CONVAR_TYPE_BOOL
     }
 }
 
@@ -65,6 +85,11 @@ RegisterRole(ROLE)
 
 local pharaoh_is_independent = CreateConVar("ttt_pharaoh_is_independent", 0, FCVAR_REPLICATED, "Whether Pharaohs should be treated as independent")
 local pharaoh_steal_time = CreateConVar("ttt_pharaoh_steal_time", "10", FCVAR_REPLICATED, "The amount of time it takes to steal an Ankh", 1, 60)
+--[[local pharaoh_innocent_steal = ]]CreateConVar("ttt_pharaoh_innocent_steal", "0", FCVAR_REPLICATED, "Whether innocents are allowed to steal the Ankh", 0, 1)
+--[[local pharaoh_traitor_steal = ]]CreateConVar("ttt_pharaoh_traitor_steal", "1", FCVAR_REPLICATED, "Whether traitors are allowed to steal the Ankh", 0, 1)
+--[[local pharaoh_jester_steal = ]]CreateConVar("ttt_pharaoh_jester_steal", "0", FCVAR_REPLICATED, "Whether jesters are allowed to steal the Ankh", 0, 1)
+--[[local pharaoh_independent_steal = ]]CreateConVar("ttt_pharaoh_independent_steal", "1", FCVAR_REPLICATED, "Whether independents are allowed to steal the Ankh", 0, 1)
+--[[local pharaoh_monster_steal = ]]CreateConVar("ttt_pharaoh_monster_steal", "1", FCVAR_REPLICATED, "Whether monsters are allowed to steal the Ankh", 0, 1)
 
 -----------------
 -- TEAM CHANGE --
@@ -76,15 +101,32 @@ AddHook("TTTUpdateRoleState", "Pharaoh_TTTUpdateRoleState", function()
     INNOCENT_ROLES[ROLE_PHARAOH] = not is_independent
 end)
 
-
 if SERVER then
     AddCSLuaFile()
 
     local pharaoh_warn_steal = CreateConVar("ttt_pharaoh_warn_steal", "1", FCVAR_NONE, "Whether to warn an Ankh's owner is warned when it is stolen", 0, 1)
 
-    -- TODO: On disconnect, destroy ankh
-    -- TODO: On death, resurrect and destroy ankh, clear sync properties
-    -- TODO: If the resurrected player is not the Pharaoh, notify them (if enabled)
+    -- TODO: On death:
+        -- Resurrect after configurable delay (and ankh isn't destroyed in the meantime)
+        -- If Ankh owner isn't Pharaoh, warn original Pharaoh that their Ankh has been used (if configured to do so)
+        -- Destroy ankh
+        -- Reset state
+
+    local function ResetState(ply)
+        ply:ClearProperty("PharaohStealTarget", ply)
+        ply:ClearProperty("PharaohStealStart", ply)
+        ply.PharaohLastStealTime = nil
+    end
+
+    ----------------
+    -- DISCONNECT --
+    ----------------
+
+    -- On disconnect, destroy ankh if they have one
+    AddHook("PlayerDisconnected", "Pharaoh_PlayerDisconnected", function(ply)
+        if not IsPlayer(ply) then return end
+        SafeRemoveEntity(ply.PharaohStealTarget)
+    end)
 
     --------------------
     -- STEAL TRACKING --
@@ -125,11 +167,6 @@ if SERVER then
     -------------
     -- CLEANUP --
     -------------
-
-    local function ResetState(ply)
-        ply:ClearProperty("PharaohStealTarget", ply)
-        ply:ClearProperty("PharaohStealStart", ply)
-    end
 
     AddHook("TTTPrepareRound", "Pharaoh_TTTPrepareRound", function()
         for _, v in PlayerIterator() do

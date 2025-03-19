@@ -13,8 +13,17 @@ if CLIENT then
             name = LANG.GetTranslation("phr_ankh_name"),
             hint = "phr_ankh_hint",
             fmt  = function(ent, txt)
+                local client = LocalPlayer()
+                if not IsPlayer(client) then return end
+
                 local hint = txt
-                if ent:GetPlacer() ~= LocalPlayer() then
+                if ent:GetPlacer() ~= client then
+                    local roleTeam = client:GetRoleTeam(true)
+                    local teamName = GetRawRoleTeamName(roleTeam)
+                    local canSteal = cvars.Bool("ttt_pharaoh_" .. teamName .. "_steal", false)
+                    -- Don't tell the user they can steal it when they can't
+                    if not canSteal then return end
+
                     hint = hint .. "_steal"
                 elseif not move_ankh:GetBool() then
                     hint = hint .. "_unmovable"
@@ -107,6 +116,12 @@ if SERVER then
             return
         end
 
+        -- Make sure this player's team is allowed to steal the ankh
+        local roleTeam = activator:GetRoleTeam(true)
+        local teamName = GetRawRoleTeamName(roleTeam)
+        local canSteal = cvars.Bool("ttt_pharaoh_" .. teamName .. "_steal", false)
+        if not canSteal then return end
+
         local curTime = CurTime()
 
         -- If this is a new activator, start tracking how long they've been using it for
@@ -120,5 +135,5 @@ if SERVER then
         activator.PharaohLastStealTime = curTime
     end
 
-    -- TODO: If placer is nearby, heal eachother at configurable rate
+    -- TODO: If placer is a Pharaoh and they are nearby, heal eachother at configurable rate
 end
