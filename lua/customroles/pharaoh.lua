@@ -1,6 +1,8 @@
 local hook = hook
+local player = player
 
 local AddHook = hook.Add
+local PlayerIterator = player.Iterator
 
 local ROLE = {}
 
@@ -39,6 +41,10 @@ ROLE.convars = {
     {
         cvar = "ttt_pharaoh_warn_destroy",
         type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_pharaoh_ankh_health",
+        type = ROLE_CONVAR_TYPE_NUM
     }
 }
 
@@ -51,14 +57,14 @@ ROLE.translations = {
         ["phr_ankh_help_pri"] = "Use {primaryfire} to place your Ankh on the ground",
         ["phr_ankh_help_sec"] = "Stay near it to heal",
         ["phr_ankh_damaged"] = "Your Ankh has been damaged!",
-        ["phr_ankh_destroyed"] = "Your Ankh has been destroyed!",
-        ["phr_ankh_stolen"] = "Your Ankh has been stolen!"
+        ["pharaoh_stealing"] = "STEALING"
     }
 }
 
 RegisterRole(ROLE)
 
 local pharaoh_is_independent = CreateConVar("ttt_pharaoh_is_independent", 0, FCVAR_REPLICATED, "Whether Pharaohs should be treated as independent")
+local pharaoh_steal_time = CreateConVar("ttt_pharaoh_steal_time", "10", FCVAR_REPLICATED, "The amount of time it takes to steal an Ankh", 1, 60)
 
 -----------------
 -- TEAM CHANGE --
@@ -74,12 +80,100 @@ end)
 if SERVER then
     AddCSLuaFile()
 
+    local pharaoh_warn_steal = CreateConVar("ttt_pharaoh_warn_steal", "1", FCVAR_NONE, "Whether to warn an Ankh's owner is warned when it is stolen", 0, 1)
+
     -- TODO: On disconnect, destroy ankh
-    -- TODO: On death, resurrect and destroy ankh
+    -- TODO: On death, resurrect and destroy ankh, clear sync properties
     -- TODO: If the resurrected player is not the Pharaoh, notify them (if enabled)
+
+    --------------------
+    -- STEAL TRACKING --
+    --------------------
+
+    AddHook("TTTPlayerAliveThink", "Pharaoh_TTTPlayerAliveThink", function(ply)
+        if ply.PharaohLastStealTime == nil then return end
+
+        local stealTarget = ply.PharaohStealTarget
+        if not IsValid(stealTarget) then return end
+
+        local stealStart = ply.PharaohStealStart
+        if not stealStart or stealStart <= 0 then return end
+
+        local curTime = CurTime()
+
+        -- If it's been too long since the user used the ankh, stop tracking their progress
+        if curTime - ply.PharaohLastStealTime >= 0 then
+            ply.PharaohLastStealTime = nil
+            ply:SetProperty("PharaohStealTarget", nil, activator)
+            ply:SetProperty("PharaohStealStart", 0, activator)
+            return
+        end
+
+        -- If they haven't used this item long enough then keep waiting
+        if curTime - stealStart < pharaoh_steal_time:GetInt() then return end
+
+        local placer = stealTarget:GetPlacer()
+        if IsPlayer(placer) and pharaoh_warn_steal:GetBool() then
+            placer:QueueMessage(MSG_PRINTBOTH, "Your Ankh has been stolen!")
+        end
+
+        ply:Give("weapon_phr_ankh")
+        stealTarget:SetPlacer(nil)
+        stealTarget:Remove()
+    end)
+
+    -------------
+    -- CLEANUP --
+    -------------
+
+    local function ResetState(ply)
+        ply:ClearProperty("PharaohStealTarget", ply)
+        ply:ClearProperty("PharaohStealStart", ply)
+    end
+
+    AddHook("TTTPrepareRound", "Pharaoh_TTTPrepareRound", function()
+        for _, v in PlayerIterator() do
+            ResetState(v)
+        end
+    end)
+
+    AddHook("TTTBeginRound", "Pharaoh_TTTBeginRound", function()
+        for _, v in PlayerIterator() do
+            ResetState(v)
+        end
+    end)
 end
 
 if CLIENT then
+    --------------------
+    -- STEAL PROGRESS --
+    --------------------
+
+    local client
+    AddHook("HUDPaint", "Pharaoh_HUDPaint", function()
+        if not client then
+            client = LocalPlayer()
+        end
+
+        local stealTarget = client.PharaohStealTarget
+        if not IsValid(stealTarget) then return end
+
+        local stealStart = client.PharaohStealStart
+        if not stealStart or stealStart <= 0 then return end
+
+        local curTime = CurTime()
+        local stealTime = pharaoh_steal_time:GetInt()
+        local endTime = stealStart + stealTime
+        local progress = math.min(1, 1 - ((endTime - curTime) / stealTime))
+
+        local text = LANG.GetTranslation("pharaoh_stealing")
+
+        local x = ScrW() / 2
+        local y = ScrH() / 2
+        local w = 300
+        CRHUD:PaintProgressBar(x, y, w, COLOR_GREEN, text, progress)
+    end)
+
     --------------
     -- TUTORIAL --
     --------------

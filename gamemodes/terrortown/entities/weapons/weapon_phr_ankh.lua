@@ -82,14 +82,7 @@ function SWEP:PrimaryAttack()
     ankh:SetPharaoh(owner)
     ankh:SetPlacer(owner)
     ankh:Spawn()
-    ankh:PhysWake()
     owner:SetNWEntity("PharaohAnkh", ankh)
-
-    -- Lock it in place
-    local phys = ankh:GetPhysicsObject()
-    if IsValid(phys) then
-        phys:EnableMotion(false)
-    end
 
     self:Remove()
 end
