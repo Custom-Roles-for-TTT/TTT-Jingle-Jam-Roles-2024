@@ -1043,6 +1043,7 @@ globals = {
     -- JJ2024
     "ROLE_BARRELMIMIC",
     "ROLE_HOODOO",
+    "ROLE_PHARAOH",
     "ROLE_WEREWOLF",
     "ROLE_WHEELBOY",
     "WIN_BARRELMIMIC",
