@@ -19,7 +19,7 @@ if CLIENT then
                     hint = hint .. "_unmovable"
                 end
 
-                return LANG.GetParamTranslation(txt, hint_params)
+                return LANG.GetParamTranslation(hint, hint_params)
             end
         }
     end
