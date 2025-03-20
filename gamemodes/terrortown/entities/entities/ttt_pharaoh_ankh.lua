@@ -103,6 +103,8 @@ if SERVER then
 
     function ENT:Use(activator)
         if not IsPlayer(activator) then return end
+        -- Don't let them pick up the ankh if they already have the weapon
+        if activator:HasWeapon("weapon_phr_ankh") then return end
 
         local placer = self:GetPlacer()
         if not IsPlayer(placer) then return end
@@ -116,11 +118,14 @@ if SERVER then
             return
         end
 
-        -- Make sure this player's team is allowed to steal the ankh
-        local roleTeam = activator:GetRoleTeam(true)
-        local teamName = GetRawRoleTeamName(roleTeam)
-        local canSteal = cvars.Bool("ttt_pharaoh_" .. teamName .. "_steal", false)
-        if not canSteal then return end
+        -- The Pharaoh can always pick up the ankh
+        if not activator:IsPharaoh() then
+            -- Make sure this player's team is allowed to steal the ankh
+            local roleTeam = activator:GetRoleTeam(true)
+            local teamName = GetRawRoleTeamName(roleTeam)
+            local canSteal = cvars.Bool("ttt_pharaoh_" .. teamName .. "_steal", false)
+            if not canSteal then return end
+        end
 
         local curTime = CurTime()
 
