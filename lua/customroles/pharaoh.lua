@@ -132,13 +132,13 @@ ROLE.translations = {
 RegisterRole(ROLE)
 
 local pharaoh_is_independent = CreateConVar("ttt_pharaoh_is_independent", 0, FCVAR_REPLICATED, "Whether Pharaohs should be treated as independent")
-local pharaoh_steal_time = CreateConVar("ttt_pharaoh_steal_time", "10", FCVAR_REPLICATED, "The amount of time it takes to steal an Ankh", 1, 60)
+local pharaoh_steal_time = CreateConVar("ttt_pharaoh_steal_time", "15", FCVAR_REPLICATED, "The amount of time it takes to steal an Ankh", 1, 60)
 local pharaoh_innocent_steal = CreateConVar("ttt_pharaoh_innocent_steal", "0", FCVAR_REPLICATED, "Whether innocents are allowed to steal the Ankh", 0, 1)
 local pharaoh_traitor_steal = CreateConVar("ttt_pharaoh_traitor_steal", "1", FCVAR_REPLICATED, "Whether traitors are allowed to steal the Ankh", 0, 1)
 local pharaoh_jester_steal = CreateConVar("ttt_pharaoh_jester_steal", "0", FCVAR_REPLICATED, "Whether jesters are allowed to steal the Ankh", 0, 1)
 local pharaoh_independent_steal = CreateConVar("ttt_pharaoh_independent_steal", "1", FCVAR_REPLICATED, "Whether independents are allowed to steal the Ankh", 0, 1)
 local pharaoh_monster_steal = CreateConVar("ttt_pharaoh_monster_steal", "1", FCVAR_REPLICATED, "Whether monsters are allowed to steal the Ankh", 0, 1)
-local pharaoh_respawn_delay = CreateConVar("ttt_pharaoh_respawn_delay", 10, FCVAR_REPLICATED, "How long (in seconds) after death a Pharaoh should respawn if they placed down an Ankh. Set to 0 to disable respawning", 0, 180)
+local pharaoh_respawn_delay = CreateConVar("ttt_pharaoh_respawn_delay", 20, FCVAR_REPLICATED, "How long (in seconds) after death a Pharaoh should respawn if they placed down an Ankh. Set to 0 to disable respawning", 0, 180)
 CreateConVar("ttt_pharaoh_can_see_jesters", "0", FCVAR_REPLICATED)
 CreateConVar("ttt_pharaoh_update_scoreboard", "0", FCVAR_REPLICATED)
 

@@ -49,6 +49,43 @@ ttt_hoodoo_shop_random_percent        0      // The percent chance that a weapon
 ttt_hoodoo_shop_random_enabled        0      // Whether role shop randomization is enabled for the hoodoo
 ```
 
+## Pharaoh
+_Suggested By_: Fat_Medibirb\
+_Based On_: [\[TTT2\] Pharaoh](https://steamcommunity.com/sharedfiles/filedetails/?id=2002040119), by Tim | Mineotopia\
+The Pharaoh is an innocent role that can place an Ankh in the world somewhere. If they die, they consume the Ankh and respawn where it was placed.
+\
+\
+**ConVars**
+```cpp
+ttt_pharaoh_enabled                0   // Whether or not the Pharaoh should spawn
+ttt_pharaoh_spawn_weight           1   // The weight assigned to spawning the Pharaoh
+ttt_pharaoh_min_players            0   // The minimum number of players required to spawn the Pharaoh
+ttt_pharaoh_starting_health        100 // The amount of health Pharaohs start with
+ttt_pharaoh_max_health             100 // The maximum amount of health Pharaohs can have
+ttt_pharaoh_is_independent         0   // Whether Pharaohs should be treated as independent
+ttt_pharaoh_steal_time             15  // The amount of time it takes to steal an Ankh
+ttt_pharaoh_innocent_steal         0   // Whether innocents are allowed to steal the Ankh
+ttt_pharaoh_traitor_steal          1   // Whether traitors are allowed to steal the Ankh
+ttt_pharaoh_jester_steal           0   // Whether jesters are allowed to steal the Ankh
+ttt_pharaoh_independent_steal      1   // Whether independents are allowed to steal the Ankh
+ttt_pharaoh_monster_steal          1   // Whether monsters are allowed to steal the Ankh
+ttt_pharaoh_respawn_delay          20  // How long (in seconds) after death a Pharaoh should respawn if they placed down an Ankh. Set to 0 to disable respawning
+ttt_pharaoh_respawn_warn_pharaoh   1   // Whether the original Pharaoh owner of an Ankh should be notified when it's used by someone else
+ttt_pharaoh_ankh_health            500 // How much health the Ankh should have
+ttt_pharaoh_move_ankh              1   // Whether an Ankh's owner can move it
+ttt_pharaoh_ankh_heal_repair_dist  150 // The maximum distance away the Pharaoh can be for the heal and repair to occur. Set to 0 to disable
+ttt_pharaoh_ankh_heal_rate         1   // How often (in seconds) the Pharaoh should heal when they are near the Ankh. Set to 0 to disable
+ttt_pharaoh_ankh_heal_amount       1   // How much to heal the Pharaoh per tick when they are near the Ankh. Set to 0 to disable
+ttt_pharaoh_ankh_repair_rate       1   // How often (in seconds) the Ankh should repair when their Pharaoh is near. Set to 0 to disable
+ttt_pharaoh_ankh_repair_amount     5   // How much to repair the Ankh per tick when their Pharaoh is near it. Set to 0 to disable
+ttt_pharaoh_damage_own_ankh        0   // Whether an Ankh's owner can damage it
+ttt_pharaoh_warn_damage            1   // Whether to warn an Ankh's owner is warned when it is damaged
+ttt_pharaoh_warn_destroy           1   // Whether to warn an Ankh's owner is warned when it is destroyed
+ttt_pharaoh_warn_steal             1   // Whether to warn an Ankh's owner is warned when it is stolen
+ttt_pharaoh_can_see_jesters        1   // Whether jesters are revealed (via head icons, color/icon on the scoreboard, etc.) to Pharaohs. Only used when "ttt_pharaoh_is_independent" is enabled
+ttt_pharaoh_update_scoreboard      1   // Whether Pharaohs see dead players as missing in action on the scoreboard. Only used when "ttt_pharaoh_is_independent" is enabled
+```
+
 ## Werewolf
 _Contributed By_: Nick\
 The Werewolf is an independent role who wins by being the last one standing, but can only kill under the cover of night.\
@@ -57,35 +94,35 @@ _[Fenrir (Smite) Playermodel](https://steamcommunity.com/sharedfiles/filedetails
 \
 **ConVars**
 ```cpp
-ttt_werewolf_enabled                0       // Whether or not the Werewolf should spawn
-ttt_werewolf_spawn_weight           1       // The weight assigned to spawning the Werewolf
-ttt_werewolf_min_players            0       // The minimum number of players required to spawn the Werewolf
-ttt_werewolf_starting_health        100     // The amount of health Werewolves start with
-ttt_werewolf_max_health             100     // The maximum amount of health Werewolves can have
-ttt_werewolf_is_monster             0       // Whether Werewolves should be treated as members of the monster team (rather than the independent team)
-ttt_werewolf_night_visibility_mode  1       // Which players know when it is night. 0 - Only Werewolves, 1 - Everyone if a Werewolf is alive, 2 - Everyone if a Werewolf is in the round, 3 - Everyone regardless of whether a Werewolf exists
-ttt_werewolf_timer_visibility_mode  1       // Which players see a timer showing when it will change to/from night. 0 - No one, 1 - Only Werewolves, 2 - Everyone
-ttt_werewolf_fog_visibility_mode    2       // Which players see fog/darkness during the night. 0 - No one, 1 - Non-Werewolves, 2 - Everyone
-ttt_werewolf_drop_weapons           0       // Whether Werewolves should drop their weapons on the ground when transforming
-ttt_werewolf_transform_model        1       // Whether Werewolves' player models should change to a Werewolf while transformed
-ttt_werewolf_hide_id                1       // Whether Werewolves' target ID (Name, health, karma etc.) should be hidden from other players' HUDs while transformed
-ttt_werewolf_vision_mode            1       // Whether Werewolves see a visible aura around other players, visible through walls. 0 - Never, 1 - While transformed, 2 - Always
-ttt_werewolf_show_target_icon       1       // Whether Werewolves see an icon over other players' heads showing who to kill. 0 - Never, 1 - While transformed, 2 - Always
-ttt_werewolf_bloodthirst_tint       1       // Whether Werewolves' screens should go red while transformed
-ttt_werewolf_night_tint             1       // Whether players' screens should be tinted during the night
-ttt_werewolf_day_length_min         75      // The minimum length of the day phase in seconds
-ttt_werewolf_day_length_max         105     // The maximum length of the day phase in seconds
-ttt_werewolf_night_length_min       20      // The minimum length of the night phase in seconds
-ttt_werewolf_night_length_max       40      // The maximum length of the night phase in seconds
-ttt_werewolf_day_damage_penalty     0.5     // Damage penalty applied to damage dealt by Werewolves during the day (e.g. 0.5 = 50% less damage)
-ttt_werewolf_night_damage_reduction 1       // Damage reduction applied to damage dealt to Werewolves during the night (e.g. 0.5 = 50% less damage)
-ttt_werewolf_night_speed_mult       1.3     // The multiplier to use on Werewolves' movement speed during the night (e.g. 1.2 = 120% normal speed)
-ttt_werewolf_night_sprint_recovery  0.15    // The amount of stamina Werewolves recover per tick at night
-ttt_werewolf_leap_enabled           1       // Whether Werewolves have their leap attack enabled
-ttt_werewolf_attack_damage          75      // The amount of a damage Werewolves do with their claws
-ttt_werewolf_attack_delay           0.7     // The amount of time between Werewolves' claw attacks
-ttt_werewolf_can_see_jesters        1       // Whether jesters are revealed (via head icons, color/icon on the scoreboard, etc.) to Werewolves
-ttt_werewolf_update_scoreboard      1       // Whether Werewolves see dead players as missing in action on the scoreboard
+ttt_werewolf_enabled                0    // Whether or not the Werewolf should spawn
+ttt_werewolf_spawn_weight           1    // The weight assigned to spawning the Werewolf
+ttt_werewolf_min_players            0    // The minimum number of players required to spawn the Werewolf
+ttt_werewolf_starting_health        100  // The amount of health Werewolves start with
+ttt_werewolf_max_health             100  // The maximum amount of health Werewolves can have
+ttt_werewolf_is_monster             0    // Whether Werewolves should be treated as members of the monster team (rather than the independent team)
+ttt_werewolf_night_visibility_mode  1    // Which players know when it is night. 0 - Only Werewolves, 1 - Everyone if a Werewolf is alive, 2 - Everyone if a Werewolf is in the round, 3 - Everyone regardless of whether a Werewolf exists
+ttt_werewolf_timer_visibility_mode  1    // Which players see a timer showing when it will change to/from night. 0 - No one, 1 - Only Werewolves, 2 - Everyone
+ttt_werewolf_fog_visibility_mode    2    // Which players see fog/darkness during the night. 0 - No one, 1 - Non-Werewolves, 2 - Everyone
+ttt_werewolf_drop_weapons           0    // Whether Werewolves should drop their weapons on the ground when transforming
+ttt_werewolf_transform_model        1    // Whether Werewolves' player models should change to a Werewolf while transformed
+ttt_werewolf_hide_id                1    // Whether Werewolves' target ID (Name, health, karma etc.) should be hidden from other players' HUDs while transformed
+ttt_werewolf_vision_mode            1    // Whether Werewolves see a visible aura around other players, visible through walls. 0 - Never, 1 - While transformed, 2 - Always
+ttt_werewolf_show_target_icon       1    // Whether Werewolves see an icon over other players' heads showing who to kill. 0 - Never, 1 - While transformed, 2 - Always
+ttt_werewolf_bloodthirst_tint       1    // Whether Werewolves' screens should go red while transformed
+ttt_werewolf_night_tint             1    // Whether players' screens should be tinted during the night
+ttt_werewolf_day_length_min         75   // The minimum length of the day phase in seconds
+ttt_werewolf_day_length_max         105  // The maximum length of the day phase in seconds
+ttt_werewolf_night_length_min       20   // The minimum length of the night phase in seconds
+ttt_werewolf_night_length_max       40   // The maximum length of the night phase in seconds
+ttt_werewolf_day_damage_penalty     0.5  // Damage penalty applied to damage dealt by Werewolves during the day (e.g. 0.5 = 50% less damage)
+ttt_werewolf_night_damage_reduction 1    // Damage reduction applied to damage dealt to Werewolves during the night (e.g. 0.5 = 50% less damage)
+ttt_werewolf_night_speed_mult       1.3  // The multiplier to use on Werewolves' movement speed during the night (e.g. 1.2 = 120% normal speed)
+ttt_werewolf_night_sprint_recovery  0.15 // The amount of stamina Werewolves recover per tick at night
+ttt_werewolf_leap_enabled           1    // Whether Werewolves have their leap attack enabled
+ttt_werewolf_attack_damage          75   // The amount of a damage Werewolves do with their claws
+ttt_werewolf_attack_delay           0.7  // The amount of time between Werewolves' claw attacks
+ttt_werewolf_can_see_jesters        1    // Whether jesters are revealed (via head icons, color/icon on the scoreboard, etc.) to Werewolves. Only used when "ttt_werewolf_is_monster" is disabled
+ttt_werewolf_update_scoreboard      1    // Whether Werewolves see dead players as missing in action on the scoreboard. Only used when "ttt_werewolf_is_monster" is disabled
 ```
 
 ## Wheel Boy
