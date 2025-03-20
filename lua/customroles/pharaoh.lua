@@ -13,8 +13,13 @@ ROLE.nameplural = "Pharaohs"
 ROLE.nameext = "a Pharaoh"
 ROLE.nameshort = "phr"
 
-ROLE.desc = [[You are {role}!]]
-ROLE.shortdesc = "TODO"
+ROLE.desc = [[You are {role}! You have an Ankh that can be placed down somewhere
+and which serves as a single-use respawn anchor.
+
+If you die with the Ankh placed, you'll respawn at it's location (once).
+
+Be careful, though, the Ankh can be destroyed by other players (and maybe stolen too)!]]
+ROLE.shortdesc = "Has an Ankh that can be placed in the world. On death, they respawn at the Ankh one time"
 
 ROLE.team = ROLE_TEAM_INNOCENT
 
