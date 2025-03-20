@@ -27,6 +27,10 @@ ROLE.convars = {
         type = ROLE_CONVAR_TYPE_BOOL
     },
     {
+        cvar = "ttt_pharaoh_steal_time",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
         cvar = "ttt_pharaoh_damage_own_ankh",
         type = ROLE_CONVAR_TYPE_BOOL
     },
