@@ -85,6 +85,13 @@ ttt_missionary_spawn_weight         1   // The weight assigned to spawning the M
 ttt_missionary_min_players          0   // The minimum number of players required to spawn the Missionary
 ttt_missionary_starting_health      100 // The amount of health the Missionary starts with
 ttt_missionary_max_health           100 // The maximum amount of health the Missionary can have
+ttt_missionary_proselytizer_time    8   // The amount of time (in seconds) the Missionary's proselytizer takes to use
+ttt_missionary_announce_proselytize 1   // How a player being proselytized will be announced to everyone. 0 - Don't announce, 1 - Announce as Missionary, 2 - Announce as Marshal
+ttt_missionary_prevent_monk         1   // Whether to only spawn the Missionary when there isn't already a Monk, Zealot, or Hermit in the round
+ttt_missionary_credits_starting     1   // The number of credits an Missionary should start with
+ttt_missionary_shop_sync            0   // Whether an Missionary should have all weapons that vanilla detectives have in their weapon shop
+ttt_missionary_shop_random_percent  0   // The percent chance that a weapon in the shop will be not be shown for the Missionary
+ttt_missionary_shop_random_enabled  0   // Whether role shop randomization is enabled for the Missionary
 ```
 
 ## Monk
