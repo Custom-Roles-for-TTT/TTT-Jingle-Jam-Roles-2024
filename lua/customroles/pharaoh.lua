@@ -37,6 +37,10 @@ ROLE.convars = {
         type = ROLE_CONVAR_TYPE_NUM
     },
     {
+        cvar = "ttt_pharaoh_respawn_delay",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
         cvar = "ttt_pharaoh_damage_own_ankh",
         type = ROLE_CONVAR_TYPE_BOOL
     },
@@ -50,6 +54,10 @@ ROLE.convars = {
     },
     {
         cvar = "ttt_pharaoh_warn_destroy",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_pharaoh_respawn_warn_pharaoh",
         type = ROLE_CONVAR_TYPE_BOOL
     },
     {
