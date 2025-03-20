@@ -1040,6 +1040,9 @@ globals = {
     -- CR Namespaces
     "CRHUD",
 
+    -- JJ2023
+    "ROLE_SOULBOUND",
+
     -- JJ2024
     "ROLE_BARRELMIMIC",
     "ROLE_HERMIT",

@@ -166,7 +166,7 @@ ttt_wheelboy_swap_on_kill        0    // Whether Wheel Boy's killer should becom
 
 ## Zealot
 _Suggested By_: Spaaz\
-The Zealot is a traitor role that can use special abilities while spectating if they die.
+The Zealot is a traitor role that becomes a Soulbound who can use special abilities while spectating if they die.
 _Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3205649099) to be installed._
 \
 \

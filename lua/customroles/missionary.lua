@@ -7,6 +7,7 @@ ROLE.nameext = "a Missionary"
 ROLE.nameshort = "mis"
 ROLE.team = ROLE_TEAM_DETECTIVE
 
+-- TODO: Missionary role descriptions
 ROLE.desc = [[You are {role}!]]
 ROLE.shortdesc = ""
 
@@ -19,3 +20,11 @@ ROLE.translations = {
 }
 
 RegisterRole(ROLE)
+
+if SERVER then
+    AddCSLuaFile()
+end
+
+if CLIENT then
+    -- TODO: Missionary tutorial
+end
