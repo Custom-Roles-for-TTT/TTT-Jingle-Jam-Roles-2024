@@ -488,6 +488,3 @@ if CLIENT then
         return html
     end)
 end
-
-
--- TODO: Win condition if independent
