@@ -785,7 +785,7 @@ if CLIENT then
 
     AddHook("TTTEventFinishIconText", "Werewolf_EventFinishIconText", function(e, win_string, role_string)
         if e.win == WIN_WEREWOLF then
-            return win_string, ROLE_STRINGS_PLURAL[ROLE_WEREWOLF]
+            return win_string, ROLE_STRINGS[ROLE_WEREWOLF]
         end
     end)
 

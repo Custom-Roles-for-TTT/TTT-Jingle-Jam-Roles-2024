@@ -103,11 +103,21 @@ ROLE.convars = {
     {
         cvar = "ttt_pharaoh_monster_steal",
         type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_pharaoh_can_see_jesters",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_pharaoh_update_scoreboard",
+        type = ROLE_CONVAR_TYPE_BOOL
     }
 }
 
 ROLE.translations = {
     ["english"] = {
+        ["ev_win_pharaoh"] = "The mystic {role} has won the round!",
+        ["win_pharaoh"] = "The {role} has outlasted you all!",
         ["phr_ankh_name"] = "Ankh",
         ["phr_ankh_hint"] = "Press {usekey} to pick up. Stay near to heal.",
         ["phr_ankh_hint_steal"] = "Hold {usekey} to steal",
@@ -129,6 +139,8 @@ local pharaoh_jester_steal = CreateConVar("ttt_pharaoh_jester_steal", "0", FCVAR
 local pharaoh_independent_steal = CreateConVar("ttt_pharaoh_independent_steal", "1", FCVAR_REPLICATED, "Whether independents are allowed to steal the Ankh", 0, 1)
 local pharaoh_monster_steal = CreateConVar("ttt_pharaoh_monster_steal", "1", FCVAR_REPLICATED, "Whether monsters are allowed to steal the Ankh", 0, 1)
 local pharaoh_respawn_delay = CreateConVar("ttt_pharaoh_respawn_delay", 10, FCVAR_REPLICATED, "How long (in seconds) after death a Pharaoh should respawn if they placed down an Ankh. Set to 0 to disable respawning", 0, 180)
+CreateConVar("ttt_pharaoh_can_see_jesters", "0", FCVAR_REPLICATED)
+CreateConVar("ttt_pharaoh_update_scoreboard", "0", FCVAR_REPLICATED)
 
 local pharaoh_ankh_heal_rate = GetConVar("ttt_pharaoh_ankh_heal_rate")
 local pharaoh_ankh_heal_amount = GetConVar("ttt_pharaoh_ankh_heal_amount")
@@ -280,6 +292,44 @@ if SERVER then
         stealTarget:Remove()
     end)
 
+    ----------------
+    -- WIN CHECKS --
+    ----------------
+
+    AddHook("Initialize", "Pharaoh_Initialize", function()
+        WIN_PHARAOH = GenerateNewWinID(ROLE_PHARAOH)
+    end)
+
+    AddHook("TTTCheckForWin", "Pharaoh_CheckForWin", function()
+        if not INDEPENDENT_ROLES[ROLE_PHARAOH] then return end
+
+        local pharaoh_alive = false
+        local other_alive = false
+        for _, v in PlayerIterator() do
+            if v:Alive() and v:IsTerror() then
+                if v:IsPharaoh() then
+                    pharaoh_alive = true
+                elseif not v:ShouldActLikeJester() and not ROLE_HAS_PASSIVE_WIN[v:GetRole()] then
+                    other_alive = true
+                end
+            end
+        end
+
+        if pharaoh_alive and not other_alive then
+            return WIN_PHARAOH
+        elseif pharaoh_alive then
+            return WIN_NONE
+        end
+    end)
+
+    AddHook("TTTPrintResultMessage", "Pharaoh_PrintResultMessage", function(type)
+        if type == WIN_PHARAOH then
+            LANG.Msg("win_pharaoh", { role = ROLE_STRINGS[ROLE_PHARAOH] })
+            ServerLog("Result: " .. ROLE_STRINGS[ROLE_PHARAOH] .. " wins.\n")
+            return true
+        end
+    end)
+
     -------------
     -- CLEANUP --
     -------------
@@ -298,6 +348,33 @@ if SERVER then
 end
 
 if CLIENT then
+
+    ----------------
+    -- WIN EVENTS --
+    ----------------
+
+    AddHook("TTTSyncWinIDs", "Pharaoh_TTTWinIDsSynced", function()
+        WIN_PHARAOH = WINS_BY_ROLE[ROLE_PHARAOH]
+    end)
+
+    AddHook("TTTEventFinishText", "Pharaoh_EventFinishText", function(e)
+        if e.win == WIN_PHARAOH then
+            return LANG.GetParamTranslation("ev_win_pharaoh", { role = string.lower(ROLE_STRINGS[ROLE_PHARAOH]) })
+        end
+    end)
+
+    AddHook("TTTEventFinishIconText", "Pharaoh_EventFinishIconText", function(e, win_string, role_string)
+        if e.win == WIN_PHARAOH then
+            return win_string, ROLE_STRINGS[ROLE_PHARAOH]
+        end
+    end)
+
+    AddHook("TTTScoringWinTitle", "Pharaoh_ScoringWinTitle", function(wintype, wintitles, title, secondaryWinRole)
+        if wintype == WIN_PHARAOH then
+            return { txt = "hilite_win_role_singular", params = { role = string.upper(ROLE_STRINGS[ROLE_PHARAOH]) }, c = ROLE_COLORS[ROLE_PHARAOH] }
+        end
+    end)
+
     --------------------
     -- STEAL PROGRESS --
     --------------------
