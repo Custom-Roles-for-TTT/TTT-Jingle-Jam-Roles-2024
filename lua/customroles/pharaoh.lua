@@ -115,12 +115,17 @@ RegisterRole(ROLE)
 
 local pharaoh_is_independent = CreateConVar("ttt_pharaoh_is_independent", 0, FCVAR_REPLICATED, "Whether Pharaohs should be treated as independent")
 local pharaoh_steal_time = CreateConVar("ttt_pharaoh_steal_time", "10", FCVAR_REPLICATED, "The amount of time it takes to steal an Ankh", 1, 60)
---[[local pharaoh_innocent_steal = ]]CreateConVar("ttt_pharaoh_innocent_steal", "0", FCVAR_REPLICATED, "Whether innocents are allowed to steal the Ankh", 0, 1)
---[[local pharaoh_traitor_steal = ]]CreateConVar("ttt_pharaoh_traitor_steal", "1", FCVAR_REPLICATED, "Whether traitors are allowed to steal the Ankh", 0, 1)
---[[local pharaoh_jester_steal = ]]CreateConVar("ttt_pharaoh_jester_steal", "0", FCVAR_REPLICATED, "Whether jesters are allowed to steal the Ankh", 0, 1)
---[[local pharaoh_independent_steal = ]]CreateConVar("ttt_pharaoh_independent_steal", "1", FCVAR_REPLICATED, "Whether independents are allowed to steal the Ankh", 0, 1)
---[[local pharaoh_monster_steal = ]]CreateConVar("ttt_pharaoh_monster_steal", "1", FCVAR_REPLICATED, "Whether monsters are allowed to steal the Ankh", 0, 1)
+local pharaoh_innocent_steal = CreateConVar("ttt_pharaoh_innocent_steal", "0", FCVAR_REPLICATED, "Whether innocents are allowed to steal the Ankh", 0, 1)
+local pharaoh_traitor_steal = CreateConVar("ttt_pharaoh_traitor_steal", "1", FCVAR_REPLICATED, "Whether traitors are allowed to steal the Ankh", 0, 1)
+local pharaoh_jester_steal = CreateConVar("ttt_pharaoh_jester_steal", "0", FCVAR_REPLICATED, "Whether jesters are allowed to steal the Ankh", 0, 1)
+local pharaoh_independent_steal = CreateConVar("ttt_pharaoh_independent_steal", "1", FCVAR_REPLICATED, "Whether independents are allowed to steal the Ankh", 0, 1)
+local pharaoh_monster_steal = CreateConVar("ttt_pharaoh_monster_steal", "1", FCVAR_REPLICATED, "Whether monsters are allowed to steal the Ankh", 0, 1)
 local pharaoh_respawn_delay = CreateConVar("ttt_pharaoh_respawn_delay", 10, FCVAR_REPLICATED, "How long (in seconds) after death a Pharaoh should respawn if they placed down an Ankh. Set to 0 to disable respawning", 0, 180)
+
+local pharaoh_ankh_heal_rate = GetConVar("ttt_pharaoh_ankh_heal_rate")
+local pharaoh_ankh_heal_amount = GetConVar("ttt_pharaoh_ankh_heal_amount")
+local pharaoh_ankh_repair_rate = GetConVar("ttt_pharaoh_ankh_repair_rate")
+local pharaoh_ankh_repair_amount = GetConVar("ttt_pharaoh_ankh_repair_amount")
 
 -----------------
 -- TEAM CHANGE --
@@ -320,5 +325,84 @@ if CLIENT then
 
     AddHook("TTTTutorialRoleText", "Pharaoh_TTTTutorialRoleText", function(role, titleLabel)
         if role ~= ROLE_PHARAOH then return end
+
+        local roleColor = ROLE_COLORS[ROLE_PHARAOH]
+        local roleTeam = player.GetRoleTeam(ROLE_PHARAOH, true)
+        local roleTeamName, _ = GetRoleTeamInfo(roleTeam)
+
+        local html = "The " .. ROLE_STRINGS[ROLE_PHARAOH] .. " is an <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>" .. roleTeamName .. "</span> role who is given an Ankh which they can place in the world."
+
+        local delay = pharaoh_respawn_delay:GetInt()
+        if delay > 0 then
+            html = html .. "<span style='display: block; margin-top: 10px;'>If the " .. ROLE_STRINGS[ROLE_PHARAOH] .. " dies <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>after placing their Ankh</span>, they respawn at it's location after " .. delay .. " second(s)!</span>"
+        end
+
+        local innocent_steal = pharaoh_innocent_steal:GetBool()
+        local traitor_steal = pharaoh_traitor_steal:GetBool()
+        local jester_steal = pharaoh_jester_steal:GetBool()
+        local independent_steal = pharaoh_independent_steal:GetBool()
+        local monster_steal = pharaoh_monster_steal:GetBool()
+
+        if innocent_steal or traitor_steal or jester_steal or independent_steal or monster_steal then
+            html = html .. "<span style='display: block; margin-top: 10px;'>Beware though, the " .. ROLE_STRINGS[ROLE_PHARAOH] .. "'s Ankh <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>can be stolen</span> by "
+            if innocent_steal and traitor_steal and jester_steal and independent_steal and monster_steal then
+                html = html .. "any player"
+            else
+                local stealTeams = {}
+                if innocent_steal then
+                    table.insert(stealTeams, LANG.GetTranslation("innocents"))
+                end
+                if traitor_steal then
+                    table.insert(stealTeams, LANG.GetTranslation("traitors"))
+                end
+                if jester_steal then
+                    table.insert(stealTeams, LANG.GetTranslation("jesters"))
+                end
+                if independent_steal then
+                    table.insert(stealTeams, LANG.GetTranslation("independents"))
+                end
+                if monster_steal then
+                    table.insert(stealTeams, LANG.GetTranslation("monsters"))
+                end
+
+                local teamsLabel = table.concat(stealTeams, ", ", 1, #stealTeams - 1)
+                if #stealTeams == 1 then
+                    teamsLabel = stealTeams[1]
+                else
+                    if #stealTeams > 2 then
+                        teamsLabel = teamsLabel .. ","
+                    end
+                    teamsLabel = teamsLabel .. " or " .. stealTeams[#stealTeams]
+                end
+
+                html = html .. teamsLabel
+            end
+            html = html .. " if they <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>interact with it</span> for " .. pharaoh_steal_time:GetInt() .. " second(s)!</span>"
+        end
+
+        local heal_rate = pharaoh_ankh_heal_rate:GetInt()
+        local heal_amount = pharaoh_ankh_heal_amount:GetInt()
+        local repair_rate = pharaoh_ankh_repair_rate:GetInt()
+        local repair_amount = pharaoh_ankh_repair_amount:GetInt()
+        local healing = heal_rate > 0 and heal_amount > 0
+        local repairing = repair_rate > 0 and repair_amount > 0
+        if healing or repairing then
+            html = html .. "<span style='display: block; margin-top: 10px;'>If the " .. ROLE_STRINGS[ROLE_PHARAOH] .. " is close enough to their Ankh, "
+            if healing then
+                html = html .. "they are <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>healed for " .. heal_amount .. "hp</span> every " .. heal_rate .. " second(s)"
+                if repairing then
+                    html = html .. " and "
+                end
+            end
+            if repairing then
+                html = html .. "the Ankh is <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>repaired for " .. repair_amount .. "hp</span> every " .. repair_rate .. " second(s)"
+            end
+            html = html .. ".</span>"
+        end
+
+        return html
     end)
 end
+
+
+-- TODO: Win condition if independent

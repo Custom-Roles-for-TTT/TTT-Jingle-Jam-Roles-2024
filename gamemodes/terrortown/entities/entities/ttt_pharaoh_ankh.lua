@@ -46,6 +46,11 @@ ENT.CanUseKey = true
 AccessorFuncDT(ENT, "Pharaoh", "Pharaoh")
 AccessorFuncDT(ENT, "Placer", "Placer")
 
+local ankh_heal_rate = CreateConVar("ttt_pharaoh_ankh_heal_rate", "1", FCVAR_REPLICATED, "How often (in seconds) the Pharaoh should heal when they are near the Ankh. Set to 0 to disable", 0, 60)
+local ankh_heal_amount = CreateConVar("ttt_pharaoh_ankh_heal_amount", "1", FCVAR_REPLICATED, "How much to heal the Pharaoh per tick when they are near the Ankh. Set to 0 to disable", 0, 100)
+local ankh_repair_rate = CreateConVar("ttt_pharaoh_ankh_repair_rate", "1", FCVAR_REPLICATED, "How often (in seconds) the Ankh should repair when their Pharaoh is near. Set to 0 to disable", 0, 60)
+local ankh_repair_amount = CreateConVar("ttt_pharaoh_ankh_repair_amount", "5", FCVAR_REPLICATED, "How much to repair the Ankh per tick when their Pharaoh is near it. Set to 0 to disable", 0, 500)
+
 function ENT:SetupDataTables()
    self:DTVar("Entity", 0, "Pharaoh")
    self:DTVar("Entity", 1, "Placer")
@@ -88,10 +93,6 @@ if SERVER then
     local warn_damage = CreateConVar("ttt_pharaoh_warn_damage", "1", FCVAR_NONE, "Whether to warn an Ankh's owner is warned when it is damaged", 0, 1)
     local warn_destroy = CreateConVar("ttt_pharaoh_warn_destroy", "1", FCVAR_NONE, "Whether to warn an Ankh's owner is warned when it is destroyed", 0, 1)
     local ankh_heal_repair_dist = CreateConVar("ttt_pharaoh_ankh_heal_repair_dist", "150", FCVAR_NONE, "The maximum distance away the Pharaoh can be for the heal and repair to occur. Set to 0 to disable", 0, 2000)
-    local ankh_heal_rate = CreateConVar("ttt_pharaoh_ankh_heal_rate", "1", FCVAR_NONE, "How often (in seconds) the Pharaoh should heal when they are near the Ankh. Set to 0 to disable", 0, 60)
-    local ankh_heal_amount = CreateConVar("ttt_pharaoh_ankh_heal_amount", "1", FCVAR_NONE, "How much to heal the Pharaoh per tick when they are near the Ankh. Set to 0 to disable", 0, 100)
-    local ankh_repair_rate = CreateConVar("ttt_pharaoh_ankh_repair_rate", "1", FCVAR_NONE, "How often (in seconds) the Ankh should repair when their Pharaoh is near. Set to 0 to disable", 0, 60)
-    local ankh_repair_amount = CreateConVar("ttt_pharaoh_ankh_repair_amount", "5", FCVAR_NONE, "How much to repair the Ankh per tick when their Pharaoh is near it. Set to 0 to disable", 0, 500)
 
     function ENT:OnTakeDamage(dmginfo)
         local att = dmginfo:GetAttacker()
