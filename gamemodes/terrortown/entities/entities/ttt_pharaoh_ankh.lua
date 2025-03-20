@@ -17,11 +17,14 @@ if CLIENT then
 
                 local hint = txt
                 if ent:GetPlacer() ~= client then
-                    local roleTeam = client:GetRoleTeam(true)
-                    local teamName = GetRawRoleTeamName(roleTeam)
-                    local canSteal = cvars.Bool("ttt_pharaoh_" .. teamName .. "_steal", false)
-                    -- Don't tell the user they can steal it when they can't
-                    if not canSteal then return end
+                    -- Pharaoh can always steal
+                    if not client:IsPharaoh() then
+                        local roleTeam = client:GetRoleTeam(true)
+                        local teamName = GetRawRoleTeamName(roleTeam)
+                        local canSteal = cvars.Bool("ttt_pharaoh_" .. teamName .. "_steal", false)
+                        -- Don't tell the user they can steal it when they can't
+                        if not canSteal then return end
+                    end
 
                     hint = hint .. "_steal"
                 elseif not move_ankh:GetBool() then
@@ -70,6 +73,10 @@ function ENT:Initialize()
 
         self:SetUseType(CONTINUOUS_USE)
     end
+
+    --if CLIENT then
+    --    -- TODO: Render projected aura
+    --end
 end
 
 if SERVER then
@@ -100,8 +107,7 @@ if SERVER then
         end
 
         if self:Health() <= 0 then
-            self:Remove()
-            util.EquipmentDestroyed(self:GetPos())
+            self:DestroyAnkh()
             if warn_destroy:GetBool() then
                 placer:QueueMessage(MSG_PRINTBOTH, "Your Ankh has been destroyed!")
             end
@@ -125,11 +131,12 @@ if SERVER then
             local wep = activator:Give("weapon_phr_ankh")
             -- Save the health remaining
             wep.RemainingHealth = self:Health()
+            self:SetPlacer(nil)
             self:Remove()
             return
         end
 
-        -- The Pharaoh can always pick up the ankh
+        -- Pharaoh can always steal
         if not activator:IsPharaoh() then
             -- Make sure this player's team is allowed to steal the ankh
             local roleTeam = activator:GetRoleTeam(true)
@@ -201,4 +208,15 @@ if SERVER then
             nextRepairTime = nil
         end
     end
+
+    function ENT:DestroyAnkh()
+        util.EquipmentDestroyed(self:GetPos())
+        self:Remove()
+    end
 end
+
+--if CLIENT then
+--    function ENT:OnRemove()
+--        -- TODO: Remove the projected aura
+--    end
+--end
