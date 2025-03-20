@@ -210,7 +210,9 @@ if SERVER then
     end
 
     function ENT:DestroyAnkh()
-        util.EquipmentDestroyed(self:GetPos())
+        local effect = EffectData()
+        effect:SetOrigin(self:GetPos())
+        util.Effect("cball_explode", effect)
         self:Remove()
     end
 end
