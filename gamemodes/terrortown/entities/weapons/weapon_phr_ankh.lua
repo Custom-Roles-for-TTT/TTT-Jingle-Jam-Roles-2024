@@ -85,6 +85,7 @@ function SWEP:PrimaryAttack()
     ankh:SetAngles(Angle(0, eyeAngles.y, 0))
     ankh:SetPharaoh(owner)
     ankh:SetPlacer(owner)
+    owner.PharaohAnkh = ankh
 
     local health = ankh_health:GetInt()
     if self.RemainingHealth > 0 then
