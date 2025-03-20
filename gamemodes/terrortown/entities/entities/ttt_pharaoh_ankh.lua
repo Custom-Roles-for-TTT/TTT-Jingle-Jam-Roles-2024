@@ -3,7 +3,6 @@ if SERVER then
 end
 
 local move_ankh = CreateConVar("ttt_pharaoh_move_ankh", "1", FCVAR_REPLICATED, "Whether an Ankh's owner can move it", 0, 1)
-local ankh_health = CreateConVar("ttt_pharaoh_ankh_health", "500", FCVAR_REPLICATED, "How much health the Ankh should have", 1, 2000)
 
 if CLIENT then
     local hint_params = {usekey = Key("+use", "USE")}
@@ -62,10 +61,7 @@ function ENT:Initialize()
 
     self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 
-    local health = ankh_health:GetInt()
     if SERVER then
-        self:SetMaxHealth(health)
-
         local phys = self:GetPhysicsObject()
         -- Make it un-moveable
         if IsValid(phys) then
@@ -74,7 +70,6 @@ function ENT:Initialize()
 
         self:SetUseType(CONTINUOUS_USE)
     end
-    self:SetHealth(health)
 end
 
 if SERVER then
@@ -83,12 +78,17 @@ if SERVER then
     local warn_destroy = CreateConVar("ttt_pharaoh_warn_destroy", "1", FCVAR_NONE, "Whether to warn an Ankh's owner is warned when it is destroyed", 0, 1)
 
     function ENT:OnTakeDamage(dmginfo)
+        local att = dmginfo:GetAttacker()
         local placer = self:GetPlacer()
         if not IsPlayer(placer) then return end
 
-        if dmginfo:GetAttacker() == placer and not damage_own_ankh:GetBool() then return end
+        if att == placer and not damage_own_ankh:GetBool() then return end
 
         self:SetHealth(self:Health() - dmginfo:GetDamage())
+
+        if IsPlayer(att) then
+            DamageLog(Format("DMG: \t %s [%s] damaged ankh %s [%s] for %d dmg", att:Nick(), ROLE_STRINGS[att:GetRole()], placer:Nick(), ROLE_STRINGS[placer:GetRole()], dmginfo:GetDamage()))
+        end
 
         if self:Health() <= 0 then
             self:Remove()
@@ -113,7 +113,9 @@ if SERVER then
         if activator == placer then
             if not move_ankh:GetBool() then return end
 
-            activator:Give("weapon_phr_ankh")
+            local wep = activator:Give("weapon_phr_ankh")
+            -- Save the health remaining
+            wep.RemainingHealth = self:Health()
             self:Remove()
             return
         end

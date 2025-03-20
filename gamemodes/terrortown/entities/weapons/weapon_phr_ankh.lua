@@ -37,8 +37,12 @@ SWEP.Primary.Cone           = 0
 SWEP.Primary.Ammo           = nil
 SWEP.Primary.Sound          = ""
 
-SWEP.GhostMinBounds = Vector(-5, -5, -5)
-SWEP.GhostMaxBounds = Vector(5, 5, 5)
+SWEP.GhostMinBounds         = Vector(-5, -5, -5)
+SWEP.GhostMaxBounds         = Vector(5, 5, 5)
+
+SWEP.RemainingHealth        = 0
+
+local ankh_health = CreateConVar("ttt_pharaoh_ankh_health", "500", FCVAR_REPLICATED, "How much health the Ankh should have", 1, 2000)
 
 function SWEP:Initialize()
     if CLIENT then
@@ -81,8 +85,16 @@ function SWEP:PrimaryAttack()
     ankh:SetAngles(Angle(0, eyeAngles.y, 0))
     ankh:SetPharaoh(owner)
     ankh:SetPlacer(owner)
+
+    local health = ankh_health:GetInt()
+    if self.RemainingHealth > 0 then
+        ankh:SetHealth(self.RemainingHealth)
+    else
+        ankh:SetHealth(health)
+    end
+    ankh:SetMaxHealth(health)
+
     ankh:Spawn()
-    owner:SetNWEntity("PharaohAnkh", ankh)
 
     self:Remove()
 end
