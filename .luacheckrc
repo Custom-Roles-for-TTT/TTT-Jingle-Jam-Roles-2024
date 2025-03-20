@@ -1052,9 +1052,6 @@ globals = {
     "ROLE_PHARAOH",
     "ROLE_WEREWOLF",
     "ROLE_WHEELBOY",
-    "WIN_BARRELMIMIC",
-    "WIN_WEREWOLF",
-    "WIN_WHEELBOY",
     "WEREWOLF",
     "WEREWOLF_NIGHT_ONLY_SHOW_WEREWOLVES",
     "WEREWOLF_NIGHT_SHOW_IF_HAS_WEREWOLF",
@@ -1070,6 +1067,10 @@ globals = {
     "WEREWOLF_VISION_TRANSFORMED",
     "WEREWOLF_VISION_ALWAYS",
     "WHEELBOY",
+    "WIN_BARRELMIMIC",
+    "WIN_PHARAOH",
+    "WIN_WEREWOLF",
+    "WIN_WHEELBOY",
 
     -- Optional external mods
     "Randomat",
