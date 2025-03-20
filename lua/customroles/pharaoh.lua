@@ -47,6 +47,26 @@ ROLE.convars = {
         type = ROLE_CONVAR_TYPE_NUM
     },
     {
+        cvar = "ttt_pharaoh_ankh_heal_repair_dist",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
+        cvar = "ttt_pharaoh_ankh_heal_rate",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
+        cvar = "ttt_pharaoh_ankh_heal_amount",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
+        cvar = "ttt_pharaoh_ankh_repair_rate",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
+        cvar = "ttt_pharaoh_ankh_repair_amount",
+        type = ROLE_CONVAR_TYPE_NUM
+    },
+    {
         cvar = "ttt_pharaoh_innocent_steal",
         type = ROLE_CONVAR_TYPE_BOOL
     },

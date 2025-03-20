@@ -73,9 +73,18 @@ function ENT:Initialize()
 end
 
 if SERVER then
+    local math = math
+
+    local MathMin = math.min
+
     local damage_own_ankh = CreateConVar("ttt_pharaoh_damage_own_ankh", "0", FCVAR_NONE, "Whether an Ankh's owner can damage it", 0, 1)
     local warn_damage = CreateConVar("ttt_pharaoh_warn_damage", "1", FCVAR_NONE, "Whether to warn an Ankh's owner is warned when it is damaged", 0, 1)
     local warn_destroy = CreateConVar("ttt_pharaoh_warn_destroy", "1", FCVAR_NONE, "Whether to warn an Ankh's owner is warned when it is destroyed", 0, 1)
+    local ankh_heal_repair_dist = CreateConVar("ttt_pharaoh_ankh_heal_repair_dist", "150", FCVAR_NONE, "The maximum distance away the Pharaoh can be for the heal and repair to occur", 0, 1)
+    local ankh_heal_rate = CreateConVar("ttt_pharaoh_ankh_heal_rate", "5", FCVAR_NONE, "How often (in seconds) the Pharaoh should heal when they are near the Ankh", 0, 60)
+    local ankh_heal_amount = CreateConVar("ttt_pharaoh_ankh_heal_amount", "1", FCVAR_NONE, "How much to heal the Pharaoh per tick when they are near the Ankh", 0, 100)
+    local ankh_repair_rate = CreateConVar("ttt_pharaoh_ankh_repair_rate", "5", FCVAR_NONE, "How often (in seconds) the Ankh should repair when their Pharaoh is near", 0, 60)
+    local ankh_repair_amount = CreateConVar("ttt_pharaoh_ankh_repair_amount", "5", FCVAR_NONE, "How much to repair the Ankh per tick when their Pharaoh is near it", 0, 500)
 
     function ENT:OnTakeDamage(dmginfo)
         local att = dmginfo:GetAttacker()
@@ -142,5 +151,52 @@ if SERVER then
         activator.PharaohLastStealTime = curTime
     end
 
-    -- TODO: If placer is a Pharaoh and they are nearby, heal eachother at configurable rate
+    -- If placer is a Pharaoh and they are nearby, heal each other at configurable rate
+    local nextHealTime = nil
+    local nextRepairTime = nil
+    function ENT:Think()
+        local placer = self:GetPlacer()
+        if not IsPlayer(placer) then return end
+
+        local distance = ankh_heal_repair_dist:GetInt()
+        local distanceSqr = distance * distance
+
+        if self:GetPos():DistToSqr(placer:GetPos()) <= distanceSqr then
+            local curTime = CurTime()
+            local healRate = ankh_heal_rate:GetInt()
+            local healAmount = ankh_heal_amount:GetInt()
+            if healRate > 0 and healAmount > 0 and (nextHealTime == nil or nextHealTime <= curTime) then
+                -- Don't heal the first tick
+                if nextHealTime ~= nil then
+                    local hp = placer:Health()
+                    local maxHp = placer:GetMaxHealth()
+                    local newHp = MathMin(maxHp, hp + healAmount)
+                    if hp ~= newHp then
+                        placer:SetHealth(newHp)
+                    end
+                end
+
+                nextHealTime = curTime + healRate
+            end
+
+            local repairRate = ankh_repair_rate:GetInt()
+            local repairAmount = ankh_repair_amount:GetInt()
+            if repairRate > 0 and repairAmount > 0 and (nextRepairTime == nil or nextRepairTime <= curTime) then
+                -- Don't repair the first tick
+                if nextRepairTime ~= nil then
+                    local hp = self:Health()
+                    local maxHp = self:GetMaxHealth()
+                    local newHp = MathMin(maxHp, hp + repairAmount)
+                    if hp ~= newHp then
+                        self:SetHealth(newHp)
+                    end
+                end
+
+                nextRepairTime = curTime + repairRate
+            end
+        else
+            nextHealTime = nil
+            nextRepairTime = nil
+        end
+    end
 end
