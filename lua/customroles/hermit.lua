@@ -113,7 +113,7 @@ if SERVER then
     -- TEAM CHANGE --
     -----------------
 
-    local function AnnounceTeamChange(ply, role)
+    local function AnnounceTeamChange(ply, team)
         for _, v in PlayerIterator() do
             local hermitMode
             if ply:IsTraitorTeam() then
@@ -127,10 +127,6 @@ if SERVER then
             local monsterTeam = v:IsMonsterTeam() and hermitMode == BEGGAR_REVEAL_ROLES_THAT_CAN_SEE_JESTER
             local indepTeam = v:IsIndependentTeam() and hermitMode == BEGGAR_REVEAL_ROLES_THAT_CAN_SEE_JESTER and cvars.Bool("ttt_" .. ROLE_STRINGS_RAW[self:GetRole()] .. "_can_see_jesters", false)
 
-            local team = ROLE_STRINGS[ROLE_INNOCENT]
-            if role == ROLE_ZEALOT then
-                team = ROLE_STRINGS[ROLE_TRAITOR]
-            end
             if hermitMode == BEGGAR_REVEAL_ALL or traitorTeam or innocentTeam or monsterTeam or indepTeam then
                 v:QueueMessage(MSG_PRINTBOTH, "The " .. ROLE_STRINGS[ROLE_HERMIT] .. " has joined the " .. team .. " team")
             end
@@ -180,23 +176,30 @@ if SERVER then
         else
             ply:SetRole(role)
         end
-        ply:QueueMessage(MSG_PRINTBOTH, "You have joined the " .. ROLE_STRINGS[role] .. " team")
+
+        local team = ROLE_STRINGS[ROLE_INNOCENT]
+        local team_ext = ROLE_STRINGS_EXT[ROLE_INNOCENT]
+        if role == ROLE_ZEALOT then
+            team = ROLE_STRINGS[ROLE_TRAITOR]
+            team_ext = ROLE_STRINGS_EXT[ROLE_TRAITOR]
+        end
+        ply:QueueMessage(MSG_PRINTBOTH, "You have joined the " .. team .. " team")
         timer.Simple(0.5, function() SendFullStateUpdate() end) -- Slight delay to avoid flickering from Hermit to the new role and back to Hermit
 
         local announceDelay = hermit_announce_delay:GetInt()
         if announceDelay > 0 then
             timer.Create(ply:Nick() .. "HermitAnnounce", announceDelay, 1, function()
                 if not IsPlayer(ply) then return end
-                AnnounceTeamChange(ply, role)
+                AnnounceTeamChange(ply, team)
             end)
         else
-            AnnounceTeamChange(ply, role)
+            AnnounceTeamChange(ply, team)
         end
 
         net.Start("TTT_HermitConverted")
         net.WriteString(ply:Nick())
         net.WriteString(wep.BoughtBy:Nick())
-        net.WriteString(ROLE_STRINGS_EXT[role])
+        net.WriteString(team_ext)
         net.WriteString(ply:SteamID64())
         net.Broadcast()
     end)
@@ -245,6 +248,12 @@ if SERVER then
             ply:SetRole(role)
             SendFullStateUpdate()
         end
+
+        local team = ROLE_STRINGS[ROLE_INNOCENT]
+        if role == ROLE_ZEALOT then
+            team = ROLE_STRINGS[ROLE_TRAITOR]
+        end
+        ply:QueueMessage(MSG_PRINTBOTH, "You have joined the " .. team .. " team")
     end)
 
     local ghostwhisperer_max_abilities = GetConVar("ttt_ghostwhisperer_max_abilities")
@@ -281,6 +290,16 @@ if SERVER then
         net.Start("TTT_HermitKilled")
         net.WriteString(victim:Nick())
         net.Broadcast()
+    end)
+
+    hook.Add("TTTDeathNotifyOverride", "Hermit_TTTDeathNotifyOverride", function(victim, inflictor, attacker, reason, killerName, role)
+        if GetRoundState() ~= ROUND_ACTIVE then return end
+        if not IsValid(inflictor) or not IsValid(attacker) then return end
+        if not attacker:IsPlayer() then return end
+        if victim == attacker then return end
+        if not victim:IsHermit() then return end
+
+        return reason, killerName, ROLE_NONE
     end)
 
     ------------

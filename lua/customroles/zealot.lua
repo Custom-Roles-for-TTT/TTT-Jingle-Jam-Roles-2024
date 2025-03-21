@@ -75,6 +75,16 @@ if SERVER then
         net.Broadcast()
     end)
 
+    hook.Add("TTTDeathNotifyOverride", "Zealot_TTTDeathNotifyOverride", function(victim, inflictor, attacker, reason, killerName, role)
+        if GetRoundState() ~= ROUND_ACTIVE then return end
+        if not IsValid(inflictor) or not IsValid(attacker) then return end
+        if not attacker:IsPlayer() then return end
+        if victim == attacker then return end
+        if not victim:IsZealot() then return end
+
+        return reason, killerName, ROLE_NONE
+    end)
+
     ------------
     -- EVENTS --
     ------------
