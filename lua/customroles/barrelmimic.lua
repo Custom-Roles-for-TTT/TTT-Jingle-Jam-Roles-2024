@@ -131,7 +131,7 @@ if SERVER then
     -- RESPAWN --
     -------------
 
-    local function BarrelMimicNotification(attacker, victim, verb)
+    local function BarrelMimicKilledNotification(attacker, victim, verb)
         JesterTeamKilledNotification(attacker, victim,
             -- getkillstring
             function()
@@ -217,7 +217,7 @@ if SERVER then
         if victim == attacker then return end
         if dmginfo:GetDamage() < ent:GetMaxHealth() then return end
 
-        BarrelMimicNotification(dmginfo:GetAttacker(), ent.BarrelMimic, "exploded")
+        BarrelMimicKilledNotification(dmginfo:GetAttacker(), ent.BarrelMimic, "exploded")
     end)
 
     AddHook("TTTStopPlayerRespawning", "BarrelMimic_TTTStopPlayerRespawning", function(ply)
@@ -239,7 +239,7 @@ if SERVER then
             local valid_kill = IsPlayer(attacker) and attacker ~= victim and GetRoundState() == ROUND_ACTIVE
             if not valid_kill then return end
 
-            BarrelMimicNotification(attacker, victim, "eliminated")
+            BarrelMimicKilledNotification(attacker, victim, "eliminated")
 
             -- Respawn this barrel mimic if they were killed while a barrel or all deaths allow respawn
             if IsValid(victim.BarrelMimicEnt) or respawn_all_deaths:GetBool() then
