@@ -37,7 +37,7 @@ end
 function SWEP:Initialize()
     self:SendWeaponAnim(ACT_SLAM_DETONATOR_DRAW)
     if CLIENT then
-        self:AddHUDHelp("mis_proselytizer_help_pri", "mis_proselytizer_help_sec", true)
+        self:AddHUDHelp("mis_proselytizer_help_pri", "mis_proselytizer_help_sec", true, {amonk = ROLE_STRINGS_EXT[ROLE_MONK], zealot = ROLE_STRINGS[ROLE_ZEALOT], hermit = ROLE_STRINGS[ROLE_HERMIT]})
     end
     return self.BaseClass.Initialize(self)
 end

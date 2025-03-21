@@ -52,7 +52,8 @@ ROLE.convars = {
 
 ROLE.translations = {
     ["english"] = {
-        ["mis_proselytizer_help_pri"] = "Hold {primaryfire} to deputize a player.",
+        ["mis_proselytizer_help_pri"] = "Hold {primaryfire} to proselytize a player.",
+        ["mis_proselytizer_help_sec"] = "The target player will become {amonk}, {zealot}, or {hermit}",
         ["missionary_proselytize_announce"] = "{amissionary} has proselytized {target}",
         ["ev_missionary_proselytize"] = "{target} was proselytized by {missionary}"
     }
@@ -79,15 +80,6 @@ if SERVER then
 end
 
 if CLIENT then
-    ------------------
-    -- TRANSLATIONS --
-    ------------------
-
-    AddHook("Initialize", "Missionary_Translations_Initialize", function()
-        -- This needs to happen after the Monk, Zealot and Hermit have been registered so we can't put it in ROLE.translations
-        LANG.AddToLanguage("english", "mis_proselytizer_help_sec", "The target player will become " .. ROLE_STRINGS_EXT[ROLE_MONK] .. ", " .. ROLE_STRINGS[ROLE_ZEALOT] .. ", or " .. ROLE_STRINGS[ROLE_HERMIT])
-    end)
-
     ------------
     -- EVENTS --
     ------------
