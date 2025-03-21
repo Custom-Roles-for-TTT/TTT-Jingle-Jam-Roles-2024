@@ -119,6 +119,7 @@ ROLE.translations = {
         ["ev_win_pharaoh"] = "The mystic {role} has won the round!",
         ["win_pharaoh"] = "The {role} has outlasted you all!",
         ["phr_ankh_name"] = "Ankh",
+        ["phr_ankh_name_health"] = "Ankh ({current}/{max})",
         ["phr_ankh_hint"] = "Press {usekey} to pick up. Stay near to heal.",
         ["phr_ankh_hint_steal"] = "Hold {usekey} to steal",
         ["phr_ankh_hint_unmovable"] = "Stay near to heal",

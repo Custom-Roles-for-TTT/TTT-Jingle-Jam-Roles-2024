@@ -7,13 +7,21 @@ local move_ankh = CreateConVar("ttt_pharaoh_move_ankh", "1", FCVAR_REPLICATED, "
 if CLIENT then
     local hint_params = {usekey = Key("+use", "USE")}
 
-    ENT.TargetIDHint = function()
+    ENT.TargetIDHint = function(ankh)
+        local client = LocalPlayer()
+        if not IsPlayer(client) then return end
+
+        local name
+        if not IsValid(ankh) or ankh:GetPlacer() ~= client then
+            name = LANG.GetTranslation("phr_ankh_name")
+        else
+            name = LANG.GetParamTranslation("phr_ankh_name_health", { current = ankh:Health(), max = ankh:GetMaxHealth() })
+        end
+
         return {
-            name = LANG.GetTranslation("phr_ankh_name"),
+            name = name,
             hint = "phr_ankh_hint",
             fmt  = function(ent, txt)
-                local client = LocalPlayer()
-                if not IsPlayer(client) then return end
 
                 local hint = txt
                 if ent:GetPlacer() ~= client then
