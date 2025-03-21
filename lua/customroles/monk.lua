@@ -13,9 +13,9 @@ ROLE.nameext = "a Monk"
 ROLE.nameshort = "mon"
 ROLE.team = ROLE_TEAM_INNOCENT
 
--- TODO: Monk role descriptions
-ROLE.desc = [[You are {role}!]]
-ROLE.shortdesc = ""
+ROLE.desc = [[You are {role}! When you die you will become a ghost with powerful
+abilities including the ability to speak with the living.]]
+ROLE.shortdesc = "Becomes a ghost who can speak with the living and use powerful abilities when they die."
 
 ROLE.selectionpredicate = function()
     if not ROLE_SOULBOUND then return false end

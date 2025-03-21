@@ -13,9 +13,12 @@ ROLE.nameext = "a Missionary"
 ROLE.nameshort = "mis"
 ROLE.team = ROLE_TEAM_DETECTIVE
 
--- TODO: Missionary role descriptions
-ROLE.desc = [[You are {role}!]]
-ROLE.shortdesc = ""
+ROLE.desc = [[You are {role}! As {adetective}, HQ has given you special resources to find the {traitors}.
+You have a Proselytizer that can grant a player powerful abilities if they die.
+Be careful, though! If used on a bad player, they might use those abilities against you!
+
+Press {menukey} to receive your equipment!]]
+ROLE.shortdesc = "Can use their proselytizer to turn a player into a Monk, Zealot, or Hermit."
 
 ROLE.loadout = {"weapon_mis_proselytizer"}
 

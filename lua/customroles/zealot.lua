@@ -13,9 +13,13 @@ ROLE.nameext = "a Zealot"
 ROLE.nameshort = "zea"
 ROLE.team = ROLE_TEAM_TRAITOR
 
--- TODO: Zealot role descriptions
-ROLE.desc = [[You are {role}! {comrades}]]
-ROLE.shortdesc = ""
+ROLE.desc = [[You are {role}! {comrades}
+
+When you die you will become {asoulbound} who can speak with
+the living and use powerful abilities to help your comrades.
+
+Press {menukey} to receive your special equipment!]]
+ROLE.shortdesc = "Becomes a Soulbound who can speak with the living and use powerful abilities when they die."
 
 ROLE.selectionpredicate = function()
     if not ROLE_SOULBOUND then return false end
@@ -128,6 +132,16 @@ if CLIENT then
         -- Make the Zealot appear as the Zealot instead of Soulbound in the round summary
         if ROLE_SOULBOUND and finalRole == ROLE_SOULBOUND and ply:GetNWInt("TTTSoulboundOldRole", -1) == ROLE_ZEALOT then
             return ROLE_STRINGS_SHORT[ROLE_ZEALOT]
+        end
+    end)
+
+    ----------------
+    -- ROLE POPUP --
+    ----------------
+
+    hook.Add("TTTRolePopupParams", "Zealot_TTTRolePopupParams", function(cli)
+        if cli:IsZealot() then
+            return { asoulbound = ROLE_STRINGS_EXT[ROLE_SOULBOUND] }
         end
     end)
 

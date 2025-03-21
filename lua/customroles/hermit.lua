@@ -13,9 +13,8 @@ ROLE.nameext = "a Hermit"
 ROLE.nameshort = "her"
 ROLE.team = ROLE_TEAM_JESTER
 
--- TODO: Hermit role descriptions
-ROLE.desc = [[You are {role}!]]
-ROLE.shortdesc = ""
+ROLE.desc = [[You are {role}! If you are seeing this message, please let the developers know!]]
+ROLE.shortdesc = "Joins someone's team and becomes an Monk or a Zealot when they are given a shop item by another player."
 
 ROLE.selectionpredicate = function()
     if not ROLE_SOULBOUND then return false end
@@ -80,6 +79,17 @@ ROLE.convars = {
 
 ROLE.translations = {
     ["english"] = {
+        ["info_popup_hermit_jester"] = [[You are {role}! {traitors} think you are {ajester} and you
+deal no damage. However, if you can convince someone to give
+you a shop item you will join their team.
+
+When you die you will become a ghost with powerful abilities
+including the ability to speak with the living.]],
+        ["info_popup_hermit_indep"] = [[You are {role}! If you can convince someone to give
+you a shop item you will join their team.
+
+When you die you will become a ghost with powerful abilities
+including the ability to speak with the living.]],
         ["ev_hermit_converted"] = "The {hermit} ({victim}) was converted to {team} by {attacker}",
         ["ev_hermit_killed"] = "The {hermit} ({ply}) died and became a ghost"
     }
@@ -425,6 +435,19 @@ if CLIENT then
         if ROLE_SOULBOUND and finalRole == ROLE_SOULBOUND and TRAITOR_ROLES[ROLE_HERMIT] and ply:GetNWInt("TTTSoulboundOldRole", -1) == ROLE_HERMIT then
             return ROLE_STRINGS_SHORT[ROLE_HERMIT]
         end
+    end)
+
+    ----------------
+    -- ROLE POPUP --
+    ----------------
+
+    hook.Add("TTTRolePopupRoleStringOverride", "Hermit_TTTRolePopupRoleStringOverride", function(cli, roleString)
+        if not IsPlayer(cli) or not cli:IsHermit() then return end
+
+        if hermit_is_independent:GetBool() then
+            return roleString .. "_indep"
+        end
+        return roleString .. "_jester"
     end)
 
     -- TODO: Hermit tutorial
