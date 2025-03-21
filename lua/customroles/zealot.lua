@@ -71,7 +71,7 @@ if CLIENT then
 
     hook.Add("TTTScoringSummaryRender", "Zealot_TTTScoringSummaryRender", function(ply, roleFileName, groupingRole, roleColor, name, startingRole, finalRole)
         -- Make the Zealot appear as the Zealot instead of Soulbound in the round summary
-        if finalRole == ROLE_SOULBOUND and ply:GetNWInt("TTTSoulboundOldRole", -1) == ROLE_ZEALOT then
+        if ROLE_SOULBOUND and finalRole == ROLE_SOULBOUND and ply:GetNWInt("TTTSoulboundOldRole", -1) == ROLE_ZEALOT then
             return ROLE_STRINGS_SHORT[ROLE_ZEALOT]
         end
     end)

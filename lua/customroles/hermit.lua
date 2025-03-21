@@ -30,6 +30,24 @@ ROLE.selectionpredicate = function()
 end
 
 ROLE.convars = {
+    {
+        cvar = "ttt_hermit_notify_mode",
+        type = ROLE_CONVAR_TYPE_DROPDOWN,
+        choices = {"None", "Detective and Traitor", "Traitor", "Detective", "Everyone"},
+        isNumeric = true
+    },
+    {
+        cvar = "ttt_hermit_notify_killer",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_hermit_notify_sound",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_hermit_notify_confetti",
+        type = ROLE_CONVAR_TYPE_BOOL
+    }
 }
 
 ROLE.translations = {
@@ -41,6 +59,11 @@ RegisterRole(ROLE)
 
 if SERVER then
     AddCSLuaFile()
+
+    CreateConVar("ttt_hermit_notify_mode", "0", FCVAR_NONE, "The logic to use when notifying players that a hermit was killed. Killer is notified unless \"ttt_hermit_notify_killer\" is disabled", 0, 4)
+    CreateConVar("ttt_hermit_notify_killer", "0", FCVAR_NONE, "Whether to notify a hermit's killer", 0, 1)
+    CreateConVar("ttt_hermit_notify_sound", "0", FCVAR_NONE, "Whether to play a cheering sound when a hermit is killed", 0, 1)
+    CreateConVar("ttt_hermit_notify_confetti", "0", FCVAR_NONE, "Whether to throw confetti when a hermit is a killed", 0, 1)
 end
 
 if CLIENT then
@@ -50,7 +73,7 @@ if CLIENT then
 
     hook.Add("TTTScoringSummaryRender", "Zealot_TTTScoringSummaryRender", function(ply, roleFileName, groupingRole, roleColor, name, startingRole, finalRole)
         -- Make the traitor team Hermit appear as the Hermit instead of Soulbound in the round summary
-        if finalRole == ROLE_SOULBOUND and TRAITOR_ROLES[ROLE_HERMIT] and ply:GetNWInt("TTTSoulboundOldRole", -1) == ROLE_HERMIT then
+        if ROLE_SOULBOUND and finalRole == ROLE_SOULBOUND and TRAITOR_ROLES[ROLE_HERMIT] and ply:GetNWInt("TTTSoulboundOldRole", -1) == ROLE_HERMIT then
             return ROLE_STRINGS_SHORT[ROLE_HERMIT]
         end
     end)
