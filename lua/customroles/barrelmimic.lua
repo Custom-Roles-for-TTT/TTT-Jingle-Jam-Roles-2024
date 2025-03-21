@@ -26,6 +26,24 @@ ROLE.team = ROLE_TEAM_JESTER
 
 ROLE.convars = {
     {
+        cvar = "ttt_barrelmimic_notify_mode",
+        type = ROLE_CONVAR_TYPE_DROPDOWN,
+        choices = {"None", "Detective and Traitor", "Traitor", "Detective", "Everyone"},
+        isNumeric = true
+    },
+    {
+        cvar = "ttt_barrelmimic_notify_killer",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_barrelmimic_notify_sound",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_barrelmimic_notify_confetti",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
         cvar = "ttt_barrelmimic_announce",
         type = ROLE_CONVAR_TYPE_BOOL
     },
@@ -69,6 +87,11 @@ if SERVER then
     util.AddNetworkString("TTT_UpdateBarrelMimicWins")
     util.AddNetworkString("TTT_ResetBarrelMimicWins")
 
+    CreateConVar("ttt_barrelmimic_notify_mode", "0", FCVAR_NONE, "The logic to use when notifying players that a barrel mimic was killed. Killer is notified unless \"ttt_barrelmimic_notify_killer\" is disabled", 0, 4)
+    CreateConVar("ttt_barrelmimic_notify_killer", "0", FCVAR_NONE, "Whether to notify a barrel mimic's killer", 0, 1)
+    CreateConVar("ttt_barrelmimic_notify_sound", "0", FCVAR_NONE, "Whether to play a cheering sound when a barrel mimic is killed", 0, 1)
+    CreateConVar("ttt_barrelmimic_notify_confetti", "0", FCVAR_NONE, "Whether to throw confetti when a barrel mimic is a killed", 0, 1)
+
     -----------
     -- KARMA --
     -----------
@@ -107,6 +130,14 @@ if SERVER then
     -------------
     -- RESPAWN --
     -------------
+
+    local function BarrelMimicNotification(attacker, victim, verb)
+        JesterTeamKilledNotification(attacker, victim,
+            -- getkillstring
+            function()
+                return attacker:Nick() .. " " .. verb .. " the " .. ROLE_STRINGS[ROLE_BARRELMIMIC] .. "!"
+            end)
+    end
 
     local respawnTimers = {}
     local function ClearRespawnTimer(ply)
@@ -175,6 +206,20 @@ if SERVER then
         StartRespawnTimer(ply)
     end)
 
+    AddHook("PostEntityTakeDamage", "BarrelMimic_PostEntityTakeDamage", function(ent, dmginfo, wasDamageTaken)
+        if not wasDamageTaken then return end
+        local victim = ent.BarrelMimic
+        if not IsPlayer(victim) then return end
+
+        local attacker = dmginfo:GetAttacker()
+        if not IsPlayer(attacker) then return end
+
+        if victim == attacker then return end
+        if dmginfo:GetDamage() < ent:GetMaxHealth() then return end
+
+        BarrelMimicNotification(dmginfo:GetAttacker(), ent.BarrelMimic, "exploded")
+    end)
+
     AddHook("TTTStopPlayerRespawning", "BarrelMimic_TTTStopPlayerRespawning", function(ply)
         if not IsPlayer(ply) then return end
         if ply:Alive() then return end
@@ -191,7 +236,10 @@ if SERVER then
         if barrelMimicWins then return end
 
         if IsPlayer(victim) and victim:IsBarrelMimic() then
-            if victim == attacker then return end
+            local valid_kill = IsPlayer(attacker) and attacker ~= victim and GetRoundState() == ROUND_ACTIVE
+            if not valid_kill then return end
+
+            BarrelMimicNotification(attacker, victim, "eliminated")
 
             -- Respawn this barrel mimic if they were killed while a barrel or all deaths allow respawn
             if IsValid(victim.BarrelMimicEnt) or respawn_all_deaths:GetBool() then

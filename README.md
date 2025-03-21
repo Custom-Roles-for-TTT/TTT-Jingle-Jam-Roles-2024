@@ -10,14 +10,18 @@ The Barrel Mimic is a jester role that can transform into a barrel. If their bar
 \
 **ConVars**
 ```cpp
-ttt_barrelmimic_enabled             0   // Whether or not the barrel mimic should spawn
-ttt_barrelmimic_spawn_weight        1   // The weight assigned to spawning the barrel mimic
-ttt_barrelmimic_min_players         0   // The minimum number of players required to spawn the barrel mimic
-ttt_barrelmimic_starting_health     100 // The amount of health the barrel mimic starts with
-ttt_barrelmimic_max_health          100 // The maximum amount of health the barrel mimic can have
-ttt_barrelmimic_announce            1   // Whether to announce that there is a barrel mimic
+ttt_barrelmimic_enabled             0   // Whether or not the Barrel Mimic should spawn
+ttt_barrelmimic_spawn_weight        1   // The weight assigned to spawning the Barrel Mimic
+ttt_barrelmimic_min_players         0   // The minimum number of players required to spawn the Barrel Mimic
+ttt_barrelmimic_starting_health     100 // The amount of health the Barrel Mimic starts with
+ttt_barrelmimic_max_health          100 // The maximum amount of health the Barrel Mimic can have
+ttt_barrelmimic_announce            1   // Whether to announce that there is a Barrel Mimic
 ttt_barrelmimic_respawn_all_deaths  1   // Whether to respawn when the Barrel Mimic is killed in any way. If disabled, they will only respawn when killed as a barrel
 ttt_barrelmimic_respawn_delay       15  // The delay before the Barrel Mimic is killed without winning the round. If set to 0, they will not respawn
+ttt_barrelmimic_notify_mode         0   // The logic to use when notifying players that a Barrel Mimic was killed. Killer is notified unless "ttt_barrelmimic_notify_killer" is disabled. 0 - Don't notify anyone. 1 - Only notify traitors and detective. 2 - Only notify traitors. 3 - Only notify detective. 4 - Notify everyone.
+ttt_barrelmimic_notify_killer       1   // Whether to notify a Barrel Mimic's killer
+ttt_barrelmimic_notify_sound        0   // Whether to play a cheering sound when a Barrel Mimic is killed
+ttt_barrelmimic_notify_confetti     0   // Whether to throw confetti when a Barrel Mimic is a killed
 ```
 
 ## Hoodoo
