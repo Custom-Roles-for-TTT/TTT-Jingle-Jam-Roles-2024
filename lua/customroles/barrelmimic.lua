@@ -26,24 +26,6 @@ ROLE.team = ROLE_TEAM_JESTER
 
 ROLE.convars = {
     {
-        cvar = "ttt_barrelmimic_notify_mode",
-        type = ROLE_CONVAR_TYPE_DROPDOWN,
-        choices = {"None", "Detective and Traitor", "Traitor", "Detective", "Everyone"},
-        isNumeric = true
-    },
-    {
-        cvar = "ttt_barrelmimic_notify_killer",
-        type = ROLE_CONVAR_TYPE_BOOL
-    },
-    {
-        cvar = "ttt_barrelmimic_notify_sound",
-        type = ROLE_CONVAR_TYPE_BOOL
-    },
-    {
-        cvar = "ttt_barrelmimic_notify_confetti",
-        type = ROLE_CONVAR_TYPE_BOOL
-    },
-    {
         cvar = "ttt_barrelmimic_announce",
         type = ROLE_CONVAR_TYPE_BOOL
     },
@@ -86,11 +68,6 @@ if SERVER then
 
     util.AddNetworkString("TTT_UpdateBarrelMimicWins")
     util.AddNetworkString("TTT_ResetBarrelMimicWins")
-
-    CreateConVar("ttt_barrelmimic_notify_mode", "0", FCVAR_NONE, "The logic to use when notifying players that a barrel mimic was killed. Killer is notified unless \"ttt_barrelmimic_notify_killer\" is disabled", 0, 4)
-    CreateConVar("ttt_barrelmimic_notify_killer", "0", FCVAR_NONE, "Whether to notify a barrel mimic's killer", 0, 1)
-    CreateConVar("ttt_barrelmimic_notify_sound", "0", FCVAR_NONE, "Whether to play a cheering sound when a barrel mimic is killed", 0, 1)
-    CreateConVar("ttt_barrelmimic_notify_confetti", "0", FCVAR_NONE, "Whether to throw confetti when a barrel mimic is a killed", 0, 1)
 
     -----------
     -- KARMA --

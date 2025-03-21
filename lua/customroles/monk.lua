@@ -29,10 +29,18 @@ ROLE.selectionpredicate = function()
     return true
 end
 
+ROLE.translations = {
+    ["english"] = {
+        ["ev_monk_killed"] = "The {monk} ({ply}) died and became a ghost"
+    }
+}
+
 RegisterRole(ROLE)
 
 if SERVER then
     AddCSLuaFile()
+
+    util.AddNetworkString("TTT_MonkKilled")
 
     ----------------
     -- MONK DEATH --
@@ -58,10 +66,48 @@ if SERVER then
         victim:QueueMessage(MSG_PRINTBOTH, message)
 
         victim:SetProperty("TTTIsGhosting", true, victim)
+
+        net.Start("TTT_MonkKilled")
+        net.WriteString(victim:Nick())
+        net.Broadcast()
+    end)
+
+    ------------
+    -- EVENTS --
+    ------------
+
+    AddHook("Initialize", "Monk_Initialize", function()
+        EVENT_MONKDIED = GenerateNewEventID(ROLE_MONK)
     end)
 end
 
 if CLIENT then
+    ------------
+    -- EVENTS --
+    ------------
+
+    AddHook("TTTSyncEventIDs", "Monk_TTTSyncEventIDs", function()
+        EVENT_MONKDIED = EVENTS_BY_ROLE[ROLE_MONK]
+        local ghost_icon = Material("icon16/status_offline.png")
+        local Event = CLSCORE.DeclareEventDisplay
+        local PT = LANG.GetParamTranslation
+        Event(EVENT_MONKDIED, {
+            text = function(e)
+                return PT("ev_monk_died", {ply = e.ply, monk = ROLE_STRINGS[ROLE_MONK]})
+            end,
+            icon = function(e)
+                return ghost_icon, "Ghosted"
+            end})
+    end)
+
+    net.Receive("TTT_MonkKilled", function(len)
+        local monkname = net.ReadString()
+        CLSCORE:AddEvent({
+            id = EVENT_MONKDIED,
+            ply = monkname
+        })
+    end)
+
     -- TODO: Monk tutorial
 end
 

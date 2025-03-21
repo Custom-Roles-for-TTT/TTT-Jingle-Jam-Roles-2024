@@ -18,10 +18,6 @@ ttt_barrelmimic_max_health          100 // The maximum amount of health the Barr
 ttt_barrelmimic_announce            1   // Whether to announce that there is a Barrel Mimic
 ttt_barrelmimic_respawn_all_deaths  1   // Whether to respawn when the Barrel Mimic is killed in any way. If disabled, they will only respawn when killed as a barrel
 ttt_barrelmimic_respawn_delay       15  // The delay before the Barrel Mimic is killed without winning the round. If set to 0, they will not respawn
-ttt_barrelmimic_notify_mode         0   // The logic to use when notifying players that a Barrel Mimic is killed. Killer is notified unless "ttt_barrelmimic_notify_killer" is disabled. 0 - Don't notify anyone. 1 - Only notify traitors and detective. 2 - Only notify traitors. 3 - Only notify detective. 4 - Notify everyone
-ttt_barrelmimic_notify_killer       0   // Whether to notify a Barrel Mimic's killer
-ttt_barrelmimic_notify_sound        0   // Whether to play a cheering sound when a Barrel Mimic is killed
-ttt_barrelmimic_notify_confetti     0   // Whether to throw confetti when a Barrel Mimic is a killed
 ```
 
 ## Hermit
@@ -32,15 +28,22 @@ _Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommuni
 \
 **ConVars**
 ```cpp
-ttt_hemit_enabled               0   // Whether or not the Hermit should spawn
-ttt_hemit_spawn_weight          1   // The weight assigned to spawning the Hermit
-ttt_hemit_min_players           0   // The minimum number of players required to spawn the Hermit
-ttt_hemit_starting_health       100 // The amount of health the Hermit starts with
-ttt_hemit_max_health            100 // The maximum amount of health the Hermit can have
-ttt_hemit_notify_mode           0   // The logic to use when notifying players that a Hermit is killed. Killer is notified unless "ttt_hermit_notify_killer" is disabled. 0 - Don't notify anyone. 1 - Only notify traitors and detective. 2 - Only notify traitors. 3 - Only notify detective. 4 - Notify everyone
-ttt_hemit_notify_killer         0   // Whether to notify a Hermit's killer
-ttt_hemit_notify_sound          0   // Whether to play a cheering sound when a Hermit is killed
-ttt_hemit_notify_confetti       0   // Whether to throw confetti when a Hermit is a killed
+ttt_hemit_enabled                       0   // Whether or not the Hermit should spawn
+ttt_hemit_spawn_weight                  1   // The weight assigned to spawning the Hermit
+ttt_hemit_min_players                   0   // The minimum number of players required to spawn the Hermit
+ttt_hemit_starting_health               100 // The amount of health the Hermit starts with
+ttt_hemit_max_health                    100 // The maximum amount of health the Hermit can have
+ttt_hermit_is_independent               0   // Whether Hermits should be treated as members of the independent team
+ttt_hermit_reveal_traitor               1   // Who the Hermit is revealed to when they join the traitor team. 0 - No one. 1 - Everyone. 2 - Traitors. 3 - Innocents. 4 - Roles that can see jesters
+ttt_hermit_reveal_innocent              2   // Who the Hermit is revealed to when they join the innocent team. 0 - No one. 1 - Everyone. 2 - Traitors. 3 - Innocents. 4 - Roles that can see jesters
+ttt_beggar_announce_delay               0   // How long the delay between the Hermit's role change and announcement should be
+ttt_hermit_keep_begging                 0   // Whether the Hermit should be able to keep begging after joining a team and switch teams multiple times
+ttt_hermit_ignore_empty_weapons         0   // Whether the Hermit should not change teams if they are given a weapon with no ammo
+ttt_hermit_ignore_empty_weapons_warning 0   // Whether the Hermit should receive a chat message warning on receiving an empty weapon
+ttt_hemit_notify_mode                   0   // The logic to use when notifying players that a Hermit is killed. Killer is notified unless "ttt_hermit_notify_killer" is disabled. 0 - Don't notify anyone. 1 - Only notify traitors and detective. 2 - Only notify traitors. 3 - Only notify detective. 4 - Notify everyone
+ttt_hemit_notify_killer                 1   // Whether to notify a Hermit's killer
+ttt_hemit_notify_sound                  0   // Whether to play a cheering sound when a Hermit is killed
+ttt_hemit_notify_confetti               0   // Whether to throw confetti when a Hermit is a killed
 ```
 
 ## Hoodoo

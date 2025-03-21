@@ -29,10 +29,18 @@ ROLE.selectionpredicate = function()
     return true
 end
 
+ROLE.translations = {
+    ["english"] = {
+        ["ev_zealot_killed"] = "The {zealot} ({ply}) died and became a ghost"
+    }
+}
+
 RegisterRole(ROLE)
 
 if SERVER then
     AddCSLuaFile()
+
+    util.AddNetworkString("TTT_ZealotKilled")
 
     ------------------
     -- ZEALOT DEATH --
@@ -55,21 +63,59 @@ if SERVER then
             message = message .. " and can now buy abilities"
         end
         message = message .. "!"
-
         victim:QueueMessage(MSG_PRINTBOTH, message)
+
         victim:SetProperty("TTTIsGhosting", true, victim)
         victim:SetNWInt("TTTSoulboundOldRole", ROLE_ZEALOT)
         victim:SetRole(ROLE_SOULBOUND)
         SendFullStateUpdate()
+
+        net.Start("TTT_ZealotKilled")
+        net.WriteString(victim:Nick())
+        net.Broadcast()
+    end)
+
+    ------------
+    -- EVENTS --
+    ------------
+
+    AddHook("Initialize", "Zealot_Initialize", function()
+        EVENT_ZEALOTDIED = GenerateNewEventID(ROLE_ZEALOT)
     end)
 end
 
 if CLIENT then
+    ------------
+    -- EVENTS --
+    ------------
+
+    AddHook("TTTSyncEventIDs", "Zealot_TTTSyncEventIDs", function()
+        EVENT_ZEALOTDIED = EVENTS_BY_ROLE[ROLE_ZEALOT]
+        local ghost_icon = Material("icon16/status_offline.png")
+        local Event = CLSCORE.DeclareEventDisplay
+        local PT = LANG.GetParamTranslation
+        Event(EVENT_ZEALOTDIED, {
+            text = function(e)
+                return PT("ev_zealot_died", {ply = e.ply, zealot = ROLE_STRINGS[ROLE_ZEALOT]})
+            end,
+            icon = function(e)
+                return ghost_icon, "Ghosted"
+            end})
+    end)
+
+    net.Receive("TTT_ZealotKilled", function(len)
+        local zealotname = net.ReadString()
+        CLSCORE:AddEvent({
+            id = EVENT_ZEALOTDIED,
+            ply = zealotname
+        })
+    end)
+
     -------------------
     -- ROUND SUMMARY --
     -------------------
 
-    hook.Add("TTTScoringSummaryRender", "Zealot_TTTScoringSummaryRender", function(ply, roleFileName, groupingRole, roleColor, name, startingRole, finalRole)
+    AddHook("TTTScoringSummaryRender", "Zealot_TTTScoringSummaryRender", function(ply, roleFileName, groupingRole, roleColor, name, startingRole, finalRole)
         -- Make the Zealot appear as the Zealot instead of Soulbound in the round summary
         if ROLE_SOULBOUND and finalRole == ROLE_SOULBOUND and ply:GetNWInt("TTTSoulboundOldRole", -1) == ROLE_ZEALOT then
             return ROLE_STRINGS_SHORT[ROLE_ZEALOT]
