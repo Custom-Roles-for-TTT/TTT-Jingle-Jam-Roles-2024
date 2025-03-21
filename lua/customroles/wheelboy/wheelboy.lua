@@ -17,6 +17,11 @@ util.AddNetworkString("TTT_WheelBoySpinResult")
 util.AddNetworkString("TTT_WheelBoyStartEffect")
 util.AddNetworkString("TTT_WheelBoyFinishEffect")
 
+CreateConVar("ttt_wheelboy_notify_mode", "0", FCVAR_NONE, "The logic to use when notifying players that wheel boy was killed. Killer is notified unless \"ttt_wheelboy_notify_killer\" is disabled", 0, 4)
+CreateConVar("ttt_wheelboy_notify_killer", "0", FCVAR_NONE, "Whether to notify wheel boy's killer", 0, 1)
+CreateConVar("ttt_wheelboy_notify_sound", "0", FCVAR_NONE, "Whether to play a cheering sound when wheel boy is killed", 0, 1)
+CreateConVar("ttt_wheelboy_notify_confetti", "0", FCVAR_NONE, "Whether to throw confetti when wheel boy is a killed", 0, 1)
+
 local spins_to_win = GetConVar("ttt_wheelboy_spins_to_win")
 local announce_text = GetConVar("ttt_wheelboy_announce_text")
 local announce_sound = GetConVar("ttt_wheelboy_announce_sound")
@@ -148,6 +153,14 @@ end)
 -- ROLE SWAP --
 ---------------
 
+local function WheelBoyKilledNotification(attacker, victim)
+    JesterTeamKilledNotification(attacker, victim,
+        -- getkillstring
+        function()
+            return attacker:Nick() .. " silenced " .. ROLE_STRINGS[ROLE_WHEELBOY] .. "!"
+        end)
+end
+
 AddHook("PlayerDeath", "WheelBoy_Swap_PlayerDeath", function(victim, infl, attacker)
     -- This gets set to nil when the spin count exceeds the win condition (aka, the wheelboy has won)
     if spinCount == nil then return end
@@ -156,6 +169,8 @@ AddHook("PlayerDeath", "WheelBoy_Swap_PlayerDeath", function(victim, infl, attac
     local valid_kill = IsPlayer(attacker) and attacker ~= victim and GetRoundState() == ROUND_ACTIVE
     if not valid_kill then return end
     if not victim:IsWheelBoy() then return end
+
+    WheelBoyKilledNotification(attacker, victim)
 
     -- Keep track o the killer for the scoreboard
     attacker:SetNWString("WheelBoyKilled", victim:Nick())
