@@ -125,7 +125,7 @@ if SERVER then
             local traitorTeam = v:IsTraitorTeam() and (hermitMode == BEGGAR_REVEAL_TRAITORS or hermitMode == BEGGAR_REVEAL_ROLES_THAT_CAN_SEE_JESTER)
             local innocentTeam = v:IsInnocentTeam() and hermitMode == BEGGAR_REVEAL_INNOCENTS
             local monsterTeam = v:IsMonsterTeam() and hermitMode == BEGGAR_REVEAL_ROLES_THAT_CAN_SEE_JESTER
-            local indepTeam = v:IsIndependentTeam() and hermitMode == BEGGAR_REVEAL_ROLES_THAT_CAN_SEE_JESTER and cvars.Bool("ttt_" .. ROLE_STRINGS_RAW[self:GetRole()] .. "_can_see_jesters", false)
+            local indepTeam = v:IsIndependentTeam() and hermitMode == BEGGAR_REVEAL_ROLES_THAT_CAN_SEE_JESTER and cvars.Bool("ttt_" .. ROLE_STRINGS_RAW[v:GetRole()] .. "_can_see_jesters", false)
 
             if hermitMode == BEGGAR_REVEAL_ALL or traitorTeam or innocentTeam or monsterTeam or indepTeam then
                 v:QueueMessage(MSG_PRINTBOTH, "The " .. ROLE_STRINGS[ROLE_HERMIT] .. " has joined the " .. team .. " team")
@@ -221,7 +221,7 @@ if SERVER then
     end
 
     AddHook("DoPlayerDeath", "Hermit_DoPlayerDeath", function(ply, attacker, dmg)
-        if not IsPlayer(attacker) or attacker == victim or GetRoundState() ~= ROUND_ACTIVE then return end
+        if not IsPlayer(attacker) or attacker == ply or GetRoundState() ~= ROUND_ACTIVE then return end
         if INNOCENT_ROLES[ROLE_HERMIT] or TRAITOR_ROLES[ROLE_HERMIT] then return end
 
         HermitKilledNotification(attacker, ply)
@@ -268,7 +268,6 @@ if SERVER then
             ragdoll:Dissolve()
         end
 
-        -- TODO: Change this to a less wordy and more flavourful message
         local max_abilities = ghostwhisperer_max_abilities:GetInt()
         if TRAITOR_ROLES[ROLE_HERMIT] then
             max_abilities = soulbound_max_abilities:GetInt()

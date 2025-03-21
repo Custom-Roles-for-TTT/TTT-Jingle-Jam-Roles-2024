@@ -57,7 +57,6 @@ if SERVER then
             ragdoll:Dissolve()
         end
 
-        -- TODO: Change this to a less wordy and more flavourful message
         local message = "You have died but you can still talk with the living"
         if soulbound_max_abilities:GetInt() > 0 then
             message = message .. " and can now buy abilities"
