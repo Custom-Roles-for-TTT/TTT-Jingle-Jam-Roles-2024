@@ -26,7 +26,7 @@ ttt_barrelmimic_notify_confetti     0   // Whether to throw confetti when a Barr
 
 ## Hermit
 _Suggested By_: Spaaz\
-The Hermit is a jester role that joins the team of any players that give them a shop item by becoming a Monk or a Zealot.
+The Hermit is a jester role that joins the team of any players that give them a shop item by becoming a Monk or a Zealot.\
 _Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3205649099) to be installed._
 \
 \
@@ -81,7 +81,7 @@ ttt_hoodoo_shop_random_enabled        0      // Whether role shop randomization 
 
 ## Missionary
 _Suggested By_: Spaaz\
-The Missionary is a detective role that can turn a player into a Monk, Zealot or Hermit depending on what team that player was one.
+The Missionary is a detective role that can turn a player into a Monk, Zealot or Hermit depending on what team that player was one.\
 _Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3205649099) to be installed._
 \
 \
@@ -103,7 +103,7 @@ ttt_missionary_shop_random_enabled  0   // Whether role shop randomization is en
 
 ## Monk
 _Suggested By_: Spaaz\
-The Monk is an innocent role that can use chat to speak with the living after they die.
+The Monk is an innocent role that can use chat to speak with the living after they die.\
 _Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3205649099) to be installed._
 \
 \
@@ -161,7 +161,7 @@ ttt_pharaoh_update_scoreboard      1   // Whether Pharaohs see dead players as m
 ## Werewolf
 _Contributed By_: Nick\
 The Werewolf is an independent role who wins by being the last one standing, but can only kill under the cover of night.\
-_[Fenrir (Smite) Playermodel](https://steamcommunity.com/sharedfiles/filedetails/?id=497666467) required for visual werewolf transformation._
+_Requires [Fenrir (Smite) Playermodel](https://steamcommunity.com/sharedfiles/filedetails/?id=497666467) for visual werewolf transformation._
 \
 \
 **ConVars**
@@ -226,7 +226,7 @@ ttt_wheelboy_notify_confetti     0    // Whether to throw confetti when a Wheel 
 
 ## Zealot
 _Suggested By_: Spaaz\
-The Zealot is a traitor role that becomes a Soulbound who can use special abilities while spectating if they die.
+The Zealot is a traitor role that becomes a Soulbound who can use special abilities while spectating if they die.\
 _Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3205649099) to be installed._
 \
 \
