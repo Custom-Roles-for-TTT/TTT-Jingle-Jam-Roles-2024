@@ -1,0 +1,9 @@
+"vertexlitgeneric"
+{
+	"$baseTexture" "cr_pharaoh/models/ankh_gold_diffuse"
+	"$bumpmap" "cr_pharaoh/models/ankh_gold_normal"
+	"$envmap" "env_cubemap"
+	"$normalmapalphaenvmapmask" "1"
+	"$envmapsaturation" .5
+	"$model" 1
+}

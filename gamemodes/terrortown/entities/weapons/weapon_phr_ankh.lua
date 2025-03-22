@@ -9,8 +9,8 @@ if CLIENT then
     SWEP.ViewModelFlip      = false
 end
 
-SWEP.ViewModel              = "models/weapons/c_slam.mdl"
-SWEP.WorldModel             = "models/weapons/w_slam.mdl"
+SWEP.ViewModel              = "models/cr_pharaoh/c_cr_pharaoh_ankh.mdl"
+SWEP.WorldModel             = "models/cr_pharaoh/w_cr_pharaoh_ankh.mdl"
 SWEP.Weight                 = 2
 
 SWEP.Base                   = "weapon_tttbase"
@@ -51,6 +51,10 @@ function SWEP:Initialize()
     return self.BaseClass.Initialize(self)
 end
 
+function SWEP:SetupDataTables()
+	self:NetworkVar("Float", 0, "NextIdle")
+end
+
 function SWEP:GetAimTrace(owner)
     local aimStart = owner:EyePos()
     local aimDir = owner:GetAimVector()
@@ -77,30 +81,42 @@ function SWEP:PrimaryAttack()
     local tr, hit = self:GetAimTrace(owner)
     if not hit then return end
 
-    local ankh = ents.Create("ttt_pharaoh_ankh")
-    local eyeAngles = owner:EyeAngles()
+    self:SendWeaponAnim(ACT_VM_DOWN)
+    timer.Simple(self:SequenceDuration(), function()
+        if not IsPlayer(owner) then return end
+        if not IsValid(self) then return end
 
-    -- Spawn the ankh
-    ankh:SetPos(tr.HitPos)
-    ankh:SetAngles(Angle(0, eyeAngles.y, 0))
-    ankh:SetPharaoh(owner)
-    ankh:SetPlacer(owner)
-    owner.PharaohAnkh = ankh
+        local ankh = ents.Create("ttt_pharaoh_ankh")
+        local eyeAngles = owner:EyeAngles()
 
-    local health = ankh_health:GetInt()
-    if self.RemainingHealth > 0 then
-        ankh:SetHealth(self.RemainingHealth)
-    else
-        ankh:SetHealth(health)
-    end
-    ankh:SetMaxHealth(health)
+        -- Spawn the ankh
+        ankh:SetPos(tr.HitPos)
+        ankh:SetAngles(Angle(0, eyeAngles.y, 0))
+        ankh:SetPharaoh(owner)
+        ankh:SetPlacer(owner)
+        owner.PharaohAnkh = ankh
 
-    ankh:Spawn()
+        local health = ankh_health:GetInt()
+        if self.RemainingHealth > 0 then
+            ankh:SetHealth(self.RemainingHealth)
+        else
+            ankh:SetHealth(health)
+        end
+        ankh:SetMaxHealth(health)
 
-    self:Remove()
+        ankh:Spawn()
+
+        self:Remove()
+    end)
 end
 
 function SWEP:SecondaryAttack()
+end
+
+if CLIENT then
+    SWEP.GhostEnt = ClientsideModel(SWEP.WorldModel)
+    -- Scale this down to match (roughly) the size it will be in the world
+    SWEP.GhostEnt:SetModelScale(0.53)
 end
 
 function SWEP:ViewModelDrawn()
@@ -112,7 +128,13 @@ function SWEP:ViewModelDrawn()
     -- Draw a box where the ankh will be placed, colored GREEN for a good location and RED for a bad one
     local tr, hit = self:GetAimTrace(owner)
     local eyeAngles = owner:EyeAngles()
-    render.DrawWireframeBox(tr.HitPos, Angle(0, eyeAngles.y, 0), self.GhostMinBounds, self.GhostMaxBounds, hit and COLOR_GREEN or COLOR_RED, true)
+
+    render.Model({
+        model = self.WorldModel,
+        pos = tr.HitPos,
+        angle = Angle(0, eyeAngles.y, 0)
+    }, self.GhostEnt)
+    render.DrawWireframeBox(tr.HitPos + Vector(0, 0, 5), Angle(0, eyeAngles.y, 0), Vector(-5, -5, -5), Vector(5, 5, 12), hit and COLOR_GREEN or COLOR_RED, true)
 end
 
 function SWEP:Reload()
@@ -127,4 +149,19 @@ function SWEP:OnRemove()
     if CLIENT and IsValid(self:GetOwner()) and self:GetOwner() == LocalPlayer() and self:GetOwner():Alive() then
         RunConsoleCommand("lastinv")
     end
+end
+
+function SWEP:Think()
+	self:Idle()
+end
+
+function SWEP:Idle()
+	-- Update idle anim
+	local curtime = CurTime()
+	if curtime < self:GetNextIdle() then return false end
+
+	self:SendWeaponAnim(ACT_VM_IDLE)
+	self:SetNextIdle(curtime + self:SequenceDuration())
+
+	return true
 end

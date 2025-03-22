@@ -47,7 +47,7 @@ if CLIENT then
 end
 
 ENT.Type = "anim"
-ENT.Model = Model("models/props/cs_office/microwave.mdl")
+ENT.Model = Model("models/cr_pharaoh/w_cr_pharaoh_ankh.mdl")
 
 ENT.CanUseKey = true
 
@@ -58,6 +58,7 @@ local ankh_heal_rate = CreateConVar("ttt_pharaoh_ankh_heal_rate", "1", FCVAR_REP
 local ankh_heal_amount = CreateConVar("ttt_pharaoh_ankh_heal_amount", "1", FCVAR_REPLICATED, "How much to heal the Pharaoh per tick when they are near the Ankh. Set to 0 to disable", 0, 100)
 local ankh_repair_rate = CreateConVar("ttt_pharaoh_ankh_repair_rate", "1", FCVAR_REPLICATED, "How often (in seconds) the Ankh should repair when their Pharaoh is near. Set to 0 to disable", 0, 60)
 local ankh_repair_amount = CreateConVar("ttt_pharaoh_ankh_repair_amount", "5", FCVAR_REPLICATED, "How much to repair the Ankh per tick when their Pharaoh is near it. Set to 0 to disable", 0, 500)
+local ankh_heal_repair_dist = CreateConVar("ttt_pharaoh_ankh_heal_repair_dist", "100", FCVAR_REPLICATED, "The maximum distance away the Pharaoh can be for the heal and repair to occur. Set to 0 to disable", 0, 2000)
 
 function ENT:SetupDataTables()
    self:DTVar("Entity", 0, "Pharaoh")
@@ -71,10 +72,7 @@ function ENT:Initialize()
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_BBOX)
 
-    -- TODO: Modify this to match model
-    local b = 32
-    self:SetCollisionBounds(Vector(-b, -b, -b), Vector(b,b,b))
-
+    self:SetCollisionBounds(Vector(-5, -5, -5), Vector(5, 5, 32))
     self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
 
     if SERVER then
@@ -87,9 +85,21 @@ function ENT:Initialize()
         self:SetUseType(CONTINUOUS_USE)
     end
 
-    --if CLIENT then
-    --    -- TODO: Render projected aura
-    --end
+    if CLIENT then
+        local auraTexture = Material("cr_pharaoh/decals/ankh_floor_decal.vmt")
+        local pos = self:GetPos()
+        local angle = self:GetAngles()
+        local radius = ankh_heal_repair_dist:GetInt()
+        local size = Vector(radius, radius, 0)
+
+        -- Render the projected aura
+        hook.Add("HUDPaint", self:EntIndex() .. "_HUDPaint", function()
+            cam.Start3D()
+                render.SetMaterial(auraTexture)
+                render.DrawBox(pos, angle, -size, size, COLOR_WHITE)
+            cam.End3D()
+        end)
+    end
 end
 
 if SERVER then
@@ -100,7 +110,6 @@ if SERVER then
     local damage_own_ankh = CreateConVar("ttt_pharaoh_damage_own_ankh", "0", FCVAR_NONE, "Whether an Ankh's owner can damage it", 0, 1)
     local warn_damage = CreateConVar("ttt_pharaoh_warn_damage", "1", FCVAR_NONE, "Whether to warn an Ankh's owner is warned when it is damaged", 0, 1)
     local warn_destroy = CreateConVar("ttt_pharaoh_warn_destroy", "1", FCVAR_NONE, "Whether to warn an Ankh's owner is warned when it is destroyed", 0, 1)
-    local ankh_heal_repair_dist = CreateConVar("ttt_pharaoh_ankh_heal_repair_dist", "150", FCVAR_NONE, "The maximum distance away the Pharaoh can be for the heal and repair to occur. Set to 0 to disable", 0, 2000)
 
     function ENT:OnTakeDamage(dmginfo)
         local att = dmginfo:GetAttacker()
@@ -226,8 +235,9 @@ if SERVER then
     end
 end
 
---if CLIENT then
---    function ENT:OnRemove()
---        -- TODO: Remove the projected aura
---    end
---end
+if CLIENT then
+    function ENT:OnRemove()
+        -- Remove the projected aura
+        hook.Remove("HUDPaint", self:EntIndex() .. "_HUDPaint")
+    end
+end

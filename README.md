@@ -77,7 +77,7 @@ ttt_pharaoh_respawn_delay          20  // How long (in seconds) after death a Ph
 ttt_pharaoh_respawn_warn_pharaoh   1   // Whether the original Pharaoh owner of an Ankh should be notified when it's used by someone else
 ttt_pharaoh_ankh_health            500 // How much health the Ankh should have
 ttt_pharaoh_move_ankh              1   // Whether an Ankh's owner can move it
-ttt_pharaoh_ankh_heal_repair_dist  150 // The maximum distance away the Pharaoh can be for the heal and repair to occur. Set to 0 to disable
+ttt_pharaoh_ankh_heal_repair_dist  100 // The maximum distance away the Pharaoh can be for the heal and repair to occur. Set to 0 to disable
 ttt_pharaoh_ankh_heal_rate         1   // How often (in seconds) the Pharaoh should heal when they are near the Ankh. Set to 0 to disable
 ttt_pharaoh_ankh_heal_amount       1   // How much to heal the Pharaoh per tick when they are near the Ankh. Set to 0 to disable
 ttt_pharaoh_ankh_repair_rate       1   // How often (in seconds) the Ankh should repair when their Pharaoh is near. Set to 0 to disable
