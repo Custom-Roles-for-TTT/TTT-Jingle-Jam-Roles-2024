@@ -129,7 +129,8 @@ ttt_pharaoh_spawn_weight           1   // The weight assigned to spawning the Ph
 ttt_pharaoh_min_players            0   // The minimum number of players required to spawn the Pharaoh
 ttt_pharaoh_starting_health        100 // The amount of health Pharaohs start with
 ttt_pharaoh_max_health             100 // The maximum amount of health Pharaohs can have
-ttt_pharaoh_is_independent         0   // Whether Pharaohs should be treated as independent
+ttt_pharaoh_is_detective           0   // Whether Pharaohs should be treated as a detective role
+ttt_pharaoh_is_independent         0   // Whether Pharaohs should be treated as independent. Ignored when "ttt_pharaoh_is_detective" is enabled
 ttt_pharaoh_steal_time             15  // The amount of time it takes to steal an Ankh
 ttt_pharaoh_innocent_steal         0   // Whether innocents are allowed to steal the Ankh
 ttt_pharaoh_traitor_steal          1   // Whether traitors are allowed to steal the Ankh
@@ -149,8 +150,12 @@ ttt_pharaoh_damage_own_ankh        0   // Whether an Ankh's owner can damage it
 ttt_pharaoh_warn_damage            1   // Whether to warn an Ankh's owner is warned when it is damaged
 ttt_pharaoh_warn_destroy           1   // Whether to warn an Ankh's owner is warned when it is destroyed
 ttt_pharaoh_warn_steal             1   // Whether to warn an Ankh's owner is warned when it is stolen
-ttt_pharaoh_can_see_jesters        1   // Whether jesters are revealed (via head icons, color/icon on the scoreboard, etc.) to Pharaohs. Only used when "ttt_pharaoh_is_independent" is enabled
-ttt_pharaoh_update_scoreboard      1   // Whether Pharaohs see dead players as missing in action on the scoreboard. Only used when "ttt_pharaoh_is_independent" is enabled
+ttt_pharaoh_credits_starting       1   // The number of credits a Pharaoh should start with. Only used when "ttt_pharaoh_is_detective" is enabled
+ttt_pharaoh_shop_sync              0   // Whether pharaohs should have all weapons that vanilla detectives have in their weapon shop. Only used when "ttt_pharaoh_is_detective" is enabled
+ttt_pharaoh_shop_random_enabled    0   // Whether role shop randomization is enabled for pharaohs. Only used when "ttt_pharaoh_is_detective" is enabled
+ttt_pharaoh_shop_random_percent    0   // The percent chance that a weapon in the shop will be not be shown for pharaohs. Only used when "ttt_pharaoh_is_detective" is enabled
+ttt_pharaoh_can_see_jesters        1   // Whether jesters are revealed (via head icons, color/icon on the scoreboard, etc.) to Pharaohs. Only used when "ttt_pharaoh_is_independent" is enabled and "ttt_pharaoh_is_detective" is disabled
+ttt_pharaoh_update_scoreboard      1   // Whether Pharaohs see dead players as missing in action on the scoreboard. Only used when "ttt_pharaoh_is_independent" is enabled and "ttt_pharaoh_is_detective" is disabled
 ```
 
 ## Werewolf

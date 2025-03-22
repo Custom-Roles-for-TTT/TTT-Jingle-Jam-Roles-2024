@@ -155,7 +155,7 @@ local pharaoh_respawn_delay = CreateConVar("ttt_pharaoh_respawn_delay", 20, FCVA
 CreateConVar("ttt_pharaoh_can_see_jesters", "0", FCVAR_REPLICATED)
 CreateConVar("ttt_pharaoh_update_scoreboard", "0", FCVAR_REPLICATED)
 -- Detective ConVars
-CreateConVar("ttt_pharaoh_credits_starting", credits, FCVAR_REPLICATED)
+CreateConVar("ttt_pharaoh_credits_starting", "1", FCVAR_REPLICATED)
 CreateConVar("ttt_pharaoh_shop_sync", "0", FCVAR_REPLICATED)
 CreateConVar("ttt_pharaoh_shop_random_percent", "0", FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the pharaoh", 0, 100)
 CreateConVar("ttt_pharaoh_shop_random_enabled", "0", FCVAR_REPLICATED, "Whether shop randomization should run for the pharaoh")
