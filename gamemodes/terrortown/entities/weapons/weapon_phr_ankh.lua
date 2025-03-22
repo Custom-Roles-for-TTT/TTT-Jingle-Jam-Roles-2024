@@ -18,7 +18,7 @@ SWEP.Category               = WEAPON_CATEGORY_ROLE
 
 SWEP.Spawnable              = false
 SWEP.AutoSpawnable          = false
-SWEP.HoldType               = "slam"
+SWEP.HoldType               = "normal"
 SWEP.Kind                   = WEAPON_ROLE
 
 SWEP.DeploySpeed            = 4
@@ -164,4 +164,10 @@ function SWEP:Idle()
     self:SetNextIdle(curtime + self:SequenceDuration())
 
     return true
+end
+
+function SWEP:DrawWorldModel()
+end
+
+function SWEP:DrawWorldModelTranslucent()
 end
