@@ -52,7 +52,7 @@ function SWEP:Initialize()
 end
 
 function SWEP:SetupDataTables()
-	self:NetworkVar("Float", 0, "NextIdle")
+    self:NetworkVar("Float", 0, "NextIdle")
 end
 
 function SWEP:GetAimTrace(owner)
@@ -152,16 +152,16 @@ function SWEP:OnRemove()
 end
 
 function SWEP:Think()
-	self:Idle()
+    self:Idle()
 end
 
 function SWEP:Idle()
-	-- Update idle anim
-	local curtime = CurTime()
-	if curtime < self:GetNextIdle() then return false end
+    -- Update idle anim
+    local curtime = CurTime()
+    if curtime < self:GetNextIdle() then return false end
 
-	self:SendWeaponAnim(ACT_VM_IDLE)
-	self:SetNextIdle(curtime + self:SequenceDuration())
+    self:SendWeaponAnim(ACT_VM_IDLE)
+    self:SetNextIdle(curtime + self:SequenceDuration())
 
-	return true
+    return true
 end
