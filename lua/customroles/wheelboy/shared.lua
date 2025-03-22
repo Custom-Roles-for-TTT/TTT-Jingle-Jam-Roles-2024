@@ -30,6 +30,24 @@ ROLE.maxhealth = 150
 ROLE.convars =
 {
     {
+        cvar = "ttt_wheelboy_notify_mode",
+        type = ROLE_CONVAR_TYPE_DROPDOWN,
+        choices = {"None", "Detective and Traitor", "Traitor", "Detective", "Everyone"},
+        isNumeric = true
+    },
+    {
+        cvar = "ttt_wheelboy_notify_killer",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_wheelboy_notify_sound",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
+        cvar = "ttt_wheelboy_notify_confetti",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
         cvar = "ttt_wheelboy_wheel_recharge_time",
         type = ROLE_CONVAR_TYPE_NUM
     },

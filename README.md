@@ -18,6 +18,10 @@ ttt_barrelmimic_max_health          100 // The maximum amount of health the Barr
 ttt_barrelmimic_announce            1   // Whether to announce that there is a Barrel Mimic
 ttt_barrelmimic_respawn_all_deaths  1   // Whether to respawn when the Barrel Mimic is killed in any way. If disabled, they will only respawn when killed as a barrel
 ttt_barrelmimic_respawn_delay       15  // The delay before the Barrel Mimic is killed without winning the round. If set to 0, they will not respawn
+ttt_barrelmimic_notify_mode         0   // The logic to use when notifying players that a Barrel Mimic was killed. Killer is notified unless "ttt_barrelmimic_notify_killer" is disabled. 0 - Don't notify anyone. 1 - Only notify traitors and detective. 2 - Only notify traitors. 3 - Only notify detective. 4 - Notify everyone.
+ttt_barrelmimic_notify_killer       1   // Whether to notify a Barrel Mimic's killer
+ttt_barrelmimic_notify_sound        0   // Whether to play a cheering sound when a Barrel Mimic is killed
+ttt_barrelmimic_notify_confetti     0   // Whether to throw confetti when a Barrel Mimic is a killed
 ```
 
 ## Hermit
@@ -153,7 +157,7 @@ ttt_werewolf_update_scoreboard      1       // Whether Werewolves see dead playe
 
 ## Wheel Boy
 _Suggested By_: spammonster\
-Wheel Boy can spin a wheel to apply random effects to everyone. Spin enough times and they win.
+Wheel Boy is a jester role that can spin a wheel to apply random effects to everyone. Spin enough times and they win.
 \
 \
 **ConVars**
@@ -172,6 +176,10 @@ ttt_wheelboy_announce_sound      1    // Whether to announce that there is a Whe
 ttt_wheelboy_speed_mult          1.2  // The multiplier to use on Wheel Boy's movement speed (e.g. 1.2 = 120% normal speed)
 ttt_wheelboy_sprint_recovery     0.12 // The amount of stamina to recover per tick
 ttt_wheelboy_swap_on_kill        0    // Whether Wheel Boy's killer should become the new Wheel Boy (if they haven't won yet)
+ttt_wheelboy_notify_mode         0    // The logic to use when notifying players that a Wheel Boy was killed. Killer is notified unless "ttt_wheelboy_notify_killer" is disabled. 0 - Don't notify anyone. 1 - Only notify traitors and detective. 2 - Only notify traitors. 3 - Only notify detective. 4 - Notify everyone.
+ttt_wheelboy_notify_killer       1    // Whether to notify a Wheel Boy's killer
+ttt_wheelboy_notify_sound        0    // Whether to play a cheering sound when a Wheel Boy is killed
+ttt_wheelboy_notify_confetti     0    // Whether to throw confetti when a Wheel Boy is a killed
 ```
 
 ## Zealot
