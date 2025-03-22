@@ -86,6 +86,14 @@ function ENT:Initialize()
     end
 
     if CLIENT then
+        local cam = cam
+        local render = render
+
+        local CamStart3D = cam.Start3D
+        local CamEnd3D = cam.End3D
+        local RenderDrawBox = render.DrawBox
+        local RenderSetMaterial = render.SetMaterial
+
         local auraTexture = Material("cr_pharaoh/decals/ankh_floor_decal.vmt")
         local pos = self:GetPos()
         local angle = self:GetAngles()
@@ -94,10 +102,10 @@ function ENT:Initialize()
 
         -- Render the projected aura
         hook.Add("HUDPaint", self:EntIndex() .. "_HUDPaint", function()
-            cam.Start3D()
-                render.SetMaterial(auraTexture)
-                render.DrawBox(pos, angle, -size, size, COLOR_WHITE)
-            cam.End3D()
+            CamStart3D()
+                RenderSetMaterial(auraTexture)
+                RenderDrawBox(pos, angle, -size, size, COLOR_WHITE)
+            CamEnd3D()
         end)
     end
 end
