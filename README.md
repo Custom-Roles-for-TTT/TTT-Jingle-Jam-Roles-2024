@@ -246,6 +246,7 @@ ttt_zealot_shop_random_enabled      0   // Whether role shop randomization is en
 # Special Thanks
 - [Game icons](https://game-icons.net/) for the role icons
 - [The Stig](https://steamcommunity.com/id/The-Stig-294) for the Randoman role that the Hoodoo was very heavily based on
+- [Tim | Mineotopia](https://steamcommunity.com/id/mineotopia) for the TTT2 version of the Pharaoh that our Pharaoh was inspired by
 - [Spaaz](https://steamcommunity.com/profiles/76561198027913001) for the models and textures used by the Ankh for the Pharaoh
 - Angela from the [Lonely Yogs](https://lonely-yogs.co.uk/) for her help with the math for drawing Wheel Boy's segmented wheel
 - The Yogscast for clips from their videos for the Wheel Boy role
