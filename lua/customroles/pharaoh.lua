@@ -25,6 +25,10 @@ ROLE.team = ROLE_TEAM_INNOCENT
 
 ROLE.convars = {
     {
+        cvar = "ttt_pharaoh_is_detective",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
         cvar = "ttt_pharaoh_is_independent",
         type = ROLE_CONVAR_TYPE_BOOL
     },
@@ -126,13 +130,20 @@ ROLE.translations = {
         ["phr_ankh_help_pri"] = "Use {primaryfire} to place your Ankh on the ground",
         ["phr_ankh_help_sec"] = "Stay near it to heal",
         ["phr_ankh_damaged"] = "Your Ankh has been damaged!",
-        ["pharaoh_stealing"] = "STEALING"
+        ["pharaoh_stealing"] = "STEALING",
+        ["info_popup_pharaoh_detective"] = [[You are {role}! As {adetective}, HQ has given you special resources to find the {traitors}.
+You have an Ankh that can be placed down somewhere and which serves as a single-use respawn anchor.
+If you die with the Ankh placed, you'll respawn at it's location (once).
+Be careful, though, the Ankh can be destroyed by other players (and maybe stolen too)!
+
+Press {menukey} to receive your equipment!]]
     }
 }
 
 RegisterRole(ROLE)
 
-local pharaoh_is_independent = CreateConVar("ttt_pharaoh_is_independent", 0, FCVAR_REPLICATED, "Whether Pharaohs should be treated as independent")
+local pharaoh_is_detective = CreateConVar("ttt_pharaoh_is_detective", 0, FCVAR_REPLICATED, "Whether Pharaohs should be treated as a detective role", 0, 1)
+local pharaoh_is_independent = CreateConVar("ttt_pharaoh_is_independent", 0, FCVAR_REPLICATED, "Whether Pharaohs should be treated as independent. Ignored when \"ttt_pharaoh_is_detective\" is enabled", 0, 1)
 local pharaoh_steal_time = CreateConVar("ttt_pharaoh_steal_time", "15", FCVAR_REPLICATED, "The amount of time it takes to steal an Ankh", 1, 60)
 local pharaoh_innocent_steal = CreateConVar("ttt_pharaoh_innocent_steal", "0", FCVAR_REPLICATED, "Whether innocents are allowed to steal the Ankh", 0, 1)
 local pharaoh_traitor_steal = CreateConVar("ttt_pharaoh_traitor_steal", "1", FCVAR_REPLICATED, "Whether traitors are allowed to steal the Ankh", 0, 1)
@@ -140,8 +151,14 @@ local pharaoh_jester_steal = CreateConVar("ttt_pharaoh_jester_steal", "0", FCVAR
 local pharaoh_independent_steal = CreateConVar("ttt_pharaoh_independent_steal", "1", FCVAR_REPLICATED, "Whether independents are allowed to steal the Ankh", 0, 1)
 local pharaoh_monster_steal = CreateConVar("ttt_pharaoh_monster_steal", "1", FCVAR_REPLICATED, "Whether monsters are allowed to steal the Ankh", 0, 1)
 local pharaoh_respawn_delay = CreateConVar("ttt_pharaoh_respawn_delay", 20, FCVAR_REPLICATED, "How long (in seconds) after death a Pharaoh should respawn if they placed down an Ankh. Set to 0 to disable respawning", 0, 180)
+-- Independent ConVars
 CreateConVar("ttt_pharaoh_can_see_jesters", "0", FCVAR_REPLICATED)
 CreateConVar("ttt_pharaoh_update_scoreboard", "0", FCVAR_REPLICATED)
+-- Detective ConVars
+CreateConVar("ttt_pharaoh_credits_starting", credits, FCVAR_REPLICATED)
+CreateConVar("ttt_pharaoh_shop_sync", "0", FCVAR_REPLICATED)
+CreateConVar("ttt_pharaoh_shop_random_percent", "0", FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the pharaoh", 0, 100)
+CreateConVar("ttt_pharaoh_shop_random_enabled", "0", FCVAR_REPLICATED, "Whether shop randomization should run for the pharaoh")
 
 local pharaoh_ankh_heal_rate = GetConVar("ttt_pharaoh_ankh_heal_rate")
 local pharaoh_ankh_heal_amount = GetConVar("ttt_pharaoh_ankh_heal_amount")
@@ -153,9 +170,12 @@ local pharaoh_ankh_repair_amount = GetConVar("ttt_pharaoh_ankh_repair_amount")
 -----------------
 
 AddHook("TTTUpdateRoleState", "Pharaoh_TTTUpdateRoleState", function()
-    local is_independent = pharaoh_is_independent:GetBool()
+    local is_detective = pharaoh_is_detective:GetBool()
+    -- If they are a detective it doesn't matter what the other convar is set to
+    local is_independent = not is_detective and pharaoh_is_independent:GetBool()
     INDEPENDENT_ROLES[ROLE_PHARAOH] = is_independent
     INNOCENT_ROLES[ROLE_PHARAOH] = not is_independent
+    DETECTIVE_ROLES[ROLE_PHARAOH] = is_detective
 end)
 
 ----------------
@@ -405,6 +425,18 @@ if CLIENT then
         CRHUD:PaintProgressBar(x, y, w, COLOR_GREEN, text, progress)
     end)
 
+    ----------------
+    -- ROLE POPUP --
+    ----------------
+
+    hook.Add("TTTRolePopupRoleStringOverride", "Pharaoh_TTTRolePopupRoleStringOverride", function(cli, roleString)
+        if not IsPlayer(cli) or not cli:IsPharaoh() then return end
+
+        if DETECTIVE_ROLES[ROLE_PHARAOH] then
+            return roleString .. "_detective"
+        end
+    end)
+
     --------------
     -- TUTORIAL --
     --------------
@@ -413,10 +445,15 @@ if CLIENT then
         if role ~= ROLE_PHARAOH then return end
 
         local roleColor = ROLE_COLORS[ROLE_PHARAOH]
-        local roleTeam = player.GetRoleTeam(ROLE_PHARAOH, true)
+        local roleTeam = player.GetRoleTeam(ROLE_PHARAOH)
         local roleTeamName, _ = GetRoleTeamInfo(roleTeam)
 
-        local html = "The " .. ROLE_STRINGS[ROLE_PHARAOH] .. " is an <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>" .. roleTeamName .. "</span> role who is given an Ankh which they can place in the world."
+        local article = "an"
+        if roleTeam == ROLE_TEAM_DETECTIVE then
+            roleTeamName = LANG.GetTranslation("detective")
+            article = "a"
+        end
+        local html = "The " .. ROLE_STRINGS[ROLE_PHARAOH] .. " is " .. article .. " <span style='color: rgb(" .. roleColor.r .. ", " .. roleColor.g .. ", " .. roleColor.b .. ")'>" .. roleTeamName .. "</span> role who is given an Ankh which they can place in the world."
 
         local delay = pharaoh_respawn_delay:GetInt()
         if delay > 0 then
