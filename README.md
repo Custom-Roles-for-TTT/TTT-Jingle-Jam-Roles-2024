@@ -141,6 +141,7 @@ ttt_pharaoh_respawn_delay          20  // How long (in seconds) after death a Ph
 ttt_pharaoh_respawn_warn_pharaoh   1   // Whether the original Pharaoh owner of an Ankh should be notified when it's used by someone else
 ttt_pharaoh_ankh_health            500 // How much health the Ankh should have
 ttt_pharaoh_move_ankh              1   // Whether an Ankh's owner can move it
+ttt_pharaoh_ankh_place_sound       1   // Whether to play a sound when the Ankh is placed down
 ttt_pharaoh_ankh_heal_repair_dist  100 // The maximum distance away the Pharaoh can be for the heal and repair to occur. Set to 0 to disable
 ttt_pharaoh_ankh_heal_rate         1   // How often (in seconds) the Pharaoh should heal when they are near the Ankh. Set to 0 to disable
 ttt_pharaoh_ankh_heal_amount       1   // How much to heal the Pharaoh per tick when they are near the Ankh. Set to 0 to disable
@@ -245,6 +246,10 @@ ttt_zealot_shop_random_enabled      0   // Whether role shop randomization is en
 
 # Special Thanks
 - [Game icons](https://game-icons.net/) for the role icons
+- [SampleFocus.com](https://samplefocus.com) for the sounds that were combined to make the sound that plays when placing the Pharaoh's Ankh
+  - "Bell Hit - Clean Long" by [salosokssass](https://samplefocus.com/users/salosokssass)
+  - "Bell Hit - Shimmer" by [Filip Bachanek](https://samplefocus.com/users/filip-bachanek)
+  - "Choir Melody - High Short" by [Mario Francesco Comune](https://samplefocus.com/users/mario-francesco-comune)
 - [The Stig](https://steamcommunity.com/id/The-Stig-294) for the Randoman role that the Hoodoo was very heavily based on
 - [Tim | Mineotopia](https://steamcommunity.com/id/mineotopia) for the TTT2 version of the Pharaoh that our Pharaoh was inspired by
 - [Spaaz](https://steamcommunity.com/profiles/76561198027913001) for the models and textures used by the Ankh for the Pharaoh

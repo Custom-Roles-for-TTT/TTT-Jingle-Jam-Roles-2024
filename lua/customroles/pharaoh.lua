@@ -37,6 +37,10 @@ ROLE.convars = {
         type = ROLE_CONVAR_TYPE_BOOL
     },
     {
+        cvar = "ttt_pharaoh_ankh_place_sound",
+        type = ROLE_CONVAR_TYPE_BOOL
+    },
+    {
         cvar = "ttt_pharaoh_steal_time",
         type = ROLE_CONVAR_TYPE_NUM
     },

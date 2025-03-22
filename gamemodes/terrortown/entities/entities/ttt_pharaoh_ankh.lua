@@ -60,6 +60,11 @@ local ankh_repair_rate = CreateConVar("ttt_pharaoh_ankh_repair_rate", "1", FCVAR
 local ankh_repair_amount = CreateConVar("ttt_pharaoh_ankh_repair_amount", "5", FCVAR_REPLICATED, "How much to repair the Ankh per tick when their Pharaoh is near it. Set to 0 to disable", 0, 500)
 local ankh_heal_repair_dist = CreateConVar("ttt_pharaoh_ankh_heal_repair_dist", "100", FCVAR_REPLICATED, "The maximum distance away the Pharaoh can be for the heal and repair to occur. Set to 0 to disable", 0, 2000)
 
+if SERVER then
+    ENT.PlaceSound = Sound("phr/choir_and_bell_short.wav")
+    CreateConVar("ttt_pharaoh_ankh_place_sound", "1", FCVAR_NONE, "Whether to play a sound when the Ankh is placed down", 0, 1)
+end
+
 function ENT:SetupDataTables()
    self:DTVar("Entity", 0, "Pharaoh")
    self:DTVar("Entity", 1, "Placer")
@@ -83,6 +88,10 @@ function ENT:Initialize()
         end
 
         self:SetUseType(CONTINUOUS_USE)
+
+        if GetConVar("ttt_pharaoh_ankh_place_sound"):GetBool() then
+            self:EmitSound(self.PlaceSound)
+        end
     end
 
     if CLIENT then
