@@ -24,6 +24,32 @@ ttt_barrelmimic_notify_sound        0   // Whether to play a cheering sound when
 ttt_barrelmimic_notify_confetti     0   // Whether to throw confetti when a Barrel Mimic is a killed
 ```
 
+## Hermit
+_Suggested By_: Spaaz\
+The Hermit is a jester role that joins the team of any players that give them a shop item by becoming a Monk or a Zealot.
+_Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3205649099) to be installed._
+\
+\
+**ConVars**
+```cpp
+ttt_hemit_enabled                       0   // Whether or not the Hermit should spawn
+ttt_hemit_spawn_weight                  1   // The weight assigned to spawning the Hermit
+ttt_hemit_min_players                   0   // The minimum number of players required to spawn the Hermit
+ttt_hemit_starting_health               100 // The amount of health the Hermit starts with
+ttt_hemit_max_health                    100 // The maximum amount of health the Hermit can have
+ttt_hermit_is_independent               0   // Whether Hermits should be treated as members of the independent team
+ttt_hermit_reveal_traitor               1   // Who the Hermit is revealed to when they join the traitor team. 0 - No one. 1 - Everyone. 2 - Traitors. 3 - Innocents. 4 - Roles that can see jesters
+ttt_hermit_reveal_innocent              2   // Who the Hermit is revealed to when they join the innocent team. 0 - No one. 1 - Everyone. 2 - Traitors. 3 - Innocents. 4 - Roles that can see jesters
+ttt_beggar_announce_delay               0   // How long the delay between the Hermit's role change and announcement should be
+ttt_hermit_keep_begging                 0   // Whether the Hermit should be able to keep begging after joining a team and switch teams multiple times
+ttt_hermit_ignore_empty_weapons         0   // Whether the Hermit should not change teams if they are given a weapon with no ammo
+ttt_hermit_ignore_empty_weapons_warning 0   // Whether the Hermit should receive a chat message warning on receiving an empty weapon
+ttt_hemit_notify_mode                   0   // The logic to use when notifying players that a Hermit is killed. Killer is notified unless "ttt_hermit_notify_killer" is disabled. 0 - Don't notify anyone. 1 - Only notify traitors and detective. 2 - Only notify traitors. 3 - Only notify detective. 4 - Notify everyone
+ttt_hemit_notify_killer                 1   // Whether to notify a Hermit's killer
+ttt_hemit_notify_sound                  0   // Whether to play a cheering sound when a Hermit is killed
+ttt_hemit_notify_confetti               0   // Whether to throw confetti when a Hermit is a killed
+```
+
 ## Hoodoo
 _Suggested By_: Corvatile\
 _Based On_: Randoman, by The Stig\
@@ -33,24 +59,61 @@ _Requires [TTT Randomat 2.0 for Custom Roles for TTT](https://steamcommunity.com
 \
 **ConVars**
 ```cpp
-ttt_hoodoo_enabled                    0      // Whether or not the hoodoo should spawn
-ttt_hoodoo_spawn_weight               1      // The weight assigned to spawning the hoodoo
-ttt_hoodoo_min_players                0      // The minimum number of players required to spawn the hoodoo
-ttt_hoodoo_starting_health            100    // The amount of health the hoodoo starts with
-ttt_hoodoo_max_health                 100    // The maximum amount of health the hoodoo can have
-ttt_hoodoo_banned_randomats           "lame" // Events not allowed in the hoodoo's shop, separate ids with commas. You can find an ID by looking at an event in the randomat ULX menu.
-ttt_hoodoo_prevent_auto_randomat      1      // Prevent auto-randomat triggering if there is a hoodoo at the start of the round.
-ttt_hoodoo_guaranteed_categories      "biased_traitor" // At least one randomat from each of these categories will always be in the hoodoo's shop. Separate categories with a comma. Categories: biased_innocent, biased_traitor, biased_zombie, biased, deathtrigger, entityspawn, eventtrigger, fun, gamemode, item, largeimpact, moderateimpact, rolechange, smallimpact, spectator, stats
-ttt_hoodoo_banned_categories          "gamemode,rolechange" // Randomats that have any of these categories will never be in the hoodoo's shop. Separate categories with a comma. You can find a randomat's category by looking at an event in the randomat ULX menu."
-ttt_hoodoo_guaranteed_randomats       ""     // These events are guaranteed be in the hoodoo's shop, separate event IDs with commas.
-ttt_hoodoo_event_on_unbought_death    0      // Whether a randomat should trigger if a hoodoo dies and never bought anything that round
-ttt_hoodoo_choose_event_on_drop       1      // Whether the held randomat item should always trigger "Choose an event!" after being bought by a hoodoo and dropped on the ground
+ttt_hoodoo_enabled                    0      // Whether or not the Hoodoo should spawn
+ttt_hoodoo_spawn_weight               1      // The weight assigned to spawning the Hoodoo
+ttt_hoodoo_min_players                0      // The minimum number of players required to spawn the Hoodoo
+ttt_hoodoo_starting_health            100    // The amount of health the Hoodoo starts with
+ttt_hoodoo_max_health                 100    // The maximum amount of health the Hoodoo can have
+ttt_hoodoo_banned_randomats           "lame" // Events not allowed in the Hoodoo's shop, separate ids with commas. You can find an ID by looking at an event in the randomat ULX menu.
+ttt_hoodoo_prevent_auto_randomat      1      // Prevent auto-randomat triggering if there is a Hoodoo at the start of the round.
+ttt_hoodoo_guaranteed_categories      "biased_traitor" // At least one randomat from each of these categories will always be in the Hoodoo's shop. Separate categories with a comma. Categories: biased_innocent, biased_traitor, biased_zombie, biased, deathtrigger, entityspawn, eventtrigger, fun, gamemode, item, largeimpact, moderateimpact, rolechange, smallimpact, spectator, stats
+ttt_hoodoo_banned_categories          "gamemode,rolechange" // Randomats that have any of these categories will never be in the Hoodoo's shop. Separate categories with a comma. You can find a randomat's category by looking at an event in the randomat ULX menu."
+ttt_hoodoo_guaranteed_randomats       ""     // These events are guaranteed be in the Hoodoo's shop, separate event IDs with commas.
+ttt_hoodoo_event_on_unbought_death    0      // Whether a randomat should trigger if a Hoodoo dies and never bought anything that round
+ttt_hoodoo_choose_event_on_drop       1      // Whether the held randomat item should always trigger "Choose an event!" after being bought by a Hoodoo and dropped on the ground
 ttt_hoodoo_choose_event_on_drop_count 5      // The number of events a player should be able to choose from when using a dropped randomat
-ttt_hoodoo_guarantee_pockets_event    1      // Whether the "What did I find in my pocket?" event should always be available in the hoodoo's shop while the beggar role is enabled
-ttt_hoodoo_credits_starting           0      // The number of credits a hoodoo should start with
-ttt_hoodoo_shop_sync                  0      // Whether a hoodoo should have all weapons that vanilla detectives have in their weapon shop
-ttt_hoodoo_shop_random_percent        0      // The percent chance that a weapon in the shop will be not be shown for the hoodoo
-ttt_hoodoo_shop_random_enabled        0      // Whether role shop randomization is enabled for the hoodoo
+ttt_hoodoo_guarantee_pockets_event    1      // Whether the "What did I find in my pocket?" event should always be available in the Hoodoo's shop while the beggar role is enabled
+ttt_hoodoo_credits_starting           0      // The number of credits a Hoodoo should start with
+ttt_hoodoo_shop_sync                  0      // Whether a Hoodoo should have all weapons that vanilla traitors have in their weapon shop
+ttt_hoodoo_shop_random_percent        0      // The percent chance that a weapon in the shop will be not be shown for the Hoodoo
+ttt_hoodoo_shop_random_enabled        0      // Whether role shop randomization is enabled for the Hoodoo
+```
+
+## Missionary
+_Suggested By_: Spaaz\
+The Missionary is a detective role that can turn a player into a Monk, Zealot or Hermit depending on what team that player was one.
+_Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3205649099) to be installed._
+\
+\
+**ConVars**
+```cpp
+ttt_missionary_enabled              0   // Whether or not the Missionary should spawn
+ttt_missionary_spawn_weight         1   // The weight assigned to spawning the Missionary
+ttt_missionary_min_players          0   // The minimum number of players required to spawn the Missionary
+ttt_missionary_starting_health      100 // The amount of health the Missionary starts with
+ttt_missionary_max_health           100 // The maximum amount of health the Missionary can have
+ttt_missionary_proselytizer_time    8   // The amount of time (in seconds) the Missionary's proselytizer takes to use
+ttt_missionary_announce_proselytize 1   // How a player being proselytized will be announced to everyone. 0 - Don't announce, 1 - Announce as Missionary, 2 - Announce as Marshal
+ttt_missionary_prevent_monk         1   // Whether to only spawn the Missionary when there isn't already a Monk, Zealot, or Hermit in the round
+ttt_missionary_credits_starting     1   // The number of credits an Missionary should start with
+ttt_missionary_shop_sync            0   // Whether an Missionary should have all weapons that vanilla detectives have in their weapon shop
+ttt_missionary_shop_random_percent  0   // The percent chance that a weapon in the shop will be not be shown for the Missionary
+ttt_missionary_shop_random_enabled  0   // Whether role shop randomization is enabled for the Missionary
+```
+
+## Monk
+_Suggested By_: Spaaz\
+The Monk is an innocent role that can use chat to speak with the living after they die.
+_Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3205649099) to be installed._
+\
+\
+**ConVars**
+```cpp
+ttt_monk_enabled                0   // Whether or not the Monk should spawn
+ttt_monk_spawn_weight           1   // The weight assigned to spawning the Monk
+ttt_monk_min_players            0   // The minimum number of players required to spawn the Monk
+ttt_monk_starting_health        100 // The amount of health the Monk starts with
+ttt_monk_max_health             100 // The maximum amount of health the Monk can have
 ```
 
 ## Pharaoh
@@ -150,10 +213,29 @@ ttt_wheelboy_announce_sound      1    // Whether to announce that there is a Whe
 ttt_wheelboy_speed_mult          1.2  // The multiplier to use on Wheel Boy's movement speed (e.g. 1.2 = 120% normal speed)
 ttt_wheelboy_sprint_recovery     0.12 // The amount of stamina to recover per tick
 ttt_wheelboy_swap_on_kill        0    // Whether Wheel Boy's killer should become the new Wheel Boy (if they haven't won yet)
-ttt_wheelboy_notify_mode         0   // The logic to use when notifying players that a Wheel Boy was killed. Killer is notified unless "ttt_wheelboy_notify_killer" is disabled. 0 - Don't notify anyone. 1 - Only notify traitors and detective. 2 - Only notify traitors. 3 - Only notify detective. 4 - Notify everyone.
-ttt_wheelboy_notify_killer       1   // Whether to notify a Wheel Boy's killer
-ttt_wheelboy_notify_sound        0   // Whether to play a cheering sound when a Wheel Boy is killed
-ttt_wheelboy_notify_confetti     0   // Whether to throw confetti when a Wheel Boy is a killed
+ttt_wheelboy_notify_mode         0    // The logic to use when notifying players that a Wheel Boy was killed. Killer is notified unless "ttt_wheelboy_notify_killer" is disabled. 0 - Don't notify anyone. 1 - Only notify traitors and detective. 2 - Only notify traitors. 3 - Only notify detective. 4 - Notify everyone.
+ttt_wheelboy_notify_killer       1    // Whether to notify a Wheel Boy's killer
+ttt_wheelboy_notify_sound        0    // Whether to play a cheering sound when a Wheel Boy is killed
+ttt_wheelboy_notify_confetti     0    // Whether to throw confetti when a Wheel Boy is a killed
+```
+
+## Zealot
+_Suggested By_: Spaaz\
+The Zealot is a traitor role that becomes a Soulbound who can use special abilities while spectating if they die.
+_Requires [Custom Roles for TTT Jingle Jam 2023 Roles Pack](https://steamcommunity.com/sharedfiles/filedetails/?id=3205649099) to be installed._
+\
+\
+**ConVars**
+```cpp
+ttt_zealot_enabled                  0   // Whether or not the Zealot should spawn
+ttt_zealot_spawn_weight             1   // The weight assigned to spawning the Zealot
+ttt_zealot_min_players              0   // The minimum number of players required to spawn the Zealot
+ttt_zealot_starting_health          100 // The amount of health the Zealot starts with
+ttt_zealot_max_health               100 // The maximum amount of health the Zealot can have
+ttt_zealot_credits_starting         1   // The number of credits a Zealot should start with
+ttt_zealot_shop_sync                0   // Whether a Zealot should have all weapons that vanilla traitors have in their weapon shop
+ttt_zealot_shop_random_percent      0   // The percent chance that a weapon in the shop will be not be shown for the Zealot
+ttt_zealot_shop_random_enabled      0   // Whether role shop randomization is enabled for the Zealot
 ```
 
 # Special Thanks
