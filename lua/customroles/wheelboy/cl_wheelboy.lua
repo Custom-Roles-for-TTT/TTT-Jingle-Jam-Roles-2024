@@ -45,6 +45,7 @@ local swap_on_kill = GetConVar("ttt_wheelboy_swap_on_kill")
 
 local wheel_offset_x = CreateClientConVar("ttt_wheelboy_wheel_offset_x", "0", true, false, "The screen offset from the right to render the wheel at, on the x axis (left-and-right)")
 local wheel_offset_y = CreateClientConVar("ttt_wheelboy_wheel_offset_y", "0", true, false, "The screen offset from the center to render the wheel at, on the y axes (up-and-down)")
+local old_wheel_design = CreateClientConVar("ttt_wheelboy_old_wheel_design", "0", true, false, "Should Wheel Boy's wheel use the old design instead of the current one")
 
 local wheelRadius = 250
 
@@ -258,12 +259,36 @@ end)
 
 local pointerOutlinePoints = {
     { x = 0, y = -237 },
+    { x = -11, y = -253 },
+    { x = -10, y = -257 },
+    { x = -8, y = -261 },
+    { x = -4, y = -263 },
+    { x = 0, y = -264 },
+    { x = 4, y = -263 },
+    { x = 8, y = -261 },
+    { x = 10, y = -257 },
+    { x = 10, y = -253 }
+}
+local pointerPoints = {
+    { x = 0, y = -238 },
+    { x = -10, y = -253 },
+    { x = -9, y = -257 },
+    { x = -7, y = -260 },
+    { x = -4, y = -262 },
+    { x = 0, y = -263 },
+    { x = 4, y = -262 },
+    { x = 7, y = -260 },
+    { x = 9, y = -257 },
+    { x = 10, y = -253 }
+}
+local oldPointerOutlinePoints = {
+    { x = 0, y = -237 },
     { x = -16, y = -247 },
     { x = -16, y = -264 },
     { x = 16, y = -264 },
     { x = 16, y = -247 }
 }
-local pointerPoints = {
+local oldPointerPoints = {
     { x = 0, y = -238 },
     { x = -15, y = -248 },
     { x = -15, y = -263 },
@@ -273,7 +298,7 @@ local pointerPoints = {
 local function DrawPointer(x, y)
     -- Draw the same shape but slightly larger and black
     local outlineSegments = {}
-    for _, point in ipairs(pointerOutlinePoints) do
+    for _, point in ipairs(old_wheel_design:GetBool() and oldPointerOutlinePoints or pointerOutlinePoints) do
         TableInsert(outlineSegments, { x = point.x + x, y = point.y + y })
     end
 
@@ -283,7 +308,7 @@ local function DrawPointer(x, y)
 
     -- Draw the pointer itself
     local pointerSegments = {}
-    for _, point in ipairs(pointerPoints) do
+    for _, point in ipairs(old_wheel_design:GetBool() and oldPointerPoints or pointerPoints) do
         TableInsert(pointerSegments, { x = point.x + x, y = point.y + y })
     end
 
@@ -315,6 +340,22 @@ end
 -- Wheel --
 
 local colors = {
+    Color(87, 58, 138, 255),
+    Color(64, 143, 210, 255),
+    Color(39, 179, 255, 255),
+    Color(50, 163, 28, 255),
+    Color(214, 184, 0, 255),
+    Color(248, 90, 3, 255),
+    Color(254, 61, 113, 255),
+    Color(64, 143, 210, 255),
+    Color(39, 179, 255, 255),
+    Color(50, 163, 28, 255),
+    Color(214, 184, 0, 255),
+    Color(248, 90, 3, 255),
+    Color(254, 61, 113, 255)
+}
+
+local old_colors = {
     Color(76, 170, 231, 255),
     Color(209, 98, 175, 255),
     Color(249, 67, 46, 255),
@@ -332,8 +373,13 @@ local colors = {
 }
 
 local logoMat = Material("materials/vgui/ttt/roles/whl/logo.png")
+local oldLogoMat = Material("materials/vgui/ttt/roles/whl/old_logo.png")
 local function DrawLogo(x, y)
-    SurfaceSetMaterial(logoMat)
+    if old_wheel_design:GetBool() then
+        SurfaceSetMaterial(oldLogoMat)
+    else
+        SurfaceSetMaterial(logoMat)
+    end
     SurfaceSetDrawColor(COLOR_WHITE)
     SurfaceDrawTexturedRect(x - 25, y - 25, 50, 50)
 end
@@ -342,10 +388,13 @@ end
 local function DrawCircleSegment(segmentIdx, segmentCount, anglePerSegment, pointsPerSegment, radius, blink)
     local text = WHEELBOY.Effects[segmentIdx].name
     local color = colors[segmentIdx]
+    if old_wheel_design:GetBool() then
+        color = old_colors[segmentIdx]
+    end
 
     -- If we're blinking, make this segment darker
     if blink then
-        local h, s, l = ColorToHSL(colors[segmentIdx])
+        local h, s, l = ColorToHSL(color)
         color = HSLToColor(h, s, math.max(l - 0.125, 0.125))
     end
 
