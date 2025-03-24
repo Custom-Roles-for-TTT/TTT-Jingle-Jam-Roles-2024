@@ -98,7 +98,8 @@ ROLE.translations = {
         ["score_wheelboy_killed"] = "Killed",
         ["wheelboy_config_wheel_offset_x"] = "Wheel position, X-axis offset",
         ["wheelboy_config_wheel_offset_y"] = "Wheel position, Y-axis offset",
-        ["wheelboy_config_wheel_offset_reset"] = "Reset wheel position to default"
+        ["wheelboy_config_wheel_offset_reset"] = "Reset wheel position to default",
+        ["wheelboy_old_wheel_design"] = "Legacy mode"
     }
 }
 
