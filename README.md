@@ -162,6 +162,30 @@ ttt_pharaoh_can_see_jesters        1    // Whether jesters are revealed (via hea
 ttt_pharaoh_update_scoreboard      1    // Whether Pharaohs see dead players as missing in action on the scoreboard. Only used when "ttt_pharaoh_is_independent" is enabled and "ttt_pharaoh_is_detective" is disabled
 ```
 
+## Poisoner
+_Suggested By_: /u/HereForTOMT3\
+The Poisoner is a traitor role that can poison a target, disabling that player's role ability.
+\
+\
+**ConVars**
+```cpp
+ttt_poisoner_enabled                0           // Whether or not the Poisoner should spawn
+ttt_poisoner_spawn_weight           1           // The weight assigned to spawning the Poisoner
+ttt_poisoner_min_players            0           // The minimum number of players required to spawn the Poisoner
+ttt_poisoner_starting_health        100         // The amount of health Poisoners start with
+ttt_poisoner_max_health             100         // The maximum amount of health Poisoners can have
+ttt_poisoner_is_independent         0           // Whether Poisoners should be treated as independent
+ttt_poisoner_target_jesters         0           // Whether the Poisoner can target jesters
+ttt_poisoner_target_independents    1           // Whether the Poisoner can target independents
+ttt_poisoner_block_shop_roles       "mercenary" // Names of roles that have their shop blocked when poisoned, separated with commas. Do not include spaces or capital letters
+ttt_poisoner_poison_duration        0           // How long a Poisoner's poison should last on their target. Poisoner is refunded Poison Gun ammo when it expires. Set to 0 to have it be permanent
+ttt_poisoner_cure_on_death          1           // Whether a Poisoner's target should be cured if the Poisoner dies
+ttt_poisoner_refund_on_death        0           // Whether a Poisoner should get their Poison Gun ammo refunded if their target dies
+ttt_poisoner_refund_on_death_delay  0           // How long after a Poisoner's target dies before they should be refunded their Poison Gun ammo. Only used when "ttt_poisoner_refund_on_death" is enabled
+ttt_poisoner_can_see_jesters        1           // Whether jesters are revealed (via head icons, color/icon on the scoreboard, etc.) to Poisoners. Only used when "ttt_poisoner_is_independent" is enabled and "ttt_poisoner_is_detective" is disabled
+ttt_poisoner_update_scoreboard      1           // Whether Poisoners see dead players as missing in action on the scoreboard. Only used when "ttt_poisoner_is_independent" is enabled and "ttt_poisoner_is_detective" is disabled
+```
+
 ## Werewolf
 _Contributed By_: Nick\
 The Werewolf is an independent role who wins by being the last one standing, but can only kill under the cover of night.\
