@@ -148,10 +148,14 @@ function plymeta:RemovePoisonerPoison()
 
         self:ClearProperty("TTTPoisonerStartTime")
         self:ClearProperty("TTTPoisonerPoisoned")
-    end
 
-    if blockedShopRoles[self:GetRole()] then
-        self:UnblockShopPurchases()
+        net.Start("TTT_PoisonerUnpoisoned")
+            net.WritePlayer(self)
+        net.Broadcast()
+
+        if blockedShopRoles[self:GetRole()] then
+            self:UnblockShopPurchases()
+        end
     end
     self:EnableRoleAbility()
 end
@@ -174,10 +178,10 @@ function plymeta:AddPoisonerPoison(poisoner)
             net.WritePlayer(self)
             net.WritePlayer(poisoner)
         net.Broadcast()
-    end
 
-    if blockedShopRoles[self:GetRole()] then
-        self:BlockShopPurchases()
+        if blockedShopRoles[self:GetRole()] then
+            self:BlockShopPurchases()
+        end
     end
     self:DisableRoleAbility()
 
@@ -192,6 +196,7 @@ if SERVER then
     AddCSLuaFile()
 
     util.AddNetworkString("TTT_PoisonerPoisoned")
+    util.AddNetworkString("TTT_PoisonerUnpoisoned")
 
     local poisoner_refund_on_death = CreateConVar("ttt_poisoner_refund_on_death", "0", FCVAR_NONE, "Whether a Poisoner should get their Poison Gun ammo refunded if their target dies", 0, 1)
     local poisoner_refund_on_death_delay = CreateConVar("ttt_poisoner_refund_on_death_delay", "0", FCVAR_NONE, "How long after a Poisoner's target dies before they should be refunded their Poison Gun ammo. Only used when \"ttt_poisoner_refund_on_death\" is enabled", 0, 1)
@@ -421,6 +426,11 @@ if CLIENT then
             src = source:Nick()
         })
         victim:AddPoisonerPoison(source)
+    end)
+
+    net.Receive("TTT_PoisonerUnpoisoned", function(len)
+        local victim = net.ReadPlayer()
+        victim:RemovePoisonerPoison()
     end)
 
     ----------------
