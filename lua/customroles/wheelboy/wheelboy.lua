@@ -87,6 +87,7 @@ local spinCount = 0;
 net.Receive("TTT_WheelBoySpinResult", function(len, ply)
     if not IsPlayer(ply) then return end
     if not ply:IsActiveWheelBoy() then return end
+    if ply:IsRoleAbilityDisabled() then return end
 
     local chosenSegment = net.ReadUInt(4)
     local result = WHEELBOY.Effects[chosenSegment]

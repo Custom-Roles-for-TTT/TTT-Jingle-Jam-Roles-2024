@@ -85,6 +85,8 @@ if SERVER then
     local triggeredEvents = {}
     -- Trigger a randomat event when a hoodoo item is bought
     hook.Add("TTTOrderedEquipment", "Hoodoo_TTTOrderedEquipment_TrackTriggeredEvents", function(ply, id, is_item)
+        if ply:IsRoleAbilityDisabled() then return end
+
         if is_item and IsHoodooItem(id) then
             local item = GetEquipmentItemById(id)
 

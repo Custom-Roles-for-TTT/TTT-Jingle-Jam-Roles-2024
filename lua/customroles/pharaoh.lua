@@ -229,6 +229,10 @@ if SERVER then
     AddHook("PostPlayerDeath", "Pharaoh_PostPlayerDeath", function(ply)
         if not IsPlayer(ply) then return end
         if not IsValid(ply.PharaohAnkh) then return end
+        if ply:IsPharaoh() and ply:IsRoleAbilityDisabled() then
+            ply.PharaohAnkh:DestroyAnkh()
+            return
+        end
 
         local respawn_delay = pharaoh_respawn_delay:GetInt()
         if respawn_delay > 0 then

@@ -78,36 +78,38 @@ function SWEP:PrimaryAttack()
     self:SendWeaponAnim(ACT_SLAM_DETONATOR_DETONATE)
 
     local owner = self:GetOwner()
-    if IsPlayer(owner) then
-        local ent = EntsCreate("prop_physics")
-        if not IsValid(ent) then return end
+    if not IsPlayer(owner) then return end
 
-        local pos = owner:GetPos()
-        local velocity = owner:GetVelocity()
+    if owner:IsRoleAbilityDisabled() then return end
 
-        ent:SetModel("models/props_c17/oildrum001_explosive.mdl")
-        ent:SetPos(pos)
-        ent.BarrelMimic = owner
-        ent:Spawn()
+    local ent = EntsCreate("prop_physics")
+    if not IsValid(ent) then return end
 
-        local phys = ent:GetPhysicsObject()
-        if not IsValid(phys) then ent:Remove() return end
+    local pos = owner:GetPos()
+    local velocity = owner:GetVelocity()
 
-        phys:SetVelocity(velocity)
+    ent:SetModel("models/props_c17/oildrum001_explosive.mdl")
+    ent:SetPos(pos)
+    ent.BarrelMimic = owner
+    ent:Spawn()
 
-        owner:SetParent(ent)
+    local phys = ent:GetPhysicsObject()
+    if not IsValid(phys) then ent:Remove() return end
 
-        owner:Spectate(OBS_MODE_CHASE)
-        owner:SpectateEntity(ent)
-        owner.BarrelMimicEnt = ent
+    phys:SetVelocity(velocity)
 
-        -- The transformer stays in their hand so hide it from view
-        owner:DrawViewModel(false)
-        owner:DrawWorldModel(false)
+    owner:SetParent(ent)
 
-        self.Barrel = ent
-        self.TransformBackTime = CurTime() + self.Secondary.Delay
-    end
+    owner:Spectate(OBS_MODE_CHASE)
+    owner:SpectateEntity(ent)
+    owner.BarrelMimicEnt = ent
+
+    -- The transformer stays in their hand so hide it from view
+    owner:DrawViewModel(false)
+    owner:DrawWorldModel(false)
+
+    self.Barrel = ent
+    self.TransformBackTime = CurTime() + self.Secondary.Delay
 end
 
 function SWEP:SecondaryAttack()

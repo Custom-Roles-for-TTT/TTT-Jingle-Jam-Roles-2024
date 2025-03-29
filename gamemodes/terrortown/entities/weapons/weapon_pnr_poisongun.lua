@@ -72,7 +72,7 @@ function SWEP:PrimaryAttack()
         if victim:IsPoisonerPoisoned() then
             owner:QueueMessage(MSG_PRINTBOTH, victim:Nick() .. " has already been poisoned, find someone new!")
         else
-            if victim:AddPoisonerPoison(owner) then
+            if owner:IsRoleAbilityDisabled() or victim:AddPoisonerPoison(owner) then
                 self:SetClip1(0)
             else
                 owner:QueueMessage(MSG_PRINTBOTH, "You cannot poison " .. victim:Nick() .. ", find someone new!")

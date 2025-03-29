@@ -227,6 +227,8 @@ if SERVER then
     }
 
     local function TransformWerewolf(ply)
+        if ply:IsRoleAbilityDisabled() then return end
+
         local drop_weapons = werewolf_drop_weapons:GetBool()
         if drop_weapons then
             for _, wep in pairs(ply:GetWeapons()) do
@@ -339,6 +341,7 @@ if SERVER then
 
         if WEREWOLF.isNight then
             if not ent:IsPlayer() or not ent:IsWerewolf() then return end
+            if ent:IsRoleAbilityDisabled() then return end
 
             local reduction = werewolf_night_damage_reduction:GetFloat()
             dmginfo:ScaleDamage(1 - reduction)
@@ -360,13 +363,13 @@ if SERVER then
         local att = dmginfo:GetAttacker()
         if not IsPlayer(att) or not IsPlayer(victim) then return end
 
-        if victim:IsWerewolf() then
+        if victim:IsWerewolf() and not victim:IsRoleAbilityDisabled() then
             return true, false, true, false
         end
     end)
 
     AddHook("OnPlayerHitGround", "Werewolf_OnPlayerHitGround", function(ply, in_water, on_floater, speed)
-        if WEREWOLF.isNight and ply:IsWerewolf() and GetRoundState() >= ROUND_ACTIVE then
+        if WEREWOLF.isNight and ply:IsWerewolf() and not ply:IsRoleAbilityDisabled() and GetRoundState() >= ROUND_ACTIVE then
             return true
         end
     end)
@@ -712,7 +715,7 @@ if CLIENT then
     AddHook("Think", "Werewolf_Highlight_Think", function()
         if not IsPlayer(client) or not client:Alive() or client:IsSpec() then return end
 
-        if werewolf_vision and client:IsWerewolf() then
+        if werewolf_vision and client:IsWerewolf() and not client:IsRoleAbilityDisabled() then
             local vision_mode = werewolf_vision_mode:GetInt()
             if not vision_enabled and (vision_mode == WEREWOLF_VISION_ALWAYS or WEREWOLF.isNight) then
                 EnableWerewolfHighlights()

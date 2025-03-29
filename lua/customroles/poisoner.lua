@@ -68,10 +68,6 @@ ROLE.convars = {
     }
 }
 
-ROLE.selectionpredicate = function()
-    return CRVersion("2.2.9")
-end
-
 ROLE.translations = {
     ["english"] = {
         ["poisoner_poisoned"] = "POISONED",
@@ -90,7 +86,7 @@ RegisterRole(ROLE)
 local poisoner_is_independent = CreateConVar("ttt_poisoner_is_independent", 0, FCVAR_REPLICATED, "Whether Poisoners should be treated as independent", 0, 1)
 local poisoner_target_jesters = CreateConVar("ttt_poisoner_target_jesters", "0", FCVAR_REPLICATED, "Whether the Poisoner can target jesters", 0, 1)
 local poisoner_target_independents = CreateConVar("ttt_poisoner_target_independents", "1", FCVAR_REPLICATED, "Whether the Poisoner can target independents", 0, 1)
-local poisoner_block_shop_roles = CreateConVar("ttt_poisoner_block_shop_roles", "mercenary", FCVAR_REPLICATED, "Names of roles that have their shop blocked when poisoned, separated with commas. Do not include spaces or capital letters")
+local poisoner_block_shop_roles = CreateConVar("ttt_poisoner_block_shop_roles", "mercenary,summoner", FCVAR_REPLICATED, "Names of roles that have their shop blocked when poisoned, separated with commas. Do not include spaces or capital letters")
 local poisoner_poison_duration = CreateConVar("ttt_poisoner_poison_duration", "0", FCVAR_REPLICATED, "How long a Poisoner's poison should last on their target. Poisoner is refunded Poison Gun ammo when it expires. Set to 0 to have it be permanent", 0, 300)
 local poisoner_cure_on_death = CreateConVar("ttt_poisoner_cure_on_death", "1", FCVAR_REPLICATED, "Whether a Poisoner's target should be cured if the Poisoner dies", 0, 1)
 -- Independent ConVars

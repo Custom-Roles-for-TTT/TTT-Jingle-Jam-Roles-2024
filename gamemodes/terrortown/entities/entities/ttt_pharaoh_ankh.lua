@@ -179,6 +179,8 @@ if SERVER then
         local placer = self:GetPlacer()
         if not IsPlayer(placer) then return end
 
+        if placer:IsPharaoh() and placer:IsRoleAbilityDisabled() then return end
+
         local distance = ankh_heal_repair_dist:GetInt()
         if distance <= 0 then return end
 

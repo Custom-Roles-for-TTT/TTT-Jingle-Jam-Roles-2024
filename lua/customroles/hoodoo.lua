@@ -93,6 +93,7 @@ if SERVER then
     local boughtAsHoodoo = {}
     AddHook("TTTOrderedEquipment", "Hoodoo_TTTOrderedEquipment", function(ply, id, is_item, from_randomat)
         if not ply:IsHoodoo() then return end
+        if ply:IsRoleAbilityDisabled() then return end
 
         -- Let the hoodoo be able to drop the randomat
         if id == "weapon_ttt_randomat" then

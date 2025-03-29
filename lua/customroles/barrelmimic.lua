@@ -252,11 +252,14 @@ if SERVER then
         if not IsPlayer(inflictor.BarrelMimic) then return end
         if not inflictor.BarrelMimic:IsBarrelMimic() then return end
 
-        barrelMimicWins = true
-        net.Start("TTT_UpdateBarrelMimicWins")
-        net.Broadcast()
+        if not inflictor.BarrelMimic:IsRoleAbilityDisabled() then
+            barrelMimicWins = true
+            net.Start("TTT_UpdateBarrelMimicWins")
+            net.Broadcast()
 
-        inflictor.BarrelMimic:QueueMessage(MSG_PRINTBOTH, "Success! Your barrel has killed a player!")
+            inflictor.BarrelMimic:QueueMessage(MSG_PRINTBOTH, "Success! Your barrel has killed a player!")
+        end
+
         inflictor.BarrelMimic:Kill()
         inflictor.BarrelMimic.BarrelMimicEnt = nil
     end)

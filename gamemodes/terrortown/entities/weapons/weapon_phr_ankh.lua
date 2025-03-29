@@ -78,6 +78,8 @@ function SWEP:PrimaryAttack()
     local owner = self:GetOwner()
     if not IsPlayer(owner) then return end
 
+    if owner:IsRoleAbilityDisabled() then return end
+
     local tr, hit = self:GetAimTrace(owner)
     if not hit then return end
 

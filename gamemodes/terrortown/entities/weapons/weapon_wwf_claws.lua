@@ -177,7 +177,11 @@ function SWEP:PrimaryAttack()
 
     if not CLIENT and IsPlayer(hitEnt) and not hitEnt:ShouldActLikeJester() then
         local dmg = DamageInfo()
-        dmg:SetDamage(self.Primary.Damage)
+        if owner:IsRoleAbilityDisabled() then
+            dmg:SetDamage(0)
+        else
+            dmg:SetDamage(self.Primary.Damage)
+        end
         dmg:SetAttacker(owner)
         dmg:SetInflictor(self)
         dmg:SetDamageForce(owner:GetAimVector() * 5)

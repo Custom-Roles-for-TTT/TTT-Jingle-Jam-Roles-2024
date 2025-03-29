@@ -177,7 +177,7 @@ ttt_poisoner_max_health             100         // The maximum amount of health 
 ttt_poisoner_is_independent         0           // Whether Poisoners should be treated as independent
 ttt_poisoner_target_jesters         0           // Whether the Poisoner can target jesters
 ttt_poisoner_target_independents    1           // Whether the Poisoner can target independents
-ttt_poisoner_block_shop_roles       "mercenary" // Names of roles that have their shop blocked when poisoned, separated with commas. Do not include spaces or capital letters
+ttt_poisoner_block_shop_roles       "mercenary,summoner" // Names of roles that have their shop blocked when poisoned, separated with commas. Do not include spaces or capital letters
 ttt_poisoner_poison_duration        0           // How long a Poisoner's poison should last on their target. Poisoner is refunded Poison Gun ammo when it expires. Set to 0 to have it be permanent
 ttt_poisoner_cure_on_death          1           // Whether a Poisoner's target should be cured if the Poisoner dies
 ttt_poisoner_notify_use             0           // Whether to notify a Poisoner's target when they try to use their disabled ability the first time

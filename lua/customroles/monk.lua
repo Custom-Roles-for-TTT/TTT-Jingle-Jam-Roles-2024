@@ -51,6 +51,7 @@ if SERVER then
     AddHook("PlayerDeath", "Monk_PlayerDeath", function(victim, inflictor, attacker)
         if not IsPlayer(victim) then return end
         if not victim:IsMonk() then return end
+        if victim:IsRoleAbilityDisabled() then return end
 
         local ragdoll = victim.server_ragdoll or victim:GetRagdollEntity()
         if ragdoll then

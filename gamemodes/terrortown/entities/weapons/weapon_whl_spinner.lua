@@ -69,6 +69,7 @@ function SWEP:PrimaryAttack()
 
     local owner = self:GetOwner()
     if not IsPlayer(owner) then return end
+    if owner:IsRoleAbilityDisabled() then return end
 
     local curTime = CurTime()
     local nextSpinTime = owner:GetNWInt("WheelBoyNextSpinTime", nil)

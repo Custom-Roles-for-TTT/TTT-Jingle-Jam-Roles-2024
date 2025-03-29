@@ -151,6 +151,8 @@ if SERVER then
         if not IsPlayer(wep.BoughtBy) or wep.BoughtBy:IsHermit() or wep.BoughtBy:IsBeggar() then return end
         -- Hermits can only become a traitor or an innocent, so ignore everyone else
         if not wep.BoughtBy:IsTraitorTeam() and not wep.BoughtBy:IsInnocentTeam() then return end
+        -- If the hermit's ability is disabled, they can't change roles
+        if ply:IsRoleAbilityDisabled() then return end
 
         if hermit_ignore_empty_weapons:GetBool() and wep:GetMaxClip1() > 0 and wep:Clip1() == 0 then
             if hermit_ignore_empty_weapons_warning:GetBool() then
