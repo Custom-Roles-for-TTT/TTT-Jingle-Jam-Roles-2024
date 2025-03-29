@@ -141,10 +141,11 @@ local plymeta = FindMetaTable("Player")
 function plymeta:RemovePoisonerPoison()
     if SERVER then
         local poisonerSid64 = self.TTTPoisonerPoisonedBy
-        local poisoner = player.GetBySteamID(poisonerSid64)
+        local poisoner = player.GetBySteamID64(poisonerSid64)
         if IsPlayer(poisoner) then
             poisoner:ClearProperty("TTTPoisonerPoisonTarget")
         end
+        self:ClearProperty("TTTPoisonerPoisonedBy")
 
         self:ClearProperty("TTTPoisonerStartTime")
         self:ClearProperty("TTTPoisonerPoisoned")
@@ -219,7 +220,7 @@ if SERVER then
         if not ply.TTTPoisonerPoisoned then return end
 
         local poisonerSid64 = ply.TTTPoisonerPoisonedBy
-        local poisoner = player.GetBySteamID(poisonerSid64)
+        local poisoner = player.GetBySteamID64(poisonerSid64)
         if not IsPlayer(poisoner) then return end
 
         local delay = poisoner_refund_on_death_delay:GetInt()
@@ -237,7 +238,7 @@ if SERVER then
         if not ply.TTTPoisonerPoisoned then return end
 
         local poisonerSid64 = ply.TTTPoisonerPoisonedBy
-        local poisoner = player.GetBySteamID(poisonerSid64)
+        local poisoner = player.GetBySteamID64(poisonerSid64)
         if not IsPlayer(poisoner) then return end
 
         RefundPoisonAmmo(poisoner)
@@ -271,7 +272,7 @@ if SERVER then
             local poisonStartTime = p.TTTPoisonerStartTime
             if curTime >= poisonStartTime + duration then
                 local poisonerSid64 = p.TTTPoisonerPoisonedBy
-                local poisoner = player.GetBySteamID(poisonerSid64)
+                local poisoner = player.GetBySteamID64(poisonerSid64)
                 if IsPlayer(poisoner) then
                     RefundPoisonAmmo(poisoner)
                 end
