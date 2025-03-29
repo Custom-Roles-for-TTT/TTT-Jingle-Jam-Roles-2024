@@ -189,7 +189,7 @@ function plymeta:AddPoisonerPoison(poisoner)
 end
 
 function plymeta:IsPoisonerPoisoned()
-    return self.TTTPoisonerPoisoned
+    return self.TTTPoisonerPoisoned == true
 end
 
 if SERVER then
