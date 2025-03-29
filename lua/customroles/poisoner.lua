@@ -199,7 +199,7 @@ if SERVER then
     util.AddNetworkString("TTT_PoisonerUnpoisoned")
 
     local poisoner_refund_on_death = CreateConVar("ttt_poisoner_refund_on_death", "0", FCVAR_NONE, "Whether a Poisoner should get their Poison Gun ammo refunded if their target dies", 0, 1)
-    local poisoner_refund_on_death_delay = CreateConVar("ttt_poisoner_refund_on_death_delay", "0", FCVAR_NONE, "How long after a Poisoner's target dies before they should be refunded their Poison Gun ammo. Only used when \"ttt_poisoner_refund_on_death\" is enabled", 0, 1)
+    local poisoner_refund_on_death_delay = CreateConVar("ttt_poisoner_refund_on_death_delay", "0", FCVAR_NONE, "How long after a Poisoner's target dies before they should be refunded their Poison Gun ammo. Only used when \"ttt_poisoner_refund_on_death\" is enabled", 0, 120)
 
     ----------
     -- INIT --
