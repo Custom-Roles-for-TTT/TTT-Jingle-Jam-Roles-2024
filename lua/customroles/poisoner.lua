@@ -259,6 +259,87 @@ if SERVER then
     AddHook("TTTOnRoleAbilityEnabled", "Poisoner_Notify_TTTOnRoleAbilityEnabled", OnUnpoisoned)
     AddHook("TTTOnShopPurchaseEnabled", "Poisoner_Notify_TTTOnShopPurchaseEnabled", OnUnpoisoned)
 
+    ---------------------
+    -- GENERIC EFFECTS --
+    ---------------------
+
+    -- Innocent, Independent, and Monster team members don't have a generic disabled effect in the core,
+    -- so we're going to nerf damage and rate of fire
+
+    -- Reduce fire rate by 80%
+    local function ReduceWeaponFireRate(wep)
+        if wep.Primary and wep.Primary.Delay then
+            wep.Primary.DelayOrig = wep.Primary.Delay
+            wep.Primary.Delay = wep.Primary.Delay * 1.2
+        elseif wep.Primary_TFA and wep.Primary_TFA.RPM then
+            wep.Primary_TFA.RPMOrig = wep.Primary_TFA.RPM
+            wep.Primary_TFA.RPM = wep.Primary_TFA.RPM * 0.8
+        elseif wep.FireDelay then
+            wep.FireDelayOrig = wep.FireDelay
+            wep.FireDelay = wep.FireDelay * 1.2
+        end
+    end
+
+    local function RestoreWeaponFireRate(wep)
+        if wep.Primary and wep.Primary.DelayOrig then
+            wep.Primary.Delay = wep.Primary.DelayOrig
+            wep.Primary.DelayOrig = nil
+        elseif wep.Primary_TFA and wep.Primary_TFA.RPMOrig then
+            wep.Primary_TFA.RPM = wep.Primary_TFA.RPMOrig
+            wep.Primary_TFA.RPMOrig = nil
+        elseif wep.FireDelayOrig then
+            wep.FireDelay = wep.FireDelayOrig
+            wep.FireDelayOrig = nil
+        end
+    end
+
+    -- Reduce the weapon rate of fire for each weapon the poisoned player picks up
+    AddHook("WeaponEquip", "Poisoner_GenericEffect_WeaponEquip", function(wep, ply)
+        if not IsValid(wep) or not IsPlayer(ply) then return end
+        if not ply:IsInnocentTeam() and not ply:IsIndependentTeam() and not ply:IsMonsterTeam() then return end
+        if not ply:IsPoisonerPoisoned() then return end
+        ReduceWeaponFireRate(wep)
+    end)
+
+    -- If we previously changed the fire rate of this weapon, undo it on drop
+    AddHook("PlayerDroppedWeapon", "Poisoner_GenericEffect_PlayerDroppedWeapon", function(ply, wep)
+        if not IsValid(wep) or not IsPlayer(ply) then return end
+        if not ply:IsPoisonerPoisoned() then return end
+        RestoreWeaponFireRate(wep)
+    end)
+
+    AddHook("TTTOnRoleAbilityDisabled", "Poisoner_GenericEffect_TTTOnRoleAbilityDisabled", function(ply)
+        if not IsPlayer(ply) then return end
+        if not ply:IsInnocentTeam() and not ply:IsIndependentTeam() and not ply:IsMonsterTeam() then return end
+
+        local weps = ply:GetWeapons()
+        -- Reduce the fire rate of all weapons
+        for _, wep in ipairs(weps) do
+            ReduceWeaponFireRate(wep)
+        end
+    end)
+
+    AddHook("TTTOnRoleAbilityEnabled", "Poisoner_GenericEffect_TTTOnRoleAbilityEnabled", function(ply)
+        if not IsPlayer(ply) then return end
+        if not ply:IsInnocentTeam() and not ply:IsIndependentTeam() and not ply:IsMonsterTeam() then return end
+
+        local weps = ply:GetWeapons()
+        -- Reset the fire rate of all weapons to original
+        for _, wep in ipairs(weps) do
+            RestoreWeaponFireRate(wep)
+        end
+    end)
+
+    -- Reduce damage to 80%
+    AddHook("ScalePlayerDamage", "Poisoner_GenericEffect_ScalePlayerDamage", function(ply, hitgroup, dmginfo)
+        local attacker = dmginfo:GetAttacker()
+        if not IsPlayer(attacker) then return end
+        if not attacker:IsInnocentTeam() and not attacker:IsIndependentTeam() and not attacker:IsMonsterTeam() then return end
+        if not attacker:IsPoisonerPoisoned() then return end
+
+        dmginfo:ScaleDamage(0.8)
+    end)
+
     -----------------
     -- REFUND AMMO --
     -----------------
