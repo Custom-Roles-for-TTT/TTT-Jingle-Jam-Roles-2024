@@ -224,7 +224,7 @@ if SERVER then
 
         local delay = poisoner_refund_on_death_delay:GetInt()
         if delay > 0 then
-            timer.Create("TTTPoisonerRefundDelay_" .. poisonerSid64, delay, 0, function()
+            timer.Create("TTTPoisonerRefundDelay_" .. poisonerSid64, delay, 1, function()
                 if not IsPlayer(poisoner) then return end
                 RefundPoisonAmmo(poisoner)
             end)
