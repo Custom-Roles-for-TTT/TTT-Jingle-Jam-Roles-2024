@@ -228,6 +228,7 @@ if SERVER then
     local function OnPoisoned(ply)
         if not poisoner_notify:GetBool() then return end
         if not IsPlayer(ply) then return end
+        if not ply:IsPoisonerPoisoned() then return end
         ply:QueueMessage(MSG_PRINTBOTH, "You're feeling a little weak...")
     end
 
@@ -235,6 +236,7 @@ if SERVER then
         if not poisoner_notify:GetBool() then return end
         if not poisoner_notify_end:GetBool() then return end
         if not IsPlayer(ply) then return end
+        if not ply:IsPoisonerPoisoned() then return end
         ply:QueueMessage(MSG_PRINTBOTH, "You're feeling better =)")
     end
 
