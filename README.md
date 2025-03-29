@@ -180,7 +180,7 @@ ttt_poisoner_target_independents    1           // Whether the Poisoner can targ
 ttt_poisoner_block_shop_roles       "mercenary" // Names of roles that have their shop blocked when poisoned, separated with commas. Do not include spaces or capital letters
 ttt_poisoner_poison_duration        0           // How long a Poisoner's poison should last on their target. Poisoner is refunded Poison Gun ammo when it expires. Set to 0 to have it be permanent
 ttt_poisoner_cure_on_death          1           // Whether a Poisoner's target should be cured if the Poisoner dies
-ttt_poisoner_notify                 0           // Whether to notify a Poisoner's target when they are poisoned
+ttt_poisoner_notify_start           0           // Whether to notify a Poisoner's target when they are poisoned
 ttt_poisoner_notify_end             0           // Whether to notify a Poisoner's target when they are unpoisoned
 ttt_poisoner_refund_on_death        0           // Whether a Poisoner should get their Poison Gun ammo refunded if their target dies
 ttt_poisoner_refund_on_death_delay  0           // How long after a Poisoner's target dies before they should be refunded their Poison Gun ammo. Only used when "ttt_poisoner_refund_on_death" is enabled

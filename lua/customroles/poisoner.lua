@@ -43,7 +43,7 @@ ROLE.convars = {
         type = ROLE_CONVAR_TYPE_BOOL
     },
     {
-        cvar = "ttt_poisoner_notify",
+        cvar = "ttt_poisoner_notify_start",
         type = ROLE_CONVAR_TYPE_BOOL
     },
     {
@@ -163,7 +163,7 @@ function plymeta:RemovePoisonerPoison()
         net.Broadcast()
 
         if blockedShopRoles[self:GetRole()] then
-            self:UnblockShopPurchases()
+            self:EnableShopPurchases()
         end
     end
     self:EnableRoleAbility()
@@ -189,7 +189,7 @@ function plymeta:AddPoisonerPoison(poisoner)
         net.Broadcast()
 
         if blockedShopRoles[self:GetRole()] then
-            self:BlockShopPurchases()
+            self:DisableShopPurchases()
         end
     end
     self:DisableRoleAbility()
@@ -209,7 +209,7 @@ if SERVER then
 
     local poisoner_refund_on_death = CreateConVar("ttt_poisoner_refund_on_death", "0", FCVAR_NONE, "Whether a Poisoner should get their Poison Gun ammo refunded if their target dies", 0, 1)
     local poisoner_refund_on_death_delay = CreateConVar("ttt_poisoner_refund_on_death_delay", "0", FCVAR_NONE, "How long after a Poisoner's target dies before they should be refunded their Poison Gun ammo. Only used when \"ttt_poisoner_refund_on_death\" is enabled", 0, 120)
-    local poisoner_notify = CreateConVar("ttt_poisoner_notify", "0", FCVAR_NONE, "Whether to notify a Poisoner's target when they are poisoned", 0, 1)
+    local poisoner_notify_start = CreateConVar("ttt_poisoner_notify_start", "0", FCVAR_NONE, "Whether to notify a Poisoner's target when they are poisoned", 0, 1)
     local poisoner_notify_end = CreateConVar("ttt_poisoner_notify_end", "0", FCVAR_NONE, "Whether to notify a Poisoner's target when they are unpoisoned", 0, 1)
 
     ----------
@@ -226,14 +226,14 @@ if SERVER then
     ------------
 
     local function OnPoisoned(ply)
-        if not poisoner_notify:GetBool() then return end
+        if not poisoner_notify_start:GetBool() then return end
         if not IsPlayer(ply) then return end
         if not ply:IsPoisonerPoisoned() then return end
         ply:QueueMessage(MSG_PRINTBOTH, "You're feeling a little weak...")
     end
 
     local function OnUnpoisoned(ply)
-        if not poisoner_notify:GetBool() then return end
+        if not poisoner_notify_start:GetBool() then return end
         if not poisoner_notify_end:GetBool() then return end
         if not IsPlayer(ply) then return end
         if not ply:IsPoisonerPoisoned() then return end
@@ -242,8 +242,8 @@ if SERVER then
 
     AddHook("TTTOnRoleAbilityDisabled", "Poisoner_Notify_TTTOnRoleAbilityDisabled", OnPoisoned)
     AddHook("TTTOnRoleAbilityEnabled", "Poisoner_Notify_TTTOnRoleAbilityEnabled", OnUnpoisoned)
-    AddHook("TTTOnShopPurchaseBlocked", "Poisoner_Notify_TTTOnShopPurchaseBlocked", OnPoisoned)
-    AddHook("TTTOnShopPurchaseUnblocked", "Poisoner_Notify_TTTOnShopPurchaseUnblocked", OnUnpoisoned)
+    AddHook("TTTOnShopPurchaseDisabled", "Poisoner_Notify_TTTOnShopPurchaseDisabled", OnPoisoned)
+    AddHook("TTTOnShopPurchaseEnabled", "Poisoner_Notify_TTTOnShopPurchaseEnabled", OnUnpoisoned)
 
     -----------------
     -- REFUND AMMO --
