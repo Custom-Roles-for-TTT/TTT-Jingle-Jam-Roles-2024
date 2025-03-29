@@ -269,7 +269,7 @@ if SERVER then
             if not p.TTTPoisonerPoisoned then continue end
 
             local poisonStartTime = p.TTTPoisonerStartTime
-            if poisonStartTime + duration >= curTime then
+            if curTime >= poisonStartTime + duration then
                 local poisonerSid64 = p.TTTPoisonerPoisonedBy
                 local poisoner = player.GetBySteamID(poisonerSid64)
                 if IsPlayer(poisoner) then
