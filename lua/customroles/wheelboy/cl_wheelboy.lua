@@ -270,7 +270,7 @@ local pointerOutlinePoints = {
     { x = 4, y = -263 },
     { x = 8, y = -261 },
     { x = 10, y = -257 },
-    { x = 10, y = -253 }
+    { x = 11, y = -253 }
 }
 local pointerPoints = {
     { x = 0, y = -238 },
