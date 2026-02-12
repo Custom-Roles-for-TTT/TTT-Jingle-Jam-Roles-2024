@@ -151,9 +151,9 @@ ttt_pharaoh_ankh_heal_amount       1    // How much to heal the Pharaoh per tick
 ttt_pharaoh_ankh_repair_rate       1    // How often (in seconds) the Ankh should repair when their Pharaoh is near. Set to 0 to disable
 ttt_pharaoh_ankh_repair_amount     5    // How much to repair the Ankh per tick when their Pharaoh is near it. Set to 0 to disable
 ttt_pharaoh_damage_own_ankh        0    // Whether an Ankh's owner can damage it
-ttt_pharaoh_warn_damage            1    // Whether to warn an Ankh's owner is warned when it is damaged
-ttt_pharaoh_warn_destroy           1    // Whether to warn an Ankh's owner is warned when it is destroyed
-ttt_pharaoh_warn_steal             1    // Whether to warn an Ankh's owner is warned when it is stolen
+ttt_pharaoh_warn_damage            1    // Whether an Ankh's owner is warned when it is damaged
+ttt_pharaoh_warn_destroy           1    // Whether an Ankh's owner is warned when it is destroyed
+ttt_pharaoh_warn_steal             1    // Whether an Ankh's owner is warned when it is stolen
 ttt_pharaoh_steal_grace_time       0.25 // How long (in seconds) before the steal progress of an Ankh is reset when a player stops looking at it
 ttt_pharaoh_credits_starting       1    // The number of credits a Pharaoh should start with. Only used when "ttt_pharaoh_is_independent" or "ttt_pharaoh_is_detective" is enabled
 ttt_pharaoh_shop_sync              0    // Whether pharaohs should have all weapons that vanilla detectives have in their weapon shop. Only used when "ttt_pharaoh_is_detective" is enabled
