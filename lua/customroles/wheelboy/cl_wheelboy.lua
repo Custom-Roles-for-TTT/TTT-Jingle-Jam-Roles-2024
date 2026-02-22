@@ -118,7 +118,7 @@ AddHook("TTTHUDInfoPaint", "WheelBoy_TTTHUDInfoPaint", function(cli, label_left,
     local text = LANG.GetParamTranslation("wheelboy_spin_hud", { time = nextSpinLabel })
     local _, h = SurfaceGetTextSize(text)
 
-    -- Move this up based on how many other labels here are
+    -- Move this up based on how many other labels there are
     label_top = label_top + (20 * #active_labels)
 
     SurfaceSetTextPos(label_left, ScrH() - label_top - h)
