@@ -76,7 +76,7 @@ function ENT:Initialize()
 
     self:PhysicsInit(SOLID_VPHYSICS)
     self:SetMoveType(MOVETYPE_VPHYSICS)
-    self:SetSolid(SOLID_BBOX)
+    self:SetSolid(SOLID_VPHYSICS)
 
     local mins = Vector(-5, -5, -5)
     local maxs = Vector(5, 5, 32)
