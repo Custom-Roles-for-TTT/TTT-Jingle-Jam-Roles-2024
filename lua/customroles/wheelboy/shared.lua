@@ -137,9 +137,9 @@ WHEELBOY.Effects = {
         name = "Slow movement",
         shared = true,
         start = function(p, this)
-            local speedMult = 0.8 * this.times
+            local speedMult = 0.8
             AddHook("TTTSpeedMultiplier", "WheelBoy_SlowMovement_TTTSpeedMultiplier", function(ply, mults)
-                if IsPlayer(ply) then
+                for i = 1, this.times do
                     TableInsert(mults, speedMult)
                 end
             end)
@@ -251,9 +251,9 @@ WHEELBOY.Effects = {
         name = "Fast movement",
         shared = true,
         start = function(p, this)
-            local speedMult = 1.2 * this.times
+            local speedMult = 1.2
             AddHook("TTTSpeedMultiplier", "WheelBoy_FastMovement_TTTSpeedMultiplier", function(ply, mults)
-                if IsPlayer(ply) then
+                for i = 1, this.times do
                     TableInsert(mults, speedMult)
                 end
             end)
