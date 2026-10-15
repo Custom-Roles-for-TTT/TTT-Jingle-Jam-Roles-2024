@@ -83,7 +83,6 @@ end)
 -- WHEEL SPIN RESULT --
 -----------------------
 
-local spinCount = 0;
 net.Receive("TTT_WheelBoySpinResult", function(len, ply)
     if not IsPlayer(ply) then return end
     if not ply:IsActiveWheelBoy() then return end
@@ -94,20 +93,22 @@ net.Receive("TTT_WheelBoySpinResult", function(len, ply)
     if not effect then return end
 
     -- If we haven't already won
-    if spinCount ~= nil then
+    if ply.WheelBoySpinCount ~= nil then
         -- Increase the tracker
-        spinCount = spinCount + 1
+        ply:SetProperty("WheelBoySpinCount", ply.WheelBoySpinCount + 1)
         -- And check if they win this time
-        if spinCount >= spins_to_win:GetInt() then
-            spinCount = nil
+        if ply.WheelBoySpinCount >= spins_to_win:GetInt() then
+            ply:ClearProperty("WheelBoySpinCount")
             net.Start("TTT_UpdateWheelBoyWins")
+                net.WriteBool(true)
             net.Broadcast()
         end
     end
 
     -- Let everyone know what the wheel landed on
     for _, p in PlayerIterator() do
-        p:QueueMessage(MSG_PRINTBOTH, ROLE_STRINGS[ROLE_WHEELBOY] .. "'s wheel has landed on '" .. effect.name .. "'!")
+        p:ClearQueuedMessage("whlWheelResult")
+        p:QueueMessage(MSG_PRINTBOTH, ROLE_STRINGS[ROLE_WHEELBOY] .. "'s wheel has landed on '" .. effect.name .. "'!", 5, "whlWheelResult")
     end
 
     -- Run the associated function with the chosen effect
@@ -174,9 +175,9 @@ end
 local function ResetFullState()
     for _, p in PlayerIterator() do
         p:SetNWInt("WheelBoyNextSpinTime", 0)
+        p:SetProperty("WheelBoySpinCount", 0)
     end
     ClearEffects()
-    spinCount = 0
     net.Start("TTT_ResetWheelBoyWins")
     net.Broadcast()
 end
@@ -212,7 +213,7 @@ AddHook("TTTPlayerRoleChanged", "WheelBoy_TTTPlayerRoleChanged", function(ply, o
     -- If there's a new wheelboy, reset the spin count so
     -- they can't just build on the previous one's success
     elseif newRole == ROLE_WHEELBOY then
-        spinCount = 0
+        ply:SetProperty("WheelBoySpinCount", 0)
     end
 end)
 
@@ -247,7 +248,7 @@ local function WheelBoy_DeathLogic_PlayerDeath(victim, infl, attacker)
 
     -- This gets set to nil when the spin count exceeds the win condition (aka, the wheelboy has won)
     -- If the Wheel Boy has won, don't swap roles when someone kills them
-    if spinCount == nil then return end
+    if victim.WheelBoySpinCount == nil then return end
     if not swap_on_kill:GetBool() then return end
 
     -- Keep track of the killer for the scoreboard

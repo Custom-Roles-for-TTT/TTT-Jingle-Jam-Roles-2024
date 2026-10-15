@@ -84,7 +84,8 @@ function SWEP:PrimaryAttack()
             net.Send(owner)
         end
     else
-        owner:QueueMessage(MSG_PRINTCENTER, "Your weak muscles haven't recovered enough to spin again yet...")
+        owner:ClearQueuedMessage("whlWheelResult")
+        owner:QueueMessage(MSG_PRINTCENTER, "Your weak muscles haven't recovered enough to spin again yet...", 5, "whlWheelResult")
     end
 end
 

@@ -125,7 +125,27 @@ local function WheelBoy_TTTHUDInfoPaint(cli, label_left, label_top, active_label
     SurfaceDrawText(text)
 
     -- Track that the label was added so others can position accurately
-    TableInsert(active_labels, "wheelboy")
+    TableInsert(active_labels, "wheelboySpinTime")
+
+    if cli.WheelBoySpinCount == nil then return end
+
+    local remainingSpins = spins_to_win:GetInt() - cli.WheelBoySpinCount
+    local plural = "s"
+    if remainingSpins == 1 then
+        plural = ""
+    end
+
+    text = LANG.GetParamTranslation("wheelboy_count_hud", { count = remainingSpins, plural = plural })
+    _, h = SurfaceGetTextSize(text)
+
+    -- Move this up based on how many other labels there are
+    label_top = label_top + (20 * #active_labels)
+
+    SurfaceSetTextPos(label_left, ScrH() - label_top - h)
+    SurfaceDrawText(text)
+
+    -- Track that the label was added so others can position accurately
+    TableInsert(active_labels, "wheelboySpinCount")
 end
 
 ----------------
@@ -138,16 +158,20 @@ end)
 
 local wheelboyWins = false
 net.Receive("TTT_UpdateWheelBoyWins", function()
-    if wheelboyWins then return end
+    if net.ReadBool() then
+        if wheelboyWins then return end
 
-    SurfacePlaySound("whl/win.mp3")
+        SurfacePlaySound("whl/win.mp3")
 
-    -- Log the win event with an offset to force it to the end
-    wheelboyWins = true
-    CLSCORE:AddEvent({
-        id = EVENT_FINISH,
-        win = WIN_WHEELBOY
-    }, 1)
+        -- Log the win event with an offset to force it to the end
+        wheelboyWins = true
+        CLSCORE:AddEvent({
+            id = EVENT_FINISH,
+            win = WIN_WHEELBOY
+        }, 1)
+    else
+        wheelboyWins = false
+    end
 end)
 
 AddHook("TTTPlayerRoleChanged", "WheelBoy_WinTracking_TTTPlayerRoleChanged", function(ply, oldRole, newRole)
@@ -569,7 +593,8 @@ local function WheelBoy_Wheel_HUDPaint()
     if blinkStart == nil and curTime >= wheelEndTime then
         -- Display message telling wheelboy what was chosen if there is a delay before it takes effect
         if waitTime > 0 then
-            client:QueueMessage(MSG_PRINTBOTH, "The wheel has landed on '" .. WHEELBOY.Effects[currentSegment].name .. "'! It will take effect in " .. waitTime .. " second(s)")
+            client:ClearQueuedMessage("whlWheelResult")
+            client:QueueMessage(MSG_PRINTBOTH, "The wheel has landed on '" .. WHEELBOY.Effects[currentSegment].name .. "'! It will take effect in " .. waitTime .. " second(s)", 5, "whlWheelResult")
         end
         blinkStart = curTime
     end

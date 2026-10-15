@@ -99,6 +99,7 @@ ROLE.translations = {
         ["hilite_wheelboy"] = "AND {role} GOT CAKE!",
         ["wheelboy_spin_hud"] = "Next wheel spin: {time}",
         ["wheelboy_spin_hud_now"] = "NOW",
+        ["wheelboy_count_hud"] = "Spin {count} more time{plural} to win",
         ["score_wheelboy_killed"] = "Killed",
         ["wheelboy_config_wheel_offset_x"] = "Wheel position, X-axis offset",
         ["wheelboy_config_wheel_offset_y"] = "Wheel position, Y-axis offset",
