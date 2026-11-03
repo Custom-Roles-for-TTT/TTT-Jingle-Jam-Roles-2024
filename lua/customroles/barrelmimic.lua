@@ -196,6 +196,11 @@ if SERVER then
             ply:Give("weapon_zm_improvised")
             ply:SelectWeapon("weapon_zm_improvised")
 
+            -- Make sure they have the weapon too
+            if not ply:HasWeapon("weapon_bam_transformer") then
+                ply:Give("weapon_bam_transformer")
+            end
+
             ply:QueueMessage(MSG_PRINTBOTH, "You have respawned. Good luck =)")
         end)
     end
